@@ -6,6 +6,7 @@ def get_contactos(
     ruc: Optional[str] = None
 ):
     try:
+        print(f"DEBUG BACKEND -> Recibido nombre: {nombre}, ruc: {ruc}")
         query = supabase.table("clientes").select("*", count="exact")
         
         if nombre:
@@ -28,4 +29,5 @@ def get_contactos(
             "current_page": page
         }
     except Exception as e:
+        print(f"ERROR EN /contactos: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
