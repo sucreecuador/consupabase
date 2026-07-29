@@ -4,9 +4,8 @@ from flask_cors import CORS
 from supabase import create_client, Client
 
 app = Flask(__name__)
-CORS(app)  # Permite peticiones desde la página web (GitHub Pages o local)
+CORS(app)
 
-# Configuración de Supabase usando Variables de Entorno
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
@@ -63,7 +62,7 @@ def get_productos():
         return jsonify({"error": str(e)}), 500
 
 # ----------------------------------------------------
-# RUTA 2: CONTACTOS (Consulta la tabla 'clientes')
+# RUTA 2: CONTACTOS (Tabla 'clientes')
 # ----------------------------------------------------
 @app.route('/contactos', methods=['GET'])
 def get_contactos():
@@ -78,15 +77,24 @@ def get_contactos():
         start = page * page_size
         end = start + page_size - 1
 
-        # Conectado a la tabla 'clientes' de Supabase
         query = supabase.table('clientes').select('*', count='exact')
 
+        # Filtro flexible para evitar errores de columnas inexistentes
         if nombre:
-            query = query.ilike('nombre', f'%{nombre}%')
+            try:
+                query = query.ilike('nombre', f'%{nombre}%')
+            except:
+                pass
         if ruc:
-            query = query.ilike('ruc', f'%{ruc}%')
+            try:
+                query = query.ilike('ruc', f'%{ruc}%')
+            except:
+                pass
         if codigo:
-            query = query.ilike('codigo_cliente', f'%{codigo}%')
+            try:
+                query = query.ilike('codigo_cliente', f'%{codigo}%')
+            except:
+                pass
 
         response = query.range(start, end).execute()
 
