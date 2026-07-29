@@ -11,7 +11,7 @@ def get_contactos(
         if nombre:
             query = query.ilike("nombre", f"%{nombre}%")
         if ruc:
-            query = query.ilike("ruc", f"%{ruc}%")
+            query = query.ilike("ruc", f"{ruc}%")
             
         start = page * page_size
         end = start + page_size - 1
