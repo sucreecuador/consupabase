@@ -8,7 +8,7 @@ from supabase import create_client, Client
 
 app = FastAPI()
 
-# Configurar CORS para permitir peticiones desde cualquier origen
+# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,24 +17,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir archivos estáticos (HTML, CSS, JS) desde la carpeta 'static'
+# Servir archivos estáticos
 app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
-# Variables de entorno para Supabase
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+# Variables de entorno limpiando posibles espacios accidentales (.strip())
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 
-supabase: Optional[Client] = None
-if SUPABASE_URL and SUPABASE_KEY:
+def get_supabase_client() -> Client:
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        raise HTTPException(
+            status_code=500, 
+            detail="Faltan las variables SUPABASE_URL o SUPABASE_KEY en Render"
+        )
     try:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        return create_client(SUPABASE_URL, SUPABASE_KEY)
     except Exception as e:
-        print(f"Error al inicializar cliente Supabase: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al conectar con Supabase: {str(e)}")
 
 
 @app.get("/")
 def read_root():
-    """Redirige automáticamente la raíz al archivo index.html"""
     return RedirectResponse(url="/static/index.html")
 
 
@@ -47,8 +50,7 @@ def get_productos(
     marca: Optional[str] = None,
     proveedor: Optional[str] = None
 ):
-    if not supabase:
-        raise HTTPException(status_code=500, detail="Supabase no está configurado correctamente en el servidor")
+    supabase = get_supabase_client()
 
     try:
         query = supabase.table("productos").select("*", count="exact")
@@ -79,7 +81,7 @@ def get_productos(
             "total_pages": total_pages
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error en consulta de productos: {str(e)}")
 
 
 @app.get("/contactos")
@@ -89,8 +91,7 @@ def get_contactos(
     nombre: Optional[str] = None,
     codigo: Optional[str] = None
 ):
-    if not supabase:
-        raise HTTPException(status_code=500, detail="Supabase no está configurado correctamente en el servidor")
+    supabase = get_supabase_client()
 
     try:
         query = supabase.table("clientes").select("*", count="exact")
@@ -117,4 +118,4 @@ def get_contactos(
             "total_pages": total_pages
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error en consulta de clientes: {str(e)}")
