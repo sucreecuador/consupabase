@@ -6,10 +6,7 @@ let prodVistaActual = 1;
 let contVistaActual = 1;
 
 let busquedaProdCriterio = '';
-let busquedaProdValor = '';
-
 let busquedaContCriterio = '';
-let busquedaContValor = '';
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarDatos('productos');
@@ -49,18 +46,9 @@ function buscar(tipo, criterio) {
     if (tipo === 'productos') {
         paginaActual = 0;
         busquedaProdCriterio = criterio;
-        if (criterio === 'descripcion') busquedaProdValor = document.getElementById('filtroDesc').value;
-        if (criterio === 'codigo') busquedaProdValor = document.getElementById('filtroCodigo').value;
-        if (criterio === 'marca') busquedaProdValor = document.getElementById('filtroMarca').value;
-        if (criterio === 'proveedor') busquedaProdValor = document.getElementById('filtroProveedor').value;
     } else {
         paginaActualContacto = 0;
         busquedaContCriterio = criterio;
-        if (criterio === 'nombre') {
-            busquedaContValor = document.getElementById('filtroNombreContacto').value;
-        } else if (criterio === 'ruc') {
-            busquedaContValor = document.getElementById('filtroRucContacto').value;
-        }
     }
     cargarDatos(tipo);
 }
@@ -69,7 +57,6 @@ function mostrarTodos(tipo) {
     if (tipo === 'productos') {
         paginaActual = 0;
         busquedaProdCriterio = '';
-        busquedaProdValor = '';
         document.getElementById('filtroDesc').value = '';
         document.getElementById('filtroCodigo').value = '';
         document.getElementById('filtroMarca').value = '';
@@ -77,7 +64,6 @@ function mostrarTodos(tipo) {
     } else {
         paginaActualContacto = 0;
         busquedaContCriterio = '';
-        busquedaContValor = '';
         document.getElementById('filtroNombreContacto').value = '';
         document.getElementById('filtroRucContacto').value = '';
     }
@@ -117,13 +103,23 @@ async function cargarDatos(tipo) {
     
     if (tipo === 'productos') {
         url = `/productos?page=${paginaActual}&page_size=${pageSize}`;
-        if (busquedaProdCriterio && busquedaProdValor) {
-            url += `&${busquedaProdCriterio}=${encodeURIComponent(busquedaProdValor)}`;
+        let val = '';
+        if (busquedaProdCriterio === 'descripcion') val = document.getElementById('filtroDesc').value;
+        if (busquedaProdCriterio === 'codigo') val = document.getElementById('filtroCodigo').value;
+        if (busquedaProdCriterio === 'marca') val = document.getElementById('filtroMarca').value;
+        if (busquedaProdCriterio === 'proveedor') val = document.getElementById('filtroProveedor').value;
+
+        if (busquedaProdCriterio && val) {
+            url += `&${busquedaProdCriterio}=${encodeURIComponent(val)}`;
         }
     } else {
         url = `/contactos?page=${paginaActualContacto}&page_size=${pageSize}`;
-        if (busquedaContCriterio && busquedaContValor) {
-            url += `&${busquedaContCriterio}=${encodeURIComponent(busquedaContValor)}`;
+        let val = '';
+        if (busquedaContCriterio === 'nombre') val = document.getElementById('filtroNombreContacto').value;
+        if (busquedaContCriterio === 'ruc') val = document.getElementById('filtroRucContacto').value;
+
+        if (busquedaContCriterio && val) {
+            url += `&${busquedaContCriterio}=${encodeURIComponent(val)}`;
         }
     }
 
