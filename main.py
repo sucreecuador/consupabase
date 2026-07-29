@@ -1,68 +1,100 @@
 import os
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from supabase import create_client, Client
 
-# Configuración de credenciales Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://utcqgkeiyqvfxfhjupfc.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts")
+app = Flask(__name__)
+CORS(app)  # Permite peticiones desde la página web (GitHub Pages o local)
+
+# Configuración de Supabase usando Variables de Entorno
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Faltan las variables de entorno SUPABASE_URL o SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-app = FastAPI(title="Sistema Sucre API")
-
-# Habilitar CORS para permitir peticiones desde el Frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
+@app.route('/')
 def home():
-    return {"message": "API Sistema Sucre activa y en funcionamiento"}
+    return jsonify({"message": "API de Consulta Sucre funcionando correctamente"})
 
-@app.get("/productos")
-def productos(
-    page: int = Query(0, ge=0),
-    page_size: int = Query(50, ge=1, le=200),
-    descripcion: str = "",
-    codigo: str = "",
-    marca: str = "",
-    proveedor: str = ""
-):
-    try:
-        # Consulta base a la tabla "productos" con conteo exacto de registros
-        query = supabase.table("productos").select("*", count="exact")
+# ----------------------------------------------------
+# RUTA 1: PRODUCTOS
+# ----------------------------------------------------
+@app.route('/productos', methods=['GET'])
+def get_productos():
+    page = int(request.args.get('page', 0))
+    page_size = int(request.args.get('page_size', 50))
+    
+    descripcion = request.args.get('descripcion', '').strip()
+    codigo = request.args.get('codigo', '').strip()
+    marca = request.args.get('marca', '').strip()
+    proveedor = request.args.get('proveedor', '').strip()
 
-        # Filtros de búsqueda
-        if descripcion.strip():
-            query = query.ilike("descripcion", f"%{descripcion.strip()}%")
-        if codigo.strip():
-            query = query.ilike("codigo", f"%{codigo.strip()}%")
-        if marca.strip():
-            query = query.ilike("marca", f"%{marca.strip()}%")
-        if proveedor.strip():
-            query = query.ilike("codigo_proveedor", f"%{proveedor.strip()}%")
+    start = page * page_size
+    end = start + page_size - 1
 
-        # Paginación (ordenado por "codigo")
-        offset = page * page_size
-        limit_end = offset + page_size - 1
+    query = supabase.table('productos').select('*', count='exact')
 
-        res = query.order("codigo", desc=False).range(offset, limit_end).execute()
+    if descripcion:
+        query = query.ilike('descripcion', f'%{descripcion}%')
+    if codigo:
+        query = query.ilike('codigo', f'%{codigo}%')
+    if marca:
+        query = query.ilike('marca', f'%{marca}%')
+    if proveedor:
+        query = query.ilike('codigo_proveedor', f'%{proveedor}%')
 
-        total_records = res.count if res.count is not None else len(res.data)
-        total_pages = (total_records + page_size - 1) // page_size if page_size > 0 else 0
+    response = query.order('codigo', desc=False).range(start, end).execute()
 
-        return {
-            "data": res.data,
-            "page": page,
-            "page_size": page_size,
-            "total": total_records,
-            "total_pages": total_pages
-        }
+    total_records = response.count or 0
+    total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 1
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return jsonify({
+        "data": response.data,
+        "page": page,
+        "total_pages": total_pages,
+        "total": total_records
+    })
+
+# ----------------------------------------------------
+# RUTA 2: CONTACTOS
+# ----------------------------------------------------
+@app.route('/contactos', methods=['GET'])
+def get_contactos():
+    page = int(request.args.get('page', 0))
+    page_size = int(request.args.get('page_size', 50))
+    
+    nombre = request.args.get('nombre', '').strip()
+    ruc = request.args.get('ruc', '').strip()
+    codigo = request.args.get('codigo', '').strip()
+
+    start = page * page_size
+    end = start + page_size - 1
+
+    # Nota: Asegúrate de que la tabla en Supabase se llame 'contactos' (o cámbialo aquí a 'clientes')
+    query = supabase.table('contactos').select('*', count='exact')
+
+    if nombre:
+        query = query.ilike('nombre', f'%{nombre}%')
+    if ruc:
+        query = query.ilike('ruc', f'%{ruc}%')
+    if codigo:
+        query = query.ilike('codigo_cliente', f'%{codigo}%')
+
+    response = query.order('codigo_cliente', desc=False).range(start, end).execute()
+
+    total_records = response.count or 0
+    total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 1
+
+    return jsonify({
+        "data": response.data,
+        "page": page,
+        "total_pages": total_pages,
+        "total": total_records
+    })
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
