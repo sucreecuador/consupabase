@@ -24,76 +24,84 @@ def home():
 # ----------------------------------------------------
 @app.route('/productos', methods=['GET'])
 def get_productos():
-    page = int(request.args.get('page', 0))
-    page_size = int(request.args.get('page_size', 50))
-    
-    descripcion = request.args.get('descripcion', '').strip()
-    codigo = request.args.get('codigo', '').strip()
-    marca = request.args.get('marca', '').strip()
-    proveedor = request.args.get('proveedor', '').strip()
+    try:
+        page = int(request.args.get('page', 0))
+        page_size = int(request.args.get('page_size', 50))
+        
+        descripcion = request.args.get('descripcion', '').strip()
+        codigo = request.args.get('codigo', '').strip()
+        marca = request.args.get('marca', '').strip()
+        proveedor = request.args.get('proveedor', '').strip()
 
-    start = page * page_size
-    end = start + page_size - 1
+        start = page * page_size
+        end = start + page_size - 1
 
-    query = supabase.table('productos').select('*', count='exact')
+        query = supabase.table('productos').select('*', count='exact')
 
-    if descripcion:
-        query = query.ilike('descripcion', f'%{descripcion}%')
-    if codigo:
-        query = query.ilike('codigo', f'%{codigo}%')
-    if marca:
-        query = query.ilike('marca', f'%{marca}%')
-    if proveedor:
-        query = query.ilike('codigo_proveedor', f'%{proveedor}%')
+        if descripcion:
+            query = query.ilike('descripcion', f'%{descripcion}%')
+        if codigo:
+            query = query.ilike('codigo', f'%{codigo}%')
+        if marca:
+            query = query.ilike('marca', f'%{marca}%')
+        if proveedor:
+            query = query.ilike('codigo_proveedor', f'%{proveedor}%')
 
-    response = query.order('codigo', desc=False).range(start, end).execute()
+        response = query.range(start, end).execute()
 
-    total_records = response.count or 0
-    total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 1
+        total_records = response.count or 0
+        total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 1
 
-    return jsonify({
-        "data": response.data,
-        "page": page,
-        "total_pages": total_pages,
-        "total": total_records
-    })
+        return jsonify({
+            "data": response.data,
+            "page": page,
+            "total_pages": total_pages,
+            "total": total_records
+        })
+    except Exception as e:
+        print(f"Error en /productos: {e}")
+        return jsonify({"error": str(e)}), 500
 
 # ----------------------------------------------------
-# RUTA 2: CONTACTOS
+# RUTA 2: CONTACTOS (Consulta la tabla 'clientes')
 # ----------------------------------------------------
 @app.route('/contactos', methods=['GET'])
 def get_contactos():
-    page = int(request.args.get('page', 0))
-    page_size = int(request.args.get('page_size', 50))
-    
-    nombre = request.args.get('nombre', '').strip()
-    ruc = request.args.get('ruc', '').strip()
-    codigo = request.args.get('codigo', '').strip()
+    try:
+        page = int(request.args.get('page', 0))
+        page_size = int(request.args.get('page_size', 50))
+        
+        nombre = request.args.get('nombre', '').strip()
+        ruc = request.args.get('ruc', '').strip()
+        codigo = request.args.get('codigo', '').strip()
 
-    start = page * page_size
-    end = start + page_size - 1
+        start = page * page_size
+        end = start + page_size - 1
 
-    # Nota: Asegúrate de que la tabla en Supabase se llame 'contactos' (o cámbialo aquí a 'clientes')
-    query = supabase.table('contactos').select('*', count='exact')
+        # Conectado a la tabla 'clientes' de Supabase
+        query = supabase.table('clientes').select('*', count='exact')
 
-    if nombre:
-        query = query.ilike('nombre', f'%{nombre}%')
-    if ruc:
-        query = query.ilike('ruc', f'%{ruc}%')
-    if codigo:
-        query = query.ilike('codigo_cliente', f'%{codigo}%')
+        if nombre:
+            query = query.ilike('nombre', f'%{nombre}%')
+        if ruc:
+            query = query.ilike('ruc', f'%{ruc}%')
+        if codigo:
+            query = query.ilike('codigo_cliente', f'%{codigo}%')
 
-    response = query.order('codigo_cliente', desc=False).range(start, end).execute()
+        response = query.range(start, end).execute()
 
-    total_records = response.count or 0
-    total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 1
+        total_records = response.count or 0
+        total_pages = (total_records + page_size - 1) // page_size if total_records > 0 else 1
 
-    return jsonify({
-        "data": response.data,
-        "page": page,
-        "total_pages": total_pages,
-        "total": total_records
-    })
+        return jsonify({
+            "data": response.data,
+            "page": page,
+            "total_pages": total_pages,
+            "total": total_records
+        })
+    except Exception as e:
+        print(f"Error en /contactos: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
