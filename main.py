@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -20,9 +21,21 @@ app.add_middleware(
 # Servir archivos estáticos
 app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
-# Variables de entorno limpiando posibles espacios accidentales (.strip())
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
+def clean_supabase_url(raw_url: str) -> str:
+    if not raw_url:
+        return ""
+    # Eliminar espacios invisibles y comillas que puedan haberse colado
+    url = raw_url.strip().strip("'").strip('"')
+    # Quitar diagonales al final
+    url = url.rstrip("/")
+    # Asegurar que tenga el protocolo https://
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = f"https://{url}"
+    return url
+
+RAW_SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_URL = clean_supabase_url(RAW_SUPABASE_URL)
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip().strip("'").strip('"')
 
 def get_supabase_client() -> Client:
     if not SUPABASE_URL or not SUPABASE_KEY:
