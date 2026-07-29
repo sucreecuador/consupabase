@@ -79,12 +79,13 @@ def get_contactos():
 
         query = supabase.table('clientes').select('*', count='exact')
 
+        # Si viene filtro, buscar usando sintaxis OR para cubrir nombres de columnas comunes
         if nombre:
-            query = query.ilike('nombre', f'%{nombre}%')
+            query = query.or_(f"nombre.ilike.%{nombre}%,razon_social.ilike.%{nombre}%,nombre_apellido.ilike.%{nombre}%")
         if ruc:
-            query = query.ilike('ruc', f'%{ruc}%')
+            query = query.or_(f"ruc.ilike.%{ruc}%,cedula.ilike.%{ruc}%,identificacion.ilike.%{ruc}%")
         if codigo:
-            query = query.ilike('codigo_cliente', f'%{codigo}%')
+            query = query.or_(f"codigo.ilike.%{codigo}%,codigo_cliente.ilike.%{codigo}%,id.ilike.%{codigo}%")
 
         response = query.range(start, end).execute()
 

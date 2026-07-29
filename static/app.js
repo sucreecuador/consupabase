@@ -1,6 +1,7 @@
 ﻿const API_BASE_URL = "https://consupabase-api.onrender.com";
 
 let currentModule = "productos"; // "productos" o "contactos"
+let currentVista = 1; // 1 o 2
 let currentPage = 0;
 let totalPages = 1;
 
@@ -64,6 +65,12 @@ function switchModule(module) {
     loadData();
 }
 
+function switchVista(vistaNum) {
+    currentVista = vistaNum;
+    renderProductoHeaders();
+    loadData();
+}
+
 function renderProductoFilters() {
     filterContainer.innerHTML = `
         <label>Descripción:</label>
@@ -74,8 +81,8 @@ function renderProductoFilters() {
         <input type="text" id="f-marca" style="width: 80px;">
         <label>Proveedor:</label>
         <input type="text" id="f-prov" style="width: 80px;">
-        <button class="btn-yellow">Vista 1</button>
-        <button class="btn-yellow">Vista 2</button>
+        <button class="btn-yellow" onclick="switchVista(1)">Vista 1</button>
+        <button class="btn-yellow" onclick="switchVista(2)">Vista 2</button>
     `;
 
     actionButtons.innerHTML = `
@@ -86,17 +93,33 @@ function renderProductoFilters() {
         <button class="btn-blue" onclick="clearFilters()">Mostrar todos</button>
     `;
 
-    tableHeaders.innerHTML = `
-        <th>CODIGO</th>
-        <th>CODIGO_PROVEEDOR</th>
-        <th>MARCA</th>
-        <th>DESCRIPCION</th>
-        <th>PRECIO_VENTA</th>
-        <th>COSTO_PROM</th>
-        <th>SALDO</th>
-        <th>SALDO_BEXT</th>
-        <th>SALDO_TEMP</th>
-    `;
+    renderProductoHeaders();
+}
+
+function renderProductoHeaders() {
+    if (currentVista === 1) {
+        tableHeaders.innerHTML = `
+            <th>CODIGO</th>
+            <th>CODIGO_PROVEEDOR</th>
+            <th>MARCA</th>
+            <th>DESCRIPCION</th>
+            <th>PRECIO_VENTA</th>
+            <th>COSTO_PROM</th>
+            <th>SALDO</th>
+            <th>SALDO_BEXT</th>
+            <th>SALDO_TEMP</th>
+        `;
+    } else {
+        tableHeaders.innerHTML = `
+            <th>CODIGO</th>
+            <th>MARCA</th>
+            <th>DESCRIPCION</th>
+            <th>PRECIO_VENTA</th>
+            <th>SALDO</th>
+            <th>UBICACION</th>
+            <th>LINEA</th>
+        `;
+    }
 }
 
 function renderContactoFilters() {
@@ -200,18 +223,31 @@ function renderTableData(data) {
         const tr = document.createElement("tr");
 
         if (currentModule === "productos") {
-            tr.innerHTML = `
-                <td><strong>${item.codigo || ''}</strong></td>
-                <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
-                <td>${item.marca || ''}</td>
-                <td>${item.descripcion || ''}</td>
-                <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
-                <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
-                <td>${item.saldo || 0}</td>
-                <td>${item.saldo_bext || 0}</td>
-                <td>${item.saldo_temp || 0}</td>
-            `;
+            if (currentVista === 1) {
+                tr.innerHTML = `
+                    <td><strong>${item.codigo || ''}</strong></td>
+                    <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
+                    <td>${item.marca || ''}</td>
+                    <td>${item.descripcion || ''}</td>
+                    <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
+                    <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
+                    <td>${item.saldo || 0}</td>
+                    <td>${item.saldo_bext || 0}</td>
+                    <td>${item.saldo_temp || 0}</td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td><strong>${item.codigo || ''}</strong></td>
+                    <td>${item.marca || ''}</td>
+                    <td>${item.descripcion || ''}</td>
+                    <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
+                    <td>${item.saldo || 0}</td>
+                    <td>${item.ubicacion || ''}</td>
+                    <td>${item.linea || ''}</td>
+                `;
+            }
         } else {
+            // Mapeo amplio de propiedades para la tabla de contactos/clientes
             const cod = item.codigo_cliente || item.codigo || item.id || '';
             const ruc = item.ruc || item.cedula || item.identificacion || '';
             const nom = item.nombre || item.nombre_apellido || item.razon_social || '';
