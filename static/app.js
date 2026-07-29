@@ -119,8 +119,10 @@ async function cargarDatos(tipo) {
         }
     } else {
         url = `/contactos?page=${page}&page_size=${pageSize}`;
-        if (criterioBusqueda && valorBusqueda) {
-            url += `&${criterioBusqueda}=${encodeURIComponent(valorBusqueda)}`;
+        if (criterioBusqueda === 'nombre' && valorBusqueda) {
+            url += `&nombre=${encodeURIComponent(valorBusqueda)}`;
+        } else if (criterioBusqueda === 'ruc' && valorBusqueda) {
+            url += `&ruc=${encodeURIComponent(valorBusqueda)}`;
         }
     }
 
