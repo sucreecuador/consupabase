@@ -1,0 +1,28 @@
+/* Estilos para congelar la cabecera al hacer scroll */
+.table-container { 
+    background: white; 
+    border: 1px solid #b0b0b0; 
+    max-height: 550px; 
+    overflow-y: auto; 
+    overflow-x: auto; 
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    table-layout: auto; 
+}
+
+th { 
+    position: sticky;
+    top: 0;
+    z-index: 2; /* Mantiene la cabecera por encima del contenido al deslizar */
+    background-color: #d8d8d8; 
+    border: 1px solid #a0a0a0; 
+    padding: 6px; 
+    text-align: center; 
+    font-size: 11px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    white-space: nowrap; 
+}
