@@ -47,11 +47,11 @@ def productos(
         if proveedor.strip():
             query = query.ilike("codigo_proveedor", f"%{proveedor.strip()}%")
 
-        # Paginación
+        # Paginación (ordenado por "codigo")
         offset = page * page_size
         limit_end = offset + page_size - 1
 
-        res = query.order("id", desc=False).range(offset, limit_end).execute()
+        res = query.order("codigo", desc=False).range(offset, limit_end).execute()
 
         total_records = res.count if res.count is not None else len(res.data)
         total_pages = (total_records + page_size - 1) // page_size if page_size > 0 else 0
