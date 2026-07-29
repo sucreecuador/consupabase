@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = "https://consupabase.onrender.com"; // Cambia esta URL si tu servicio en Render tiene otro nombre
+﻿const API_BASE_URL = "https://consupabase-api.onrender.com";
 
 let currentModule = "productos"; // "productos" o "contactos"
 let currentPage = 0;
@@ -212,7 +212,6 @@ function renderTableData(data) {
                 <td>${item.saldo_temp || 0}</td>
             `;
         } else {
-            // Mapeo flexible para clientes/contactos
             const cod = item.codigo_cliente || item.codigo || item.id || '';
             const ruc = item.ruc || item.cedula || item.identificacion || '';
             const nom = item.nombre || item.nombre_apellido || item.razon_social || '';

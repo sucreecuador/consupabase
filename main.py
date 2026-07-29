@@ -79,22 +79,12 @@ def get_contactos():
 
         query = supabase.table('clientes').select('*', count='exact')
 
-        # Filtro flexible para evitar errores de columnas inexistentes
         if nombre:
-            try:
-                query = query.ilike('nombre', f'%{nombre}%')
-            except:
-                pass
+            query = query.ilike('nombre', f'%{nombre}%')
         if ruc:
-            try:
-                query = query.ilike('ruc', f'%{ruc}%')
-            except:
-                pass
+            query = query.ilike('ruc', f'%{ruc}%')
         if codigo:
-            try:
-                query = query.ilike('codigo_cliente', f'%{codigo}%')
-            except:
-                pass
+            query = query.ilike('codigo_cliente', f'%{codigo}%')
 
         response = query.range(start, end).execute()
 
