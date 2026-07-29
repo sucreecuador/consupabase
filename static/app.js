@@ -1,18 +1,19 @@
-﻿const API_URL = "https://consupabase-api.onrender.com";
+﻿// Al dejar API_URL vacío o usar window.location.origin, se conecta automáticamente al mismo servidor
+const API_URL = window.location.origin;
 
 let currentModule = "productos"; // "productos" o "contactos"
 let currentVista = 1;            // 1 o 2
 let currentPage = 0;
 let totalPages = 1;
 
-// Elementos del DOM basados en tu HTML
+// Elementos del DOM
 const btnModuleProductos = document.getElementById("btn-productos") || document.querySelector(".module-nav button:first-child");
 const btnModuleContactos = document.getElementById("btn-contactos") || document.querySelector(".module-nav button:last-child");
 const mainTitle = document.getElementById("main-title");
 const filterContainer = document.getElementById("filter-container");
 const actionButtons = document.getElementById("action-buttons");
 
-// Paginación y Tabla
+// Paginación
 const btnPrev = document.getElementById("btn-prev") || document.querySelector(".pagination-row button:first-child");
 const btnNext = document.getElementById("btn-next");
 const inputPage = document.querySelector(".pagination-row input[type='number']");
@@ -169,14 +170,18 @@ async function fetchData(searchType = null) {
         const response = await fetch(url);
         const resData = await response.json();
 
-        if (!response.ok) throw new Error(resData.error || "Error en el servidor");
+        if (!response.ok) {
+            // Captura el mensaje exacto de error que envía FastAPI en resData.detail
+            const errorMessage = resData.detail || resData.error || "Error no especificado en el servidor";
+            throw new Error(errorMessage);
+        }
 
         totalPages = resData.total_pages || 1;
         updatePaginationUI();
         buildTableHTML(tableContainer, resData.data || []);
     } catch (err) {
         console.error("Error al cargar datos:", err);
-        tableContainer.innerHTML = `<p style="text-align:center; color:red; padding: 20px;">Error al obtener información: ${err.message}</p>`;
+        tableContainer.innerHTML = `<p style="text-align:center; color:red; padding: 20px; font-weight:bold;">Error: ${err.message}</p>`;
     }
 }
 
