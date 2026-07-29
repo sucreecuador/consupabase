@@ -1,169 +1,113 @@
 ﻿const API_URL = "https://consupabase-api.onrender.com";
 
 let currentModule = "productos"; // "productos" o "contactos"
-let currentVista = 1;            // 1 o 2 (para productos)
+let currentVista = 1;            // 1 o 2
 let currentPage = 0;
 let totalPages = 1;
 
-// Elementos del DOM
-const btnModuleProductos = document.getElementById("btn-module-productos");
-const btnModuleContactos = document.getElementById("btn-module-contactos");
-const pageTitle = document.getElementById("page-title");
-const searchContainer = document.getElementById("search-container");
-const tableHeaders = document.getElementById("table-headers");
-const tableBody = document.getElementById("table-body");
-const btnPrev = document.getElementById("btn-prev");
-const btnNext = document.getElementById("btn-next");
-const pageInfo = document.getElementById("page-info");
-const inputPage = document.getElementById("input-page");
-const btnGoPage = document.getElementById("btn-go-page");
+// Elementos del DOM basados en tu HTML
+const btnModuleProductos = document.getElementById("btn-productos") || document.querySelector(".module-nav button:first-child");
+const btnModuleContactos = document.getElementById("btn-contactos") || document.querySelector(".module-nav button:last-child");
+const mainTitle = document.getElementById("main-title");
+const filterContainer = document.getElementById("filter-container");
+const actionButtons = document.getElementById("action-buttons");
 
-// Inicialización
+// Paginación y Tabla
+const btnPrev = document.getElementById("btn-prev") || document.querySelector(".pagination-row button:first-child");
+const btnNext = document.getElementById("btn-next");
+const inputPage = document.querySelector(".pagination-row input[type='number']");
+const btnGoPage = document.querySelector(".pagination-row button:last-child");
+
 document.addEventListener("DOMContentLoaded", () => {
     setupEventListeners();
     switchModule("productos");
 });
 
 function setupEventListeners() {
-    btnModuleProductos.addEventListener("click", () => switchModule("productos"));
-    btnModuleContactos.addEventListener("click", () => switchModule("contactos"));
+    if (btnModuleProductos) btnModuleProductos.onclick = () => switchModule("productos");
+    if (btnModuleContactos) btnModuleContactos.onclick = () => switchModule("contactos");
 
-    btnPrev.addEventListener("click", () => {
-        if (currentPage > 0) {
-            currentPage--;
-            fetchData();
-        }
-    });
+    if (btnPrev) {
+        btnPrev.onclick = () => {
+            if (currentPage > 0) {
+                currentPage--;
+                fetchData();
+            }
+        };
+    }
 
-    btnNext.addEventListener("click", () => {
-        if (currentPage < totalPages - 1) {
-            currentPage++;
-            fetchData();
-        }
-    });
+    if (btnNext) {
+        btnNext.onclick = () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                fetchData();
+            }
+        };
+    }
 
-    btnGoPage.addEventListener("click", () => {
-        const p = parseInt(inputPage.value) - 1;
-        if (!isNaN(p) && p >= 0 && p < totalPages) {
-            currentPage = p;
-            fetchData();
-        } else {
-            alert(`Por favor ingrese un número entre 1 y ${totalPages}`);
-        }
-    });
+    if (btnGoPage && inputPage) {
+        btnGoPage.onclick = () => {
+            const p = parseInt(inputPage.value) - 1;
+            if (!isNaN(p) && p >= 0 && p < totalPages) {
+                currentPage = p;
+                fetchData();
+            } else {
+                alert(`Por favor ingrese un número entre 1 y ${totalPages}`);
+            }
+        };
+    }
 }
 
 function switchModule(moduleName) {
     currentModule = moduleName;
     currentPage = 0;
 
-    if (moduleName === "productos") {
-        btnModuleProductos.classList.add("active");
-        btnModuleContactos.classList.remove("active");
-        pageTitle.textContent = "Consulta de Productos - Sucre";
-        renderProductSearchForm();
-    } else {
-        btnModuleContactos.classList.add("active");
-        btnModuleProductos.classList.remove("active");
-        pageTitle.textContent = "Consulta de Contactos - Sucre";
-        renderContactSearchForm();
+    if (mainTitle) {
+        mainTitle.textContent = moduleName === "productos" 
+            ? "Consulta de Productos - Sucre" 
+            : "Consulta de Contactos - Sucre";
     }
 
+    renderSearchForm();
     fetchData();
 }
 
-function renderProductSearchForm() {
-    searchContainer.innerHTML = `
-        <div class="search-fields">
+function renderSearchForm() {
+    if (!filterContainer || !actionButtons) return;
+
+    if (currentModule === "productos") {
+        filterContainer.innerHTML = `
             <label>Descripción: <input type="text" id="input-desc"></label>
             <label>Código: <input type="text" id="input-codigo"></label>
             <label>Marca: <input type="text" id="input-marca"></label>
             <label>Proveedor: <input type="text" id="input-proveedor"></label>
-            <button id="btn-vista1" class="btn-vista ${currentVista === 1 ? 'active-vista' : ''}">Vista 1</button>
-            <button id="btn-vista2" class="btn-vista ${currentVista === 2 ? 'active-vista' : ''}">Vista 2</button>
-        </div>
-        <div class="search-buttons">
+            <button id="btn-vista1" style="font-weight:${currentVista === 1 ? 'bold' : 'normal'}">Vista 1</button>
+            <button id="btn-vista2" style="font-weight:${currentVista === 2 ? 'bold' : 'normal'}">Vista 2</button>
+        `;
+
+        actionButtons.innerHTML = `
             <button onclick="triggerSearch('desc')">Buscar por descripción</button>
             <button onclick="triggerSearch('codigo')">Buscar por código</button>
             <button onclick="triggerSearch('marca')">Buscar por marca</button>
             <button onclick="triggerSearch('proveedor')">Buscar por proveedor</button>
             <button onclick="resetSearch()">Mostrar todos</button>
-        </div>
-    `;
+        `;
 
-    document.getElementById("btn-vista1").addEventListener("click", () => {
-        currentVista = 1;
-        renderProductSearchForm();
-        renderHeaders();
-        fetchData();
-    });
+        document.getElementById("btn-vista1").onclick = () => { currentVista = 1; renderSearchForm(); fetchData(); };
+        document.getElementById("btn-vista2").onclick = () => { currentVista = 2; renderSearchForm(); fetchData(); };
 
-    document.getElementById("btn-vista2").addEventListener("click", () => {
-        currentVista = 2;
-        renderProductSearchForm();
-        renderHeaders();
-        fetchData();
-    });
-
-    renderHeaders();
-}
-
-function renderContactSearchForm() {
-    searchContainer.innerHTML = `
-        <div class="search-fields">
+    } else {
+        filterContainer.innerHTML = `
             <label>Nombre / Razón Social: <input type="text" id="input-nombre"></label>
             <label>Código Cliente: <input type="text" id="input-codigo-cliente"></label>
-        </div>
-        <div class="search-buttons">
+        `;
+
+        actionButtons.innerHTML = `
             <button onclick="triggerSearch('nombre')">Buscar por nombre</button>
             <button onclick="triggerSearch('codigo_cliente')">Buscar por código</button>
             <button onclick="resetSearch()">Mostrar todos</button>
-        </div>
-    `;
-
-    renderHeaders();
-}
-
-function renderHeaders() {
-    tableHeaders.innerHTML = "";
-    const tr = document.createElement("tr");
-
-    if (currentModule === "productos") {
-        if (currentVista === 1) {
-            tr.innerHTML = `
-                <th>CODIGO</th>
-                <th>CODIGO_PROVEEDOR</th>
-                <th>MARCA</th>
-                <th>DESCRIPCION</th>
-                <th>PRECIO_VENTA</th>
-                <th>COSTO_PROM</th>
-                <th>SALDO</th>
-                <th>SALDO_BEXT</th>
-                <th>SALDO_TEMP</th>
-            `;
-        } else {
-            tr.innerHTML = `
-                <th>CODIGO</th>
-                <th>CODIGO_PROVEEDOR</th>
-                <th>MARCA</th>
-                <th>DESCRIPCION</th>
-                <th>PRECIO_VENTA</th>
-                <th>COSTO_PROM</th>
-                <th>SALDO</th>
-                <th>PESO</th>
-                <th>MEDIDAS</th>
-            `;
-        }
-    } else {
-        tr.innerHTML = `
-            <th>CODIGO</th>
-            <th>CATEGORIA</th>
-            <th>NOMBRE</th>
-            <th>RAZON SOCIAL</th>
         `;
     }
-
-    tableHeaders.appendChild(tr);
 }
 
 function triggerSearch(type) {
@@ -186,7 +130,10 @@ function resetSearch() {
 }
 
 async function fetchData(searchType = null) {
-    tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Cargando datos...</td></tr>`;
+    const tableContainer = document.querySelector(".table-container");
+    if (!tableContainer) return;
+
+    tableContainer.innerHTML = `<p style="text-align:center; padding: 20px;">Cargando datos...</p>`;
 
     let url = `${API_URL}/${currentModule}?page=${currentPage}&page_size=50`;
 
@@ -222,72 +169,93 @@ async function fetchData(searchType = null) {
         const response = await fetch(url);
         const resData = await response.json();
 
-        if (!response.ok) {
-            throw new Error(resData.error || "Error en el servidor");
-        }
+        if (!response.ok) throw new Error(resData.error || "Error en el servidor");
 
         totalPages = resData.total_pages || 1;
         updatePaginationUI();
-        renderTableData(resData.data || []);
+        buildTableHTML(tableContainer, resData.data || []);
     } catch (err) {
         console.error("Error al cargar datos:", err);
-        tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Error al obtener información: ${err.message}</td></tr>`;
+        tableContainer.innerHTML = `<p style="text-align:center; color:red; padding: 20px;">Error al obtener información: ${err.message}</p>`;
     }
 }
 
 function updatePaginationUI() {
-    pageInfo.textContent = `Página ${currentPage + 1} de ${totalPages}`;
-    inputPage.value = currentPage + 1;
-    btnPrev.disabled = currentPage === 0;
-    btnNext.disabled = currentPage >= totalPages - 1;
+    const pageInfoSpan = document.querySelector(".pagination-row span") || document.getElementById("page-info");
+    if (pageInfoSpan) {
+        pageInfoSpan.textContent = `Página ${currentPage + 1} de ${totalPages}`;
+    }
+    if (inputPage) inputPage.value = currentPage + 1;
 }
 
-function renderTableData(data) {
-    tableBody.innerHTML = "";
-
+function buildTableHTML(container, data) {
     if (!data || data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No se encontraron registros.</td></tr>`;
+        container.innerHTML = `<p style="text-align:center; padding: 20px;">No se encontraron registros.</p>`;
         return;
     }
 
-    data.forEach(item => {
-        const tr = document.createElement("tr");
+    let headersHTML = "";
+    if (currentModule === "productos") {
+        if (currentVista === 1) {
+            headersHTML = `
+                <th>CODIGO</th><th>CODIGO_PROVEEDOR</th><th>MARCA</th>
+                <th>DESCRIPCION</th><th>PRECIO_VENTA</th><th>COSTO_PROM</th>
+                <th>SALDO</th><th>SALDO_BEXT</th><th>SALDO_TEMP</th>`;
+        } else {
+            headersHTML = `
+                <th>CODIGO</th><th>CODIGO_PROVEEDOR</th><th>MARCA</th>
+                <th>DESCRIPCION</th><th>PRECIO_VENTA</th><th>COSTO_PROM</th>
+                <th>SALDO</th><th>PESO</th><th>MEDIDAS</th>`;
+        }
+    } else {
+        headersHTML = `<th>CODIGO</th><th>CATEGORIA</th><th>NOMBRE</th><th>RAZON SOCIAL</th>`;
+    }
 
+    let rowsHTML = "";
+    data.forEach(item => {
         if (currentModule === "productos") {
             if (currentVista === 1) {
-                tr.innerHTML = `
-                    <td><strong>${item.codigo || ''}</strong></td>
-                    <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
-                    <td>${item.marca || ''}</td>
-                    <td>${item.descripcion || ''}</td>
-                    <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
-                    <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
-                    <td>${item.saldo || 0}</td>
-                    <td>${item.saldo_bext || 0}</td>
-                    <td>${item.saldo_temp || 0}</td>
-                `;
+                rowsHTML += `
+                    <tr>
+                        <td><strong>${item.codigo || ''}</strong></td>
+                        <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
+                        <td>${item.marca || ''}</td>
+                        <td>${item.descripcion || ''}</td>
+                        <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
+                        <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
+                        <td>${item.saldo || 0}</td>
+                        <td>${item.saldo_bext || 0}</td>
+                        <td>${item.saldo_temp || 0}</td>
+                    </tr>`;
             } else {
-                tr.innerHTML = `
-                    <td><strong>${item.codigo || ''}</strong></td>
-                    <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
-                    <td>${item.marca || ''}</td>
-                    <td>${item.descripcion || ''}</td>
-                    <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
-                    <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
-                    <td>${item.saldo || 0}</td>
-                    <td>${item.peso || ''}</td>
-                    <td>${item.medidas || item.medida || ''}</td>
-                `;
+                rowsHTML += `
+                    <tr>
+                        <td><strong>${item.codigo || ''}</strong></td>
+                        <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
+                        <td>${item.marca || ''}</td>
+                        <td>${item.descripcion || ''}</td>
+                        <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
+                        <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
+                        <td>${item.saldo || 0}</td>
+                        <td>${item.peso || ''}</td>
+                        <td>${item.medidas || item.medida || ''}</td>
+                    </tr>`;
             }
         } else {
-            tr.innerHTML = `
-                <td><strong>${item.codigo_cliente || item.id || ''}</strong></td>
-                <td>${item.categoria || ''}</td>
-                <td>${item.nombre || ''}</td>
-                <td>${item.razon_social || ''}</td>
-            `;
+            rowsHTML += `
+                <tr>
+                    <td><strong>${item.codigo_cliente || item.id || ''}</strong></td>
+                    <td>${item.categoria || ''}</td>
+                    <td>${item.nombre || ''}</td>
+                    <td>${item.razon_social || ''}</td>
+                </tr>`;
         }
-
-        tableBody.appendChild(tr);
     });
+
+    container.innerHTML = `
+        <table border="1" style="width:100%; border-collapse:collapse;">
+            <thead><tr>${headersHTML}</tr></thead>
+            <tbody>${rowsHTML}</tbody>
+        </table>
+    `;
 }
