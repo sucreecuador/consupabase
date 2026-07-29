@@ -1,5 +1,4 @@
 import os
-import re
 from typing import Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -18,40 +17,51 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir archivos estáticos
+# Servir archivos estáticos desde la carpeta 'static'
 app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
-def clean_supabase_url(raw_url: str) -> str:
-    if not raw_url:
+def get_clean_env(var_name: str) -> str:
+    value = os.environ.get(var_name, "")
+    if not value:
         return ""
-    # Eliminar espacios invisibles y comillas que puedan haberse colado
-    url = raw_url.strip().strip("'").strip('"')
-    # Quitar diagonales al final
-    url = url.rstrip("/")
-    # Asegurar que tenga el protocolo https://
-    if not url.startswith("http://") and not url.startswith("https://"):
-        url = f"https://{url}"
-    return url
+    # Quitar comillas, espacios y barras sobrantes
+    return value.strip().strip("'").strip('"').rstrip("/")
 
-RAW_SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_URL = clean_supabase_url(RAW_SUPABASE_URL)
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip().strip("'").strip('"')
+SUPABASE_URL = get_clean_env("SUPABASE_URL")
+SUPABASE_KEY = get_clean_env("SUPABASE_KEY")
+
+# Asegurar protocolo https://
+if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = f"https://{SUPABASE_URL}"
 
 def get_supabase_client() -> Client:
     if not SUPABASE_URL or not SUPABASE_KEY:
         raise HTTPException(
             status_code=500, 
-            detail="Faltan las variables SUPABASE_URL o SUPABASE_KEY en Render"
+            detail=f"Faltan variables en Render. URL leída: '{SUPABASE_URL}' | KEY presente: {bool(SUPABASE_KEY)}"
         )
     try:
         return create_client(SUPABASE_URL, SUPABASE_KEY)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al conectar con Supabase: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error conectando a '{SUPABASE_URL}': {str(e)}"
+        )
 
 
 @app.get("/")
 def read_root():
     return RedirectResponse(url="/static/index.html")
+
+
+@app.get("/test-connection")
+def test_connection():
+    """Endpoint de prueba para verificar qué URL se está usando."""
+    return {
+        "supabase_url_detectada": SUPABASE_URL,
+        "supabase_key_configurada": bool(SUPABASE_KEY),
+        "key_longitud": len(SUPABASE_KEY) if SUPABASE_KEY else 0
+    }
 
 
 @app.get("/productos")
@@ -94,7 +104,7 @@ def get_productos(
             "total_pages": total_pages
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en consulta de productos: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error en consulta de productos (URL: {SUPABASE_URL}): {str(e)}")
 
 
 @app.get("/contactos")
@@ -131,4 +141,4 @@ def get_contactos(
             "total_pages": total_pages
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en consulta de clientes: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error en consulta de clientes (URL: {SUPABASE_URL}): {str(e)}")
