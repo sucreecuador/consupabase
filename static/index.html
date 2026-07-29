@@ -59,11 +59,11 @@
         
         <div class="filter-container">
             <label>Nombre / Razón Social: <input type="text" id="filtroNombreContacto" placeholder="Buscar..."></label>
-            <label>Código Cliente: <input type="text" id="filtroCodigoContacto" placeholder="Buscar..."></label>
+            <label>Cédula o RUC: <input type="text" id="filtroRucContacto" placeholder="Buscar..."></label>
             
             <div style="margin-top: 10px;">
                 <button onclick="buscar('contactos', 'nombre')">Buscar por nombre</button>
-                <button onclick="buscar('contactos', 'codigo')">Buscar por código</button>
+                <button onclick="buscar('contactos', 'ruc')">Buscar por cédula o RUC</button>
                 <button onclick="mostrarTodos('contactos')">Mostrar todos</button>
                 <button id="btnContVista1" onclick="cambiarVistaContactos(1)" style="margin-left: 20px; background-color: #333; color: white;">Vista 1</button>
                 <button id="btnContVista2" onclick="cambiarVistaContactos(2)" style="background-color: #777; color: white;">Vista 2</button>
