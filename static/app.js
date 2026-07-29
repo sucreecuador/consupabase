@@ -119,7 +119,7 @@ async function cargarDatos(tipo) {
         if (busquedaContCriterio === 'ruc') val = document.getElementById('filtroRucContacto').value;
 
         if (busquedaContCriterio && val) {
-            url += `&${busquedaContCriterio}=${encodeURIComponent(val)}`;
+            url += `&ruc=${encodeURIComponent(val)}`;
         }
     }
 
