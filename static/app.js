@@ -1,80 +1,85 @@
 ﻿// URL base de la API en Render
 const API_URL = "https://consupabase-api.onrender.com/productos";
 
-// Estado global de la paginación
+// Paginación
 let currentPage = 0;
 const pageSize = 50;
 
-// Elementos del DOM
-const inputDescripcion = document.getElementById("descripcion");
-const inputCodigo = document.getElementById("codigo");
-const inputMarca = document.getElementById("marca");
-const inputProveedor = document.getElementById("proveedor");
-
-const btnBuscarDescripcion = document.getElementById("btnBuscarDescripcion");
-const btnBuscarCodigo = document.getElementById("btnBuscarCodigo");
-const btnBuscarMarca = document.getElementById("btnBuscarMarca");
-const btnBuscarProveedor = document.getElementById("btnBuscarProveedor");
-const btnMostrarTodos = document.getElementById("btnMostrarTodos");
-
-const tableBody = document.getElementById("tableBody");
-const pageIndicatorEl = document.getElementById("pageIndicator");
-const btnPrev = document.getElementById("btnPrev");
-const btnNext = document.getElementById("btnNext");
-const inputIrPagina = document.getElementById("irPagina");
-const btnIrPagina = document.getElementById("btnIrPagina");
-
-// Carga inicial
+// Carga inicial al abrir la página
 document.addEventListener("DOMContentLoaded", () => {
-    fetchProductos(0);
+    initApp();
 });
 
-// Eventos de botones de búsqueda
-if (btnBuscarDescripcion) btnBuscarDescripcion.addEventListener("click", () => realizarBusqueda());
-if (btnBuscarCodigo) btnBuscarCodigo.addEventListener("click", () => realizarBusqueda());
-if (btnBuscarMarca) btnBuscarMarca.addEventListener("click", () => realizarBusqueda());
-if (btnBuscarProveedor) btnBuscarProveedor.addEventListener("click", () => realizarBusqueda());
-
-if (btnMostrarTodos) {
-    btnMostrarTodos.addEventListener("click", () => {
-        limpiarInputs();
-        currentPage = 0;
-        fetchProductos(0);
-    });
+function getTableBody() {
+    return document.getElementById("tableBody") || 
+           document.getElementById("tablaBody") || 
+           document.getElementById("cuerpoTabla") || 
+           document.querySelector("table tbody") || 
+           document.querySelector("tbody");
 }
 
-// Paginación
-if (btnPrev) {
-    btnPrev.addEventListener("click", () => {
-        if (currentPage > 0) {
-            currentPage--;
+function initApp() {
+    // Escuchar eventos de búsqueda
+    const btnDesc = document.getElementById("btnBuscarDescripcion");
+    const btnCod = document.getElementById("btnBuscarCodigo");
+    const btnMar = document.getElementById("btnBuscarMarca");
+    const btnProv = document.getElementById("btnBuscarProveedor");
+    const btnTodos = document.getElementById("btnMostrarTodos");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnIr = document.getElementById("btnIrPagina");
+
+    if (btnDesc) btnDesc.onclick = () => realizarBusqueda();
+    if (btnCod) btnCod.onclick = () => realizarBusqueda();
+    if (btnMar) btnMar.onclick = () => realizarBusqueda();
+    if (btnProv) btnProv.onclick = () => realizarBusqueda();
+
+    if (btnTodos) {
+        btnTodos.onclick = () => {
+            limpiarInputs();
+            currentPage = 0;
+            fetchProductos(0);
+        };
+    }
+
+    if (btnPrev) {
+        btnPrev.onclick = () => {
+            if (currentPage > 0) {
+                currentPage--;
+                fetchProductos(currentPage);
+            }
+        };
+    }
+
+    if (btnNext) {
+        btnNext.onclick = () => {
+            currentPage++;
             fetchProductos(currentPage);
-        }
-    });
-}
+        };
+    }
 
-if (btnNext) {
-    btnNext.addEventListener("click", () => {
-        currentPage++;
-        fetchProductos(currentPage);
-    });
-}
+    if (btnIr) {
+        btnIr.onclick = () => {
+            const inputIr = document.getElementById("irPagina");
+            if (inputIr) {
+                const pag = parseInt(inputIr.value);
+                if (!isNaN(pag) && pag > 0) {
+                    currentPage = pag - 1;
+                    fetchProductos(currentPage);
+                }
+            }
+        };
+    }
 
-if (btnIrPagina) {
-    btnIrPagina.addEventListener("click", () => {
-        const numPag = parseInt(inputIrPagina.value);
-        if (!isNaN(numPag) && numPag > 0) {
-            currentPage = numPag - 1;
-            fetchProductos(currentPage);
-        }
-    });
+    // Primera carga de datos
+    fetchProductos(0);
 }
 
 function limpiarInputs() {
-    if (inputDescripcion) inputDescripcion.value = "";
-    if (inputCodigo) inputCodigo.value = "";
-    if (inputMarca) inputMarca.value = "";
-    if (inputProveedor) inputProveedor.value = "";
+    ["descripcion", "codigo", "marca", "proveedor"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
 }
 
 function realizarBusqueda() {
@@ -82,56 +87,70 @@ function realizarBusqueda() {
     fetchProductos(0);
 }
 
-/**
- * Petición principal a la API
- */
 async function fetchProductos(page = 0) {
-    showLoading();
+    const tbody = getTableBody();
+    if (!tbody) {
+        console.error("No se encontró la etiqueta <tbody> o la tabla en la página.");
+        return;
+    }
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="9" style="text-align: center; padding: 25px; font-weight: bold; color: #0056b3;">
+                Conectando con Render y Supabase... (si el servidor estaba inactivo, puede tardar hasta 40 segundos)
+            </td>
+        </tr>
+    `;
+
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : "";
+    };
 
     const params = new URLSearchParams({
         page: page,
         page_size: pageSize,
-        descripcion: inputDescripcion ? inputDescripcion.value.trim() : "",
-        codigo: inputCodigo ? inputCodigo.value.trim() : "",
-        marca: inputMarca ? inputMarca.value.trim() : "",
-        proveedor: inputProveedor ? inputProveedor.value.trim() : ""
+        descripcion: getVal("descripcion"),
+        codigo: getVal("codigo"),
+        marca: getVal("marca"),
+        proveedor: getVal("proveedor")
     });
 
     try {
         const response = await fetch(`${API_URL}?${params.toString()}`);
 
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+            throw new Error(`Error en el servidor: HTTP ${response.status}`);
         }
 
         const result = await response.json();
-        
         renderTable(result.data || []);
         updatePaginationUI(result.page, result.total_pages, result.total);
 
     } catch (error) {
-        console.error("Error cargando productos:", error);
-        tableBody.innerHTML = `
+        console.error("Error al obtener productos:", error);
+        tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; color: red; padding: 20px;">
-                    Error al conectar con la API en Render. Verifica que el backend esté activo.
+                <td colspan="9" style="text-align: center; color: red; padding: 20px; font-weight: bold;">
+                    Error de conexión: ${error.message}.<br>
+                    Verifica que la API en Render esté activa.
                 </td>
             </tr>
         `;
     }
 }
 
-/**
- * Genera las filas de la tabla respetando los campos reales
- */
 function renderTable(productos) {
-    tableBody.innerHTML = "";
+    const tbody = getTableBody();
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
 
     if (!productos || productos.length === 0) {
-        tableBody.innerHTML = `
+        tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; padding: 20px;">
-                    No se encontraron productos.
+                <td colspan="9" style="text-align: center; padding: 20px; color: #666;">
+                    No se encontraron productos registrados.
                 </td>
             </tr>
         `;
@@ -141,11 +160,10 @@ function renderTable(productos) {
     productos.forEach((item) => {
         const row = document.createElement("tr");
 
-        // Mapeo seguro con nombres de columnas estándar o alternativos de Supabase
         const codigo = item.codigo || item.CODIGO || "";
-        const codProveedor = item.codigo_proveedor || item.CODIGO_PROVEEDOR || "";
+        const codProv = item.codigo_proveedor || item.CODIGO_PROVEEDOR || "";
         const marca = item.marca || item.MARCA || "";
-        const descripcion = item.descripcion || item.DESCRIPCION || "";
+        const desc = item.descripcion || item.DESCRIPCION || "";
         const precio = item.precio_venta || item.PRECIO_VENTA || item.precio || 0;
         const costo = item.costo_prom || item.COSTO_PROM || 0;
         const saldo = item.saldo || item.SALDO || 0;
@@ -154,9 +172,9 @@ function renderTable(productos) {
 
         row.innerHTML = `
             <td><strong>${codigo}</strong></td>
-            <td>${codProveedor}</td>
+            <td>${codProv}</td>
             <td>${marca}</td>
-            <td>${descripcion}</td>
+            <td>${desc}</td>
             <td>$${parseFloat(precio).toFixed(2)}</td>
             <td>$${parseFloat(costo).toFixed(2)}</td>
             <td>${saldo}</td>
@@ -164,14 +182,15 @@ function renderTable(productos) {
             <td>${saldoTemp}</td>
         `;
 
-        tableBody.appendChild(row);
+        tbody.appendChild(row);
     });
 }
 
-/**
- * Actualiza la barra de paginación
- */
 function updatePaginationUI(page, totalPages, totalRecords) {
+    const pageIndicatorEl = document.getElementById("pageIndicator");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+
     if (pageIndicatorEl) {
         const displayPage = totalPages === 0 ? 0 : page + 1;
         pageIndicatorEl.textContent = `Página ${displayPage} de ${totalPages || 1}`;
@@ -179,14 +198,4 @@ function updatePaginationUI(page, totalPages, totalRecords) {
 
     if (btnPrev) btnPrev.disabled = page <= 0;
     if (btnNext) btnNext.disabled = page + 1 >= totalPages || totalPages === 0;
-}
-
-function showLoading() {
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="9" style="text-align: center; padding: 20px; color: #555;">
-                Cargando productos...
-            </td>
-        </tr>
-    `;
 }
