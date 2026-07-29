@@ -1,28 +1,49 @@
-/* Estilos para congelar la cabecera al hacer scroll */
-.table-container { 
-    background: white; 
-    border: 1px solid #b0b0b0; 
-    max-height: 550px; 
-    overflow-y: auto; 
-    overflow-x: auto; 
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
 }
 
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    table-layout: auto; 
+.table-container {
+    overflow-x: auto;
+    border: 1px solid #aaa;
+    background-color: #fff;
 }
 
-th { 
-    position: sticky;
-    top: 0;
-    z-index: 2; /* Mantiene la cabecera por encima del contenido al deslizar */
-    background-color: #d8d8d8; 
-    border: 1px solid #a0a0a0; 
-    padding: 6px; 
-    text-align: center; 
-    font-size: 11px; 
-    font-weight: bold; 
-    text-transform: uppercase; 
-    white-space: nowrap; 
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #e0e0e0;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.btn-blue {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn-blue:hover {
+    background-color: #0056b3;
 }

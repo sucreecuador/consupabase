@@ -1,128 +1,139 @@
-﻿// Endpoints de API en Render
-const API_PRODUCTOS_URL = "https://consupabase-api.onrender.com/productos";
-const API_CONTACTOS_URL = "https://consupabase-api.onrender.com/contactos"; // Asegúrate de tener este endpoint en tu Flask/FastAPI
+﻿const API_PRODUCTOS_URL = "https://consupabase-api.onrender.com/productos";
+const API_CONTACTOS_URL = "https://consupabase-api.onrender.com/contactos";
 
-// Estado Global
 let currentModule = "productos"; // 'productos' | 'contactos'
 let currentPage = 0;
 const pageSize = 50;
-let currentVista = 1; // 1: Saldos extra | 2: Peso y Medidas (solo productos)
+let currentVista = 1; // 1: Saldos | 2: Peso y Medidas
 let currentSortColumn = "codigo";
 let sortAscending = true;
 let cachedData = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-    initModuleUI();
+    initUI();
     initEvents();
     fetchData(0);
 });
 
 function getTableBody() {
-    return document.querySelector("table tbody") || document.querySelector("tbody");
+    return document.querySelector("table tbody");
 }
 
-function initModuleUI() {
+function initUI() {
     const title = document.getElementById("main-title");
     const headerRow = document.getElementById("table-headers");
+    const filterContainer = document.getElementById("filter-container");
+    const actionButtons = document.getElementById("action-buttons");
     const btnModProd = document.getElementById("btn-mod-productos");
     const btnModCont = document.getElementById("btn-mod-contactos");
 
     if (currentModule === "productos") {
-        if (title) title.textContent = "Consulta de Productos - Sucre";
-        if (btnModProd) btnModProd.style.backgroundColor = "#0056b3";
-        if (btnModCont) btnModCont.style.backgroundColor = "#6c757d";
+        title.textContent = "Consulta de Productos - Sucre";
+        btnModProd.style.backgroundColor = "#0056b3";
+        btnModCont.style.backgroundColor = "#6c757d";
 
-        if (headerRow) {
-            const lastCol1 = currentVista === 2 ? "PESO" : "SALDO_BEXT";
-            const lastCol2 = currentVista === 2 ? "MEDIDAS" : "SALDO_TEMP";
-            headerRow.innerHTML = `
-                <th>CODIGO</th>
-                <th>CODIGO_PROVEEDOR</th>
-                <th>MARCA</th>
-                <th>DESCRIPCION</th>
-                <th>PRECIO_VENTA</th>
-                <th>COSTO_PROM</th>
-                <th>SALDO</th>
-                <th>${lastCol1}</th>
-                <th>${lastCol2}</th>
-            `;
-        }
+        filterContainer.innerHTML = `
+            <label>Descripción:</label><input type="text" id="inp-desc" style="width: 150px;">
+            <label>Código:</label><input type="text" id="inp-cod" style="width: 120px;">
+            <label>Marca:</label><input type="text" id="inp-marca" style="width: 120px;">
+            <label>Proveedor:</label><input type="text" id="inp-prov" style="width: 120px;">
+            <button id="btn-v1" style="background-color: #ffd700; border: 1px solid #000; font-weight: bold; padding: 4px 10px; margin-left: 10px; cursor: pointer;">Vista 1</button>
+            <button id="btn-v2" style="background-color: #ffd700; border: 1px solid #000; font-weight: bold; padding: 4px 10px; cursor: pointer;">Vista 2</button>
+        `;
+
+        actionButtons.innerHTML = `
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por descripción</button>
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por código</button>
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por marca</button>
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por proveedor</button>
+            <button class="btn-blue" onclick="mostrarTodos()">Mostrar todos</button>
+        `;
+
+        const lastCol1 = currentVista === 2 ? "PESO" : "SALDO_BEXT";
+        const lastCol2 = currentVista === 2 ? "MEDIDAS" : "SALDO_TEMP";
+
+        headerRow.innerHTML = `
+            <th>CODIGO</th>
+            <th>CODIGO_PROVEEDOR</th>
+            <th>MARCA</th>
+            <th>DESCRIPCION</th>
+            <th>PRECIO_VENTA</th>
+            <th>COSTO_PROM</th>
+            <th>SALDO</th>
+            <th>${lastCol1}</th>
+            <th>${lastCol2}</th>
+        `;
+
     } else {
-        if (title) title.textContent = "Consulta de Contactos - Sucre";
-        if (btnModProd) btnModProd.style.backgroundColor = "#6c757d";
-        if (btnModCont) btnModCont.style.backgroundColor = "#0056b3";
+        title.textContent = "Consulta de Contactos - Sucre";
+        btnModProd.style.backgroundColor = "#6c757d";
+        btnModCont.style.backgroundColor = "#0056b3";
 
-        if (headerRow) {
-            headerRow.innerHTML = `
-                <th>CODIGO</th>
-                <th>C.C. o R.U.C.</th>
-                <th>NOMBRE APELLIDO</th>
-                <th>CALLE Y NUMERO</th>
-                <th>TELEFONO</th>
-                <th>CORR.ELECTRONICO</th>
-                <th>CIUDAD</th>
-                <th>TIPO CONTACTO</th>
-            `;
-        }
+        filterContainer.innerHTML = `
+            <label>Nombre:</label><input type="text" id="inp-nombre" style="width: 180px;">
+            <label>C.C./R.U.C.:</label><input type="text" id="inp-ruc" style="width: 120px;">
+            <label>Código:</label><input type="text" id="inp-cod-cli" style="width: 100px;">
+        `;
+
+        actionButtons.innerHTML = `
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por nombre</button>
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por RUC/C.C.</button>
+            <button class="btn-blue" onclick="realizarBusqueda()">Buscar por código</button>
+            <button class="btn-blue" onclick="mostrarTodos()">Mostrar todos</button>
+        `;
+
+        headerRow.innerHTML = `
+            <th>CODIGO</th>
+            <th>C.C. o R.U.C.</th>
+            <th>NOMBRE APELLIDO</th>
+            <th>CALLE Y NUMERO</th>
+            <th>TELEFONO</th>
+            <th>CORR.ELECTRONICO</th>
+            <th>CIUDAD</th>
+            <th>TIPO CONTACTO</th>
+        `;
     }
 }
 
 function initEvents() {
+    document.getElementById("btn-mod-productos").addEventListener("click", () => {
+        currentModule = "productos";
+        currentPage = 0;
+        initUI();
+        fetchData(0);
+    });
+
+    document.getElementById("btn-mod-contactos").addEventListener("click", () => {
+        currentModule = "contactos";
+        currentPage = 0;
+        initUI();
+        fetchData(0);
+    });
+
     document.addEventListener("click", (e) => {
-        const btn = e.target.closest("button, input[type='button'], input[type='submit']");
-        
-        // Cambio de Módulo
-        if (e.target.id === "btn-mod-productos") {
-            currentModule = "productos";
-            currentPage = 0;
-            initModuleUI();
-            fetchData(0);
-            return;
-        }
-        if (e.target.id === "btn-mod-contactos") {
-            currentModule = "contactos";
-            currentPage = 0;
-            initModuleUI();
-            fetchData(0);
-            return;
-        }
-
-        // Clic en Encabezados para Ordenar
-        const th = e.target.closest("th");
-        if (th) {
-            handleHeaderClick(th.textContent.trim().toUpperCase());
-            return;
-        }
-
-        if (!btn) return;
-        const text = btn.textContent.trim().toLowerCase();
-
-        // Botones de Vistas
-        if (text.includes("vista 1") && currentModule === "productos") {
+        if (e.target.id === "btn-v1") {
             currentVista = 1;
-            initModuleUI();
+            initUI();
             renderTable(cachedData);
-        } else if (text.includes("vista 2") && currentModule === "productos") {
+        } else if (e.target.id === "btn-v2") {
             currentVista = 2;
-            initModuleUI();
+            initUI();
             renderTable(cachedData);
-        } 
-        // Búsqueda genérica
-        else if (text.includes("buscar") || text.includes("mostrar todos")) {
-            currentPage = 0;
-            fetchData(0);
-        } 
-        // Paginación
-        else if (text.includes("anterior") || text.includes("←")) {
+        } else if (e.target.id === "btn-prev") {
             if (currentPage > 0) {
                 currentPage--;
                 fetchData(currentPage);
             }
-        } else if (text.includes("siguiente") || text.includes("→")) {
+        } else if (e.target.id === "btn-next") {
             currentPage++;
             fetchData(currentPage);
-        } else if (text === "ir" || btn.id === "btn-go") {
+        } else if (e.target.id === "btn-go") {
             procesarIrPagina();
+        }
+
+        const th = e.target.closest("th");
+        if (th) {
+            handleHeaderClick(th.textContent.trim().toUpperCase());
         }
     });
 }
@@ -131,40 +142,26 @@ function handleHeaderClick(colHeader) {
     let mapCols = {};
     if (currentModule === "productos") {
         mapCols = {
-            "CODIGO": "codigo",
-            "CODIGO_PROVEEDOR": "codigo_proveedor",
-            "MARCA": "marca",
-            "DESCRIPCION": "descripcion",
-            "PRECIO_VENTA": "precio_venta",
-            "COSTO_PROM": "costo_prom",
-            "SALDO": "saldo",
-            "SALDO_BEXT": "saldo_bext",
-            "SALDO_TEMP": "saldo_temp",
-            "PESO": "peso",
-            "MEDIDAS": "medidas"
+            "CODIGO": "codigo", "CODIGO_PROVEEDOR": "codigo_proveedor", "MARCA": "marca",
+            "DESCRIPCION": "descripcion", "PRECIO_VENTA": "precio_venta", "COSTO_PROM": "costo_prom",
+            "SALDO": "saldo", "SALDO_BEXT": "saldo_bext", "SALDO_TEMP": "saldo_temp",
+            "PESO": "peso", "MEDIDAS": "medidas"
         };
     } else {
         mapCols = {
-            "CODIGO": "codigo_cliente",
-            "C.C. O R.U.C.": "ruc",
-            "NOMBRE APELLIDO": "nombre",
-            "CALLE Y NUMERO": "direccion",
-            "TELEFONO": "telefono1",
-            "CORR.ELECTRONICO": "email",
-            "CIUDAD": "ciudad",
-            "TIPO CONTACTO": "categoria"
+            "CODIGO": "codigo_cliente", "C.C. O R.U.C.": "ruc", "NOMBRE APELLIDO": "nombre",
+            "CALLE Y NUMERO": "direccion", "TELEFONO": "telefono1", "CORR.ELECTRONICO": "email",
+            "CIUDAD": "ciudad", "TIPO CONTACTO": "categoria"
         };
     }
 
     const targetCol = mapCols[colHeader] || colHeader.toLowerCase();
-
     if (currentSortColumn === targetCol) {
         sortAscending = !sortAscending;
     } else {
         currentSortColumn = targetCol;
         sortAscending = true;
     }
-
     sortAndRenderLocal();
 }
 
@@ -197,6 +194,17 @@ function procesarIrPagina() {
     }
 }
 
+function realizarBusqueda() {
+    currentPage = 0;
+    fetchData(0);
+}
+
+function mostrarTodos() {
+    document.querySelectorAll("#filter-container input").forEach(i => i.value = "");
+    currentPage = 0;
+    fetchData(0);
+}
+
 async function fetchData(page = 0) {
     const tbody = getTableBody();
     if (!tbody) return;
@@ -212,17 +220,24 @@ async function fetchData(page = 0) {
     `;
 
     const url = currentModule === "productos" ? API_PRODUCTOS_URL : API_CONTACTOS_URL;
-    const params = new URLSearchParams({
-        page: page,
-        page_size: pageSize
-    });
+    
+    let paramsObj = { page: page, page_size: pageSize };
+    if (currentModule === "productos") {
+        paramsObj.descripcion = document.getElementById("inp-desc")?.value || "";
+        paramsObj.codigo = document.getElementById("inp-cod")?.value || "";
+        paramsObj.marca = document.getElementById("inp-marca")?.value || "";
+        paramsObj.proveedor = document.getElementById("inp-prov")?.value || "";
+    } else {
+        paramsObj.nombre = document.getElementById("inp-nombre")?.value || "";
+        paramsObj.ruc = document.getElementById("inp-ruc")?.value || "";
+        paramsObj.codigo = document.getElementById("inp-cod-cli")?.value || "";
+    }
+
+    const params = new URLSearchParams(paramsObj);
 
     try {
         const response = await fetch(`${url}?${params.toString()}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const result = await response.json();
         cachedData = result.data || [];
@@ -287,12 +302,11 @@ function renderTable(data) {
                 <td>${col9Val}</td>
             `;
         } else {
-            // Módulo Contactos
             const codCliente = item.codigo_cliente || item.CODIGO_CLIENTE || "";
             const ruc = item.ruc || item.RUC || "";
             const nombre = item.nombre || item.razon_social || item.NOMBRE || "";
             const direccion = item.direccion || item.DIRECCION || "";
-            const telefono = item.telefono1 || item.TELEFONO1 || item.telefono || "";
+            const telefono = item.telefono1 || item.TELEFONO1 || "";
             const email = item.email || item.EMAIL || "";
             const ciudad = item.ciudad || item.CIUDAD || "-";
             const categoria = item.categoria || item.CATEGORIA || "-";

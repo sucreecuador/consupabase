@@ -7,27 +7,32 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Navegación de Módulos Principal -->
-        <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-            <button id="btn-mod-productos" style="background-color: #0056b3; color: white; padding: 10px 15px; font-weight: bold; border: none; cursor: pointer;">
-                Consulta de Productos
-            </button>
-            <button id="btn-mod-contactos" style="background-color: #6c757d; color: white; padding: 10px 15px; font-weight: bold; border: none; cursor: pointer;">
-                Consulta de Contactos
-            </button>
+    <!-- Botones Superiores de Módulo -->
+    <div style="background-color: #e0e0e0; padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid #ccc;">
+        <button id="btn-mod-productos" style="background-color: #0056b3; color: white; border: none; padding: 8px 16px; font-weight: bold; cursor: pointer;">
+            Consulta de Productos
+        </button>
+        <button id="btn-mod-contactos" style="background-color: #6c757d; color: white; border: none; padding: 8px 16px; font-weight: bold; cursor: pointer;">
+            Consulta de Contactos
+        </button>
+    </div>
+
+    <div style="padding: 15px;">
+        <h2 id="main-title" style="margin-top: 0; font-family: sans-serif;">Consulta de Productos - Sucre</h2>
+
+        <!-- Inputs y Botones de Filtro (Dinamizados por JavaScript) -->
+        <div id="filter-container" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; font-family: sans-serif; font-size: 14px;">
+            <!-- JavaScript inyectará aquí los inputs según el módulo -->
         </div>
 
-        <h2 id="main-title">Consulta de Productos - Sucre</h2>
-
-        <!-- Inputs de Búsqueda -->
-        <div id="search-inputs" style="margin-bottom: 15px;">
-            <!-- Generado/Actualizado dinámicamente o estructurado -->
+        <!-- Botones Azules de Búsqueda (Dinamizados por JavaScript) -->
+        <div id="action-buttons" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <!-- JavaScript inyectará los botones aquí -->
         </div>
 
         <!-- Tabla -->
         <div class="table-container">
-            <table>
+            <table id="main-table">
                 <thead>
                     <tr id="table-headers">
                         <th>CODIGO</th>
@@ -37,8 +42,8 @@
                         <th>PRECIO_VENTA</th>
                         <th>COSTO_PROM</th>
                         <th>SALDO</th>
-                        <th>PESO</th>
-                        <th>MEDIDAS</th>
+                        <th>SALDO_BEXT</th>
+                        <th>SALDO_TEMP</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -46,13 +51,13 @@
         </div>
 
         <!-- Paginación -->
-        <div class="pagination" style="margin-top: 15px;">
-            <button id="btn-prev">← Anterior</button>
-            <span id="page-info">Página 1 de 1</span>
-            <button id="btn-next">Siguiente →</button>
+        <div style="margin-top: 15px; display: flex; align-items: center; gap: 15px; font-family: sans-serif;">
+            <button id="btn-prev" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">← Anterior</button>
+            <span id="page-info" style="font-weight: bold;">Página 1 de 1</span>
+            <button id="btn-next" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">Siguiente →</button>
             <span>Ir a página:</span>
-            <input type="number" id="input-go-page" style="width: 60px;">
-            <button id="btn-go">Ir</button>
+            <input type="number" id="input-go-page" style="width: 50px; padding: 4px;">
+            <button id="btn-go" style="background-color: #007bff; color: white; border: none; padding: 5px 12px; font-weight: bold; border-radius: 4px; cursor: pointer;">Ir</button>
         </div>
     </div>
 
