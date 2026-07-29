@@ -112,12 +112,14 @@ function renderProductoHeaders() {
     } else {
         tableHeaders.innerHTML = `
             <th>CODIGO</th>
+            <th>CODIGO_PROVEEDOR</th>
             <th>MARCA</th>
             <th>DESCRIPCION</th>
             <th>PRECIO_VENTA</th>
+            <th>COSTO_PROM</th>
             <th>SALDO</th>
-            <th>UBICACION</th>
-            <th>LINEA</th>
+            <th>PESO</th>
+            <th>MEDIDAS</th>
         `;
     }
 }
@@ -238,16 +240,17 @@ function renderTableData(data) {
             } else {
                 tr.innerHTML = `
                     <td><strong>${item.codigo || ''}</strong></td>
+                    <td>${item.codigo_proveedor || item.cod_prov || ''}</td>
                     <td>${item.marca || ''}</td>
                     <td>${item.descripcion || ''}</td>
                     <td>$${Number(item.precio_venta || 0).toFixed(2)}</td>
+                    <td>$${Number(item.costo_prom || 0).toFixed(2)}</td>
                     <td>${item.saldo || 0}</td>
-                    <td>${item.ubicacion || ''}</td>
-                    <td>${item.linea || ''}</td>
+                    <td>${item.peso || ''}</td>
+                    <td>${item.medidas || item.medida || ''}</td>
                 `;
             }
         } else {
-            // Mapeo amplio de propiedades para la tabla de contactos/clientes
             const cod = item.codigo_cliente || item.codigo || item.id || '';
             const ruc = item.ruc || item.cedula || item.identificacion || '';
             const nom = item.nombre || item.nombre_apellido || item.razon_social || '';
