@@ -12,6 +12,11 @@ let vistaContactos = 1;
 let orderByCont = null;
 let orderDirCont = "asc";
 
+// Función auxiliar para formatear nombres de columnas: Mayúsculas y sin guiones bajos
+function formatearNombreColumna(nombre) {
+    return nombre.replace(/_/g, " ").toUpperCase();
+}
+
 function cambiarVistaProductos(vista) {
     vistaProductos = vista;
     paginaActual = 1;
@@ -26,6 +31,7 @@ function cambiarVistaContactos(vista) {
 
 function renderPagination() {
     document.getElementById("infoPaginacion").innerText = `Página ${paginaActual} de ${totalPaginas}`;
+    document.getElementById("inputPagina").value = paginaActual;
 }
 
 function cambiarPagina(delta) {
@@ -33,6 +39,16 @@ function cambiarPagina(delta) {
     if (nueva >= 1 && nueva <= totalPaginas) {
         paginaActual = nueva;
         cargarProductos();
+    }
+}
+
+function irAPagina() {
+    const inputVal = parseInt(document.getElementById("inputPagina").value);
+    if (!isNaN(inputVal) && inputVal >= 1 && inputVal <= totalPaginas) {
+        paginaActual = inputVal;
+        cargarProductos();
+    } else {
+        alert(`Por favor ingrese un número de página válido entre 1 y ${totalPaginas}`);
     }
 }
 
@@ -93,7 +109,8 @@ async function cargarProductos() {
             if (orderByProd === c) {
                 indicador = orderDirProd === "asc" ? " ▲" : " ▼";
             }
-            headHtml += `<th onclick="ordenarColumnaProd('${c}')" style="cursor: pointer; background-color: #e9ecef;">${c}${indicador}</th>`;
+            const nombreLimpio = formatearNombreColumna(c);
+            headHtml += `<th onclick="ordenarColumnaProd('${c}')" style="cursor: pointer;">${nombreLimpio}${indicador}</th>`;
         });
         headHtml += "</tr>";
         thead.innerHTML = headHtml;
@@ -116,6 +133,7 @@ async function cargarProductos() {
 /* CONTACTOS */
 function renderPaginationContacto() {
     document.getElementById("infoPaginacionContacto").innerText = `Página ${paginaActualContacto} de ${totalPaginasContacto}`;
+    document.getElementById("inputPaginaContacto").value = paginaActualContacto;
 }
 
 function cambiarPaginaContacto(delta) {
@@ -123,6 +141,16 @@ function cambiarPaginaContacto(delta) {
     if (nueva >= 1 && nueva <= totalPaginasContacto) {
         paginaActualContacto = nueva;
         cargarContactos();
+    }
+}
+
+function irAPaginaContacto() {
+    const inputVal = parseInt(document.getElementById("inputPaginaContacto").value);
+    if (!isNaN(inputVal) && inputVal >= 1 && inputVal <= totalPaginasContacto) {
+        paginaActualContacto = inputVal;
+        cargarContactos();
+    } else {
+        alert(`Por favor ingrese un número de página válido entre 1 y ${totalPaginasContacto}`);
     }
 }
 
@@ -182,7 +210,8 @@ async function cargarContactos() {
             if (orderByCont === c) {
                 indicador = orderDirCont === "asc" ? " ▲" : " ▼";
             }
-            headHtml += `<th onclick="ordenarColumnaCont('${c}')" style="cursor: pointer; background-color: #e9ecef;">${c}${indicador}</th>`;
+            const nombreLimpio = formatearNombreColumna(c);
+            headHtml += `<th onclick="ordenarColumnaCont('${c}')" style="cursor: pointer;">${nombreLimpio}${indicador}</th>`;
         });
         headHtml += "</tr>";
         thead.innerHTML = headHtml;

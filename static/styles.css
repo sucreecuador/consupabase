@@ -1,46 +1,69 @@
-/* ===========================
-   TABLA CON ENCABEZADOS FIJOS
-   =========================== */
-
+/* Estilos generales de la tabla tipo grid profesional */
 .table-container {
-    max-height: 70vh;        /* Ajusta a tu pantalla */
-    overflow-y: auto;        /* Scroll vertical */
-    border: 1px solid #ccc;
+    max-height: 65vh;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    background-color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
 }
 
-th, td {
-    padding: 8px;
-    border: 1px solid #ccc;
-    text-align: left;
-}
-
-/* Encabezados fijos */
 th {
-    background-color: #f2f2f2;
+    background-color: #ffeb3b !important; /* Amarillo solicitado */
+    color: #000000;
+    font-weight: bold;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
     position: sticky;
     top: 0;
     z-index: 10;
+    text-align: left;
+    user-select: none;
 }
 
-/* Botones */
-button {
-    padding: 6px 12px;
-    margin: 4px;
+td {
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0; /* Líneas gris claro */
+    color: #333333;
+}
+
+/* Filas intercaladas entre blanco y gris suave */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Botones de paginación color verde */
+.btn-verde {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
 }
 
-/* Inputs */
-input[type="text"], input[type="number"] {
-    padding: 6px;
-    margin: 4px;
+.btn-verde:hover {
+    background-color: #218838;
 }
 
-/* Paginación */
-.pagination {
-    margin-top: 20px;
+.filter-container {
+    background: #fdfdfd;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
 }

@@ -48,10 +48,17 @@
         </table>
     </div>
 
+    <!-- Paginación Productos -->
     <div class="pagination" style="margin-top: 15px; display: flex; align-items: center;">
-        <button onclick="cambiarPagina(-1)" id="btnAnterior">&lt; Anterior</button>
-        <span id="infoPaginacion" style="margin: 0 15px;">Página 1 de 1</span>
-        <button onclick="cambiarPagina(1)" id="btnSiguiente">Siguiente &gt;</button>
+        <button onclick="cambiarPagina(-1)" id="btnAnterior" class="btn-verde">&lt; Anterior</button>
+        <span id="infoPaginacion" style="margin: 0 15px; font-weight: bold;">Página 1 de 1</span>
+        <button onclick="cambiarPagina(1)" id="btnSiguiente" class="btn-verde">Siguiente &gt;</button>
+
+        <label style="margin-left: 20px;">
+            Ir a página:
+            <input type="number" id="inputPagina" min="1" style="width: 60px; text-align: center; padding: 4px;" value="1">
+        </label>
+        <button onclick="irAPagina()" class="btn-verde" style="margin-left: 5px;">Ir</button>
     </div>
 </div>
 
@@ -77,10 +84,17 @@
         </table>
     </div>
 
+    <!-- Paginación Contactos -->
     <div class="pagination" style="margin-top: 15px; display: flex; align-items: center;">
-        <button onclick="cambiarPaginaContacto(-1)" id="btnAnteriorContacto">&lt; Anterior</button>
-        <span id="infoPaginacionContacto" style="margin: 0 15px;">Página 1 de 1</span>
-        <button onclick="cambiarPaginaContacto(1)" id="btnSiguienteContacto">Siguiente &gt;</button>
+        <button onclick="cambiarPaginaContacto(-1)" id="btnAnteriorContacto" class="btn-verde">&lt; Anterior</button>
+        <span id="infoPaginacionContacto" style="margin: 0 15px; font-weight: bold;">Página 1 de 1</span>
+        <button onclick="cambiarPaginaContacto(1)" id="btnSiguienteContacto" class="btn-verde">Siguiente &gt;</button>
+
+        <label style="margin-left: 20px;">
+            Ir a página:
+            <input type="number" id="inputPaginaContacto" min="1" style="width: 60px; text-align: center; padding: 4px;" value="1">
+        </label>
+        <button onclick="irAPaginaContacto()" class="btn-verde" style="margin-left: 5px;">Ir</button>
     </div>
 </div>
 
