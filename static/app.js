@@ -47,9 +47,7 @@ async function cargarProductos() {
             return;
         }
 
-        // ============================
-        // VISTA 1 (9 columnas)
-        // ============================
+        // VISTA 1: costo_prom luego precio_venta
         const vista1 = [
             "codigo",
             "codigo_proveedor",
@@ -62,9 +60,7 @@ async function cargarProductos() {
             "saldo_temp"
         ];
 
-        // ============================
-        // VISTA 2 (9 columnas)
-        // ============================
+        // VISTA 2
         const vista2 = [
             "codigo",
             "codigo_proveedor",
@@ -79,10 +75,8 @@ async function cargarProductos() {
 
         const columnas = vistaProductos === 1 ? vista1 : vista2;
 
-        // Encabezados
         thead.innerHTML = "<tr>" + columnas.map(c => `<th>${c}</th>`).join("") + "</tr>";
 
-        // Filas
         data.data.forEach(item => {
             const fila = "<tr>" + columnas.map(c => `<td>${item[c]}</td>`).join("") + "</tr>";
             tbody.innerHTML += fila;
