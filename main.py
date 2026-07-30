@@ -7,13 +7,21 @@ import os
 app = FastAPI()
 
 # Inicialización del cliente de Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://utcqgkeiyqvfxfhjupfc.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzNjc0MDIsImV4cCI6MjA1NTk0MzQwMn0.GvX_...")
+SUPABASE_URL = os.getenv(
+    "SUPABASE_URL",
+    "https://utcqgkeiyqvfxfhjupfc.supabase.co"
+)
+SUPABASE_KEY = os.getenv(
+    "SUPABASE_ANON_KEY",
+    "TU_KEY_AQUI"
+)
+
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Servir archivos estáticos (HTML, CSS, JS)
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # Ruta principal para cargar la interfaz web
 @app.get("/")
@@ -27,19 +35,20 @@ def read_root():
             html_files = [f for f in os.listdir("static") if f.endswith(".html")]
             if html_files:
                 return FileResponse(f"static/{html_files[0]}")
-    return {"mensaje": "API funcionando correctamente."}
+        return {"mensaje": "API funcionando correctamente."}
+
 
 # Endpoint para la tabla de Productos
 @app.get("/productos")
 def get_productos(
     page: int = 0,
     page_size: int = 50,
-    descripcion: str = Query(None),
-    codigo: str = Query(None),
-    marca: str = Query(None),
-    proveedor: str = Query(None),
-    order_by: str = Query(None),
-    order_dir: str = Query("asc")
+    descripcion: str | None = Query(default=None),
+    codigo: str | None = Query(default=None),
+    marca: str | None = Query(default=None),
+    proveedor: str | None = Query(default=None),
+    order_by: str | None = Query(default=None),
+    order_dir: str = Query(default="asc"),
 ):
     try:
         query = supabase_client.table("productos").select("*", count="exact")
@@ -54,7 +63,7 @@ def get_productos(
             query = query.ilike("proveedor", f"%{proveedor}%")
 
         if order_by:
-            is_desc = (order_dir.lower() == "desc")
+            is_desc = order_dir.lower() == "desc"
             query = query.order(order_by, desc=is_desc)
 
         start = page * page_size
@@ -64,20 +73,21 @@ def get_productos(
         response = query.execute()
         return {
             "data": response.data,
-            "count": response.count
+            "count": response.count,
         }
     except Exception as e:
         return {"error": str(e)}
+
 
 # Endpoint para la tabla de Contactos / Clientes
 @app.get("/contactos")
 def get_contactos(
     page: int = 0,
     page_size: int = 50,
-    nombre: str = Query(None),
-    ruc: str = Query(None),
-    order_by: str = Query(None),
-    order_dir: str = Query("asc")
+    nombre: str | None = Query(default=None),
+    ruc: str | None = Query(default=None),
+    order_by: str | None = Query(default=None),
+    order_dir: str = Query(default="asc"),
 ):
     try:
         query = supabase_client.table("clientes").select("*", count="exact")
@@ -88,7 +98,7 @@ def get_contactos(
             query = query.ilike("ruc", f"%{ruc}%")
 
         if order_by:
-            is_desc = (order_dir.lower() == "desc")
+            is_desc = order_dir.lower() == "desc"
             query = query.order(order_by, desc=is_desc)
 
         start = page * page_size
@@ -98,7 +108,7 @@ def get_contactos(
         response = query.execute()
         return {
             "data": response.data,
-            "count": response.count
+            "count": response.count,
         }
     except Exception as e:
         return {"error": str(e)}

@@ -1,36 +1,64 @@
 /* Botones de acción general (Buscar, Mostrar todos, Siguiente, Ir) -> Color AZUL */
 button {
-    background-color: #0056b3; 
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
+  background-color: #0056b3;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
 button:hover {
-    background-color: #004085; 
+  background-color: #004085;
 }
 
 button:disabled {
-    background-color: #cccccc; 
-    color: #666666;
-    cursor: not-allowed;
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
 }
 
 /* Botones de Vista (Vista 1 / Vista 2) -> Color AMARILLO llamativo */
 .btn-vista {
-    background-color: #ffc107; /* Amarillo */
-    color: #000000; /* Texto oscuro para que resalte bien */
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
+  background-color: #ffc107; /* Amarillo */
+  color: #000000; /* Texto oscuro para que resalte bien */
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .btn-vista:hover {
-    background-color: #e0a800; /* Amarillo más oscuro al pasar el mouse */
+  background-color: #e0a800; /* Amarillo más oscuro al pasar el mouse */
+}
+
+/* Contenedores básicos */
+.filter-container {
+  margin-bottom: 10px;
+}
+
+.table-container {
+  margin-top: 10px;
+}
+
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container th,
+.table-container td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+}
+
+.table-container th {
+  background-color: #f8f9fa;
+}
+
+.pagination {
+  margin-top: 10px;
 }
