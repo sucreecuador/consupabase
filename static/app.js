@@ -8,7 +8,6 @@ let contVistaActual = 1;
 let busquedaProdCriterio = '';
 let busquedaContCriterio = '';
 
-// Variables para control de ordenamiento
 let ordenProdCol = '';
 let ordenProdDir = 'asc';
 
@@ -39,7 +38,6 @@ function cambiarVistaProductos(vista) {
     prodVistaActual = vista;
     document.getElementById('btnProdVista1').style.backgroundColor = vista === 1 ? '#333' : '#777';
     document.getElementById('btnProdVista2').style.backgroundColor = vista === 2 ? '#333' : '#777';
-    // Reiniciar orden si cambiamos de vista para evitar columnas no válidas
     ordenProdCol = '';
     ordenProdDir = 'asc';
     cargarDatos('productos');
@@ -49,7 +47,6 @@ function cambiarVistaContactos(vista) {
     contVistaActual = vista;
     document.getElementById('btnContVista1').style.backgroundColor = vista === 1 ? '#333' : '#777';
     document.getElementById('btnContVista2').style.backgroundColor = vista === 2 ? '#333' : '#777';
-    // Reiniciar orden si cambiamos de vista
     ordenContCol = '';
     ordenContDir = 'asc';
     cargarDatos('contactos');
@@ -135,7 +132,7 @@ async function cargarDatos(tipo) {
         if (busquedaContCriterio === 'ruc') val = document.getElementById('filtroRucContacto').value;
 
         if (busquedaContCriterio && val) {
-            url += `&ruc=${encodeURIComponent(val)}`;
+            url += `&${busquedaContCriterio}=${encodeURIComponent(val)}`;
         }
         if (ordenContCol) {
             url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`;
@@ -259,6 +256,9 @@ function renderizarContactos(result) {
         th.style.cursor = 'pointer';
         th.title = `Ordenar por ${col}`;
         th.onclick = () => {
+            // Evitamos ordenar por columnas que sabemos que no existen físicamente para prevenir errores
+            if (col === 'correo' || col === 'telefono') return; 
+
             if (ordenContCol === col) {
                 ordenContDir = ordenContDir === 'asc' ? 'desc' : 'asc';
             } else {
@@ -276,7 +276,16 @@ function renderizarContactos(result) {
         let tr = document.createElement('tr');
         columnas.forEach(col => {
             let td = document.createElement('td');
-            let val = item[col];
+            
+            let val = '';
+            if (col === 'correo') {
+                val = item['correo'] || item['email'] || item['correo_electronico'] || '';
+            } else if (col === 'telefono') {
+                val = item['telefono'] || item['celular'] || item['fono'] || '';
+            } else {
+                val = item[col];
+            }
+
             if (val === null || val === undefined) val = '';
             td.innerText = val;
             tr.appendChild(td);
