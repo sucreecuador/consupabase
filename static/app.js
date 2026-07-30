@@ -36,12 +36,24 @@ async function cargarProductos() {
         thead.innerHTML = "";
 
         if (data.data.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='10'>No hay datos</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='9'>No hay datos</td></tr>";
             renderPagination();
             return;
         }
 
-        const columnas = Object.keys(data.data[0]);
+        // SOLO 9 COLUMNAS
+        const columnas = [
+            "codigo",
+            "codigo_proveedor",
+            "marca",
+            "descripcion",
+            "unidad",
+            "saldo",
+            "saldo_bext",
+            "saldo_temp",
+            "costo_u"
+        ];
+
         thead.innerHTML = "<tr>" + columnas.map(c => `<th>${c}</th>`).join("") + "</tr>";
 
         data.data.forEach(item => {
