@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
 import os
+import math
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -26,7 +27,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def root():
     return FileResponse("static/index.html")
 
-
 @app.get("/productos")
 def get_productos(
     page: int = 0,
@@ -38,36 +38,39 @@ def get_productos(
     order_by: str = Query(None),
     order_dir: str = Query("asc")
 ):
-    query = supabase_client.table("productos")
+    try:
+        query = supabase_client.table("productos").select("*", count="exact")
 
-    if descripcion:
-        query = query.ilike("descripcion", f"%{descripcion}%")
-    if codigo:
-        query = query.ilike("codigo", f"%{codigo}%")
-    if marca:
-        query = query.ilike("marca", f"%{marca}%")
-    if proveedor:
-        query = query.ilike("codigo_proveedor", f"%{proveedor}%")
+        if descripcion:
+            query = query.ilike("descripcion", f"%{descripcion}%")
+        if codigo:
+            query = query.ilike("codigo", f"%{codigo}%")
+        if marca:
+            query = query.ilike("marca", f"%{marca}%")
+        if proveedor:
+            query = query.ilike("codigo_proveedor", f"%{proveedor}%")
 
-    if order_by:
-        query = query.order(order_by, desc=(order_dir == "desc"))
+        if order_by:
+            query = query.order(order_by, desc=(order_dir == "desc"))
 
-    start = page * page_size
-    end = start + page_size
+        start = page * page_size
+        end = start + page_size - 1
 
-    result = query.range(start, end).execute()
+        result = query.range(start, end).execute()
 
-    # Conteo correcto usando columna existente
-    total_result = supabase_client.table("productos").select("codigo", count="exact").execute()
-    total = total_result.count
-    total_pages = (total // page_size) + 1
+        data = result.data if result.data else []
+        total_records = result.count if hasattr(result, 'count') and result.count is not None else len(data)
+        total_pages = math.ceil(total_records / page_size) if page_size > 0 else 1
 
-    return {
-        "data": result.data,
-        "total": total,
-        "total_pages": total_pages
-    }
-
+        return {
+            "data": data,
+            "total_records": total_records,
+            "total_pages": total_pages,
+            "current_page": page
+        }
+    except Exception as e:
+        print(f"ERROR EN /productos: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/contactos")
 def get_contactos(
@@ -78,27 +81,32 @@ def get_contactos(
     order_by: str = Query(None),
     order_dir: str = Query("asc")
 ):
-    query = supabase_client.table("clientes")
+    try:
+        query = supabase_client.table("clientes").select("*", count="exact")
 
-    if nombre:
-        query = query.ilike("nombre", f"%{nombre}%")
-    if ruc:
-        query = query.ilike("ruc", f"%{ruc}%")
+        if nombre:
+            query = query.ilike("nombre", f"%{nombre}%")
+        if ruc:
+            query = query.ilike("ruc", f"%{ruc}%")
 
-    if order_by:
-        query = query.order(order_by, desc=(order_dir == "desc"))
+        if order_by:
+            query = query.order(order_by, desc=(order_dir == "desc"))
 
-    start = page * page_size
-    end = start + page_size
+        start = page * page_size
+        end = start + page_size - 1
 
-    result = query.range(start, end).execute()
+        result = query.range(start, end).execute()
 
-    total_result = supabase_client.table("clientes").select("codigo_cliente", count="exact").execute()
-    total = total_result.count
-    total_pages = (total // page_size) + 1
+        data = result.data if result.data else []
+        total_records = result.count if hasattr(result, 'count') and result.count is not None else len(data)
+        total_pages = math.ceil(total_records / page_size) if page_size > 0 else 1
 
-    return {
-        "data": result.data,
-        "total": total,
-        "total_pages": total_pages
-    }
+        return {
+            "data": data,
+            "total_records": total_records,
+            "total_pages": total_pages,
+            "current_page": page
+        }
+    except Exception as e:
+        print(f"ERROR EN /contactos: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
