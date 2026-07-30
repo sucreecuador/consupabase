@@ -8,6 +8,13 @@ let contVistaActual = 1;
 let busquedaProdCriterio = '';
 let busquedaContCriterio = '';
 
+// Variables para control de ordenamiento
+let ordenProdCol = '';
+let ordenProdDir = 'asc';
+
+let ordenContCol = '';
+let ordenContDir = 'asc';
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarDatos('productos');
 });
@@ -32,6 +39,9 @@ function cambiarVistaProductos(vista) {
     prodVistaActual = vista;
     document.getElementById('btnProdVista1').style.backgroundColor = vista === 1 ? '#333' : '#777';
     document.getElementById('btnProdVista2').style.backgroundColor = vista === 2 ? '#333' : '#777';
+    // Reiniciar orden si cambiamos de vista para evitar columnas no válidas
+    ordenProdCol = '';
+    ordenProdDir = 'asc';
     cargarDatos('productos');
 }
 
@@ -39,6 +49,9 @@ function cambiarVistaContactos(vista) {
     contVistaActual = vista;
     document.getElementById('btnContVista1').style.backgroundColor = vista === 1 ? '#333' : '#777';
     document.getElementById('btnContVista2').style.backgroundColor = vista === 2 ? '#333' : '#777';
+    // Reiniciar orden si cambiamos de vista
+    ordenContCol = '';
+    ordenContDir = 'asc';
     cargarDatos('contactos');
 }
 
@@ -112,6 +125,9 @@ async function cargarDatos(tipo) {
         if (busquedaProdCriterio && val) {
             url += `&${busquedaProdCriterio}=${encodeURIComponent(val)}`;
         }
+        if (ordenProdCol) {
+            url += `&order_by=${ordenProdCol}&order_dir=${ordenProdDir}`;
+        }
     } else {
         url = `/contactos?page=${paginaActualContacto}&page_size=${pageSize}`;
         let val = '';
@@ -120,6 +136,9 @@ async function cargarDatos(tipo) {
 
         if (busquedaContCriterio && val) {
             url += `&ruc=${encodeURIComponent(val)}`;
+        }
+        if (ordenContCol) {
+            url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`;
         }
     }
 
@@ -172,7 +191,23 @@ function renderizarProductos(result) {
     let headerRow = document.createElement('tr');
     columnas.forEach(col => {
         let th = document.createElement('th');
-        th.innerText = col.toUpperCase();
+        let texto = col.toUpperCase();
+        if (ordenProdCol === col) {
+            texto += (ordenProdDir === 'asc' ? ' ▲' : ' ▼');
+        }
+        th.innerText = texto;
+        th.style.cursor = 'pointer';
+        th.title = `Ordenar por ${col}`;
+        th.onclick = () => {
+            if (ordenProdCol === col) {
+                ordenProdDir = ordenProdDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenProdCol = col;
+                ordenProdDir = 'asc';
+            }
+            paginaActual = 0;
+            cargarDatos('productos');
+        };
         headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
@@ -216,7 +251,23 @@ function renderizarContactos(result) {
     let headerRow = document.createElement('tr');
     columnas.forEach(col => {
         let th = document.createElement('th');
-        th.innerText = col.toUpperCase();
+        let texto = col.toUpperCase();
+        if (ordenContCol === col) {
+            texto += (ordenContDir === 'asc' ? ' ▲' : ' ▼');
+        }
+        th.innerText = texto;
+        th.style.cursor = 'pointer';
+        th.title = `Ordenar por ${col}`;
+        th.onclick = () => {
+            if (ordenContCol === col) {
+                ordenContDir = ordenContDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenContCol = col;
+                ordenContDir = 'asc';
+            }
+            paginaActualContacto = 0;
+            cargarDatos('contactos');
+        };
         headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
