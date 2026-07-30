@@ -1,18 +1,26 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
 import os
-import math
 
+# -----------------------------
+# CONFIGURACIÓN SUPABASE
+# -----------------------------
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# -----------------------------
+# APP FASTAPI
+# -----------------------------
 app = FastAPI()
 
+# -----------------------------
+# CORS
+# -----------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,12 +29,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# -----------------------------
+# SERVIR FRONTEND DESDE /static
+# -----------------------------
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 def root():
     return FileResponse("static/index.html")
 
+
+# -----------------------------
+# ENDPOINT: PRODUCTOS
+# -----------------------------
 @app.get("/productos")
 def get_productos(
     page: int = 0,
@@ -38,42 +53,43 @@ def get_productos(
     order_by: str = Query(None),
     order_dir: str = Query("asc")
 ):
-    try:
-        query = supabase_client.table("productos").select("*", count="exact")
+    query = supabase_client.table("productos")
 
-        if descripcion:
-            query = query.ilike("descripcion", f"%{descripcion}%")
-        if codigo:
-            query = query.ilike("codigo", f"%{codigo}%")
-        if marca:
-            query = query.ilike("marca", f"%{marca}%")
-        if proveedor:
-            query = query.ilike("proveedor", f"%{proveedor}%")
+    # FILTROS
+    if descripcion:
+        query = query.ilike("descripcion", f"%{descripcion}%")
+    if codigo:
+        query = query.ilike("codigo", f"%{codigo}%")
+    if marca:
+        query = query.ilike("marca", f"%{marca}%")
+    if proveedor:
+        query = query.ilike("codigo_proveedor", f"%{proveedor}%")
 
-        if order_by:
-            # Validar dirección de orden
-            is_desc = True if order_dir and order_dir.lower() == "desc" else False
-            query = query.order(order_by, desc=is_desc)
+    # ORDENAMIENTO
+    if order_by:
+        query = query.order(order_by, desc=(order_dir == "desc"))
 
-        start = page * page_size
-        end = start + page_size - 1
+    # PAGINACIÓN
+    start = page * page_size
+    end = start + page_size
 
-        result = query.range(start, end).execute()
+    result = query.range(start, end).execute()
 
-        data = result.data if result.data else []
-        total_records = result.count if hasattr(result, 'count') and result.count is not None else len(data)
-        total_pages = math.ceil(total_records / page_size) if page_size > 0 else 1
+    # Conteo correcto usando columna existente
+    total_result = supabase_client.table("productos").select("codigo", count="exact").execute()
+    total = total_result.count
+    total_pages = (total // page_size) + 1
 
-        return {
-            "data": data,
-            "total_records": total_records,
-            "total_pages": total_pages,
-            "current_page": page
-        }
-    except Exception as e:
-        print(f"ERROR EN /productos: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    return {
+        "data": result.data,
+        "total": total,
+        "total_pages": total_pages
+    }
 
+
+# -----------------------------
+# ENDPOINT: CONTACTOS
+# -----------------------------
 @app.get("/contactos")
 def get_contactos(
     page: int = 0,
@@ -83,33 +99,31 @@ def get_contactos(
     order_by: str = Query(None),
     order_dir: str = Query("asc")
 ):
-    try:
-        query = supabase_client.table("clientes").select("*", count="exact")
+    query = supabase_client.table("clientes")
 
-        if nombre:
-            query = query.ilike("nombre", f"%{nombre}%")
-        if ruc:
-            query = query.ilike("ruc", f"%{ruc}%")
+    # FILTROS
+    if nombre:
+        query = query.ilike("nombre", f"%{nombre}%")
+    if ruc:
+        query = query.ilike("ruc", f"%{ruc}%")
 
-        if order_by:
-            is_desc = True if order_dir and order_dir.lower() == "desc" else False
-            query = query.order(order_by, desc=is_desc)
+    # ORDENAMIENTO
+    if order_by:
+        query = query.order(order_by, desc=(order_dir == "desc"))
 
-        start = page * page_size
-        end = start + page_size - 1
+    # PAGINACIÓN
+    start = page * page_size
+    end = start + page_size
 
-        result = query.range(start, end).execute()
+    result = query.range(start, end).execute()
 
-        data = result.data if result.data else []
-        total_records = result.count if hasattr(result, 'count') and result.count is not None else len(data)
-        total_pages = math.ceil(total_records / page_size) if page_size > 0 else 1
+    # Conteo correcto usando columna existente
+    total_result = supabase_client.table("clientes").select("codigo_cliente", count="exact").execute()
+    total = total_result.count
+    total_pages = (total // page_size) + 1
 
-        return {
-            "data": data,
-            "total_records": total_records,
-            "total_pages": total_pages,
-            "current_page": page
-        }
-    except Exception as e:
-        print(f"ERROR EN /contactos: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    return {
+        "data": result.data,
+        "total": total,
+        "total_pages": total_pages
+    }
