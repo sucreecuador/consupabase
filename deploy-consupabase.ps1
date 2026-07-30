@@ -52,7 +52,7 @@ Write-Host ""
 
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Write-Host "Creando commit..."
-git commit -m "Estilos de tabla, encabezados amarillos y paginacion verde - $fecha"
+git commit -m "Agregar mostrar todos, cambiar vistas a naranja - $fecha"
 Write-Host ""
 
 Write-Host "Subiendo a GitHub..."

@@ -29,8 +29,8 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h2 style="margin: 0;">Consulta de Productos - Sucre</h2>
         <div>
-            <button id="btnProdVista1" onclick="cambiarVistaProductos(1)" style="background-color: #333; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Vista 1</button>
-            <button id="btnProdVista2" onclick="cambiarVistaProductos(2)" style="background-color: #777; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-left: 5px;">Vista 2</button>
+            <button id="btnProdVista1" onclick="cambiarVistaProductos(1)" class="btn-naranja">Vista 1</button>
+            <button id="btnProdVista2" onclick="cambiarVistaProductos(2)" class="btn-naranja" style="margin-left: 5px;">Vista 2</button>
         </div>
     </div>
     
@@ -39,6 +39,10 @@
         <label>Código: <input type="text" id="filtroCodigo" placeholder="Buscar..." oninput="filtrarDatos()"></label>
         <label>Marca: <input type="text" id="filtroMarca" placeholder="Buscar..." oninput="filtrarDatos()"></label>
         <label>Proveedor: <input type="text" id="filtroProveedor" placeholder="Buscar..." oninput="filtrarDatos()"></label>
+        
+        <div style="margin-top: 10px;">
+            <button onclick="mostrarTodosProductos()" class="btn-verde" style="background-color: #17a2b8;">Mostrar Todos los Productos</button>
+        </div>
     </div>
 
     <div class="table-container">
@@ -67,14 +71,18 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h2 style="margin: 0;">Consulta de Contactos - Sucre</h2>
         <div>
-            <button id="btnContVista1" onclick="cambiarVistaContactos(1)" style="background-color: #333; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Vista 1</button>
-            <button id="btnContVista2" onclick="cambiarVistaContactos(2)" style="background-color: #777; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-left: 5px;">Vista 2</button>
+            <button id="btnContVista1" onclick="cambiarVistaContactos(1)" class="btn-naranja">Vista 1</button>
+            <button id="btnContVista2" onclick="cambiarVistaContactos(2)" class="btn-naranja" style="margin-left: 5px;">Vista 2</button>
         </div>
     </div>
 
     <div class="filter-container" style="margin-bottom: 15px;">
         <label>Nombre: <input type="text" id="filtroNombreContacto" placeholder="Buscar..." oninput="filtrarDatosContactos()"></label>
         <label>RUC/Cédula: <input type="text" id="filtroRucContacto" placeholder="Buscar..." oninput="filtrarDatosContactos()"></label>
+        
+        <div style="margin-top: 10px;">
+            <button onclick="mostrarTodosContactos()" class="btn-verde" style="background-color: #17a2b8;">Mostrar Todos los Contactos</button>
+        </div>
     </div>
 
     <div class="table-container">

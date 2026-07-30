@@ -12,7 +12,6 @@ let vistaContactos = 1;
 let orderByCont = null;
 let orderDirCont = "asc";
 
-// Función auxiliar para formatear nombres de columnas: Mayúsculas y sin guiones bajos
 function formatearNombreColumna(nombre) {
     return nombre.replace(/_/g, " ").toUpperCase();
 }
@@ -53,6 +52,17 @@ function irAPagina() {
 }
 
 function filtrarDatos() {
+    paginaActual = 1;
+    cargarProductos();
+}
+
+function mostrarTodosProductos() {
+    document.getElementById("filtroDesc").value = "";
+    document.getElementById("filtroCodigo").value = "";
+    document.getElementById("filtroMarca").value = "";
+    document.getElementById("filtroProveedor").value = "";
+    orderByProd = null;
+    orderDirProd = "asc";
     paginaActual = 1;
     cargarProductos();
 }
@@ -155,6 +165,15 @@ function irAPaginaContacto() {
 }
 
 function filtrarDatosContactos() {
+    paginaActualContacto = 1;
+    cargarContactos();
+}
+
+function mostrarTodosContactos() {
+    document.getElementById("filtroNombreContacto").value = "";
+    document.getElementById("filtroRucContacto").value = "";
+    orderByCont = null;
+    orderDirCont = "asc";
     paginaActualContacto = 1;
     cargarContactos();
 }
