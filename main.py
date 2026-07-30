@@ -1,84 +1,3 @@
-from fastapi import FastAPI, Query, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from supabase import create_client, Client
-import os
-import math
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-@app.get("/")
-def root():
-    return FileResponse("static/index.html")
-
-@app.get("/productos")
-def get_productos(
-    page: int = 0,
-    page_size: int = 50,
-    descripcion: str = Query(None),
-    codigo: str = Query(None),
-    marca: str = Query(None),
-    proveedor: str = Query(None),
-    order_by: str = Query(None),
-    order_dir: str = Query("asc")
-):
-    try:
-        query = supabase_client.table("productos").select("*", count="exact")
-
-        if descripcion:
-            query = query.ilike("descripcion", f"%{descripcion}%")
-        if codigo:
-            query = query.ilike("codigo", f"%{codigo}%")
-        if marca:
-            query = query.ilike("marca", f"%{marca}%")
-        if proveedor:
-            try:
-                query = query.ilike("proveedor", f"%{proveedor}%")
-            except Exception:
-                pass
-
-        if order_by:
-            is_desc = True if order_dir and order_dir.lower() == "desc" else False
-            try:
-                query = query.order(order_by, desc=is_desc)
-            except Exception as ord_err:
-                print(f"Aviso: No se pudo ordenar por {order_by}: {ord_err}")
-
-        start = page * page_size
-        end = start + page_size - 1
-
-        result = query.range(start, end).execute()
-
-        data = result.data if result.data else []
-        total_records = result.count if hasattr(result, 'count') and result.count is not None else len(data)
-        total_pages = math.ceil(total_records / page_size) if page_size > 0 else 1
-
-        return {
-            "data": data,
-            "total_records": total_records,
-            "total_pages": total_pages,
-            "current_page": page
-        }
-    except Exception as e:
-        print(f"ERROR EN /productos: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error en base de datos: {str(e)}")
-
 @app.get("/contactos")
 def get_contactos(
     page: int = 0,
@@ -97,27 +16,37 @@ def get_contactos(
             query = query.ilike("ruc", f"%{ruc}%")
 
         if order_by:
+            # Mapeamos por si el nombre en la vista difiere de la columna real en la BD
+            # Si en tu base de datos se llaman 'correo' o 'telefono', colócalos aquí:
+            col_mapping = {
+                "email": "email",       # Cambia a "correo" si en Supabase tu columna es correo
+                "telefono1": "telefono1", # Cambia a "telefono" o "celular" si en Supabase difiere
+                "codigo_cliente": "codigo_cliente",
+                "ruc": "ruc",
+                "nombre": "nombre",
+                "direccion": "direccion",
+                "ciudad": "ciudad"
+            }
+            real_col = col_mapping.get(order_by, order_by)
             is_desc = True if order_dir and order_dir.lower() == "desc" else False
-            try:
-                query = query.order(order_by, desc=is_desc)
-            except Exception as ord_err:
-                print(f"Aviso: No se pudo ordenar por {order_by}: {ord_err}")
+            query = query.order(real_col, desc=is_desc)
 
         start = page * page_size
         end = start + page_size - 1
+        query = query.range(start, end)
 
-        result = query.range(start, end).execute()
+        response = query.execute()
+        data = response.data
+        total_count = response.count if hasattr(response, 'count') else len(data)
 
-        data = result.data if result.data else []
-        total_records = result.count if hasattr(result, 'count') and result.count is not None else len(data)
-        total_pages = math.ceil(total_records / page_size) if page_size > 0 else 1
+        total_pages = (total_count + page_size - 1) // page_size if page_size > 0 else 1
 
         return {
             "data": data,
-            "total_records": total_records,
-            "total_pages": total_pages,
-            "current_page": page
+            "total": total_count,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
         }
     except Exception as e:
-        print(f"ERROR EN /contactos: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error en base de datos: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
