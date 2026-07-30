@@ -3,20 +3,18 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
 import os
+import math
 
 app = FastAPI()
 
-# Leer variables tal como vienen
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise Exception("ERROR: Variables SUPABASE_URL o SUPABASE_ANON_KEY faltantes.")
 
-# Crear cliente Supabase
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Servir archivos estáticos
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -32,7 +30,7 @@ def read_root():
 @app.get("/productos")
 def get_productos(
     page: int = 0,
-    page_size: int = 50,
+    page_size: int = 20,
     descripcion: str | None = Query(default=None),
     codigo: str | None = Query(default=None),
     marca: str | None = Query(default=None),
@@ -41,7 +39,7 @@ def get_productos(
     order_dir: str = Query(default="asc"),
 ):
     try:
-        query = supabase_client.table("productos").select("*")
+        query = supabase_client.table("productos").select("*", count="exact")
 
         if descripcion:
             query = query.ilike("descripcion", f"%{descripcion}%")
@@ -60,22 +58,30 @@ def get_productos(
         end = start + page_size - 1
 
         res = query.range(start, end).execute()
-        return {"data": res.data, "count": len(res.data)}
+        
+        total_count = res.count if hasattr(res, "count") and res.count is not None else len(res.data)
+        total_pages = math.ceil(total_count / page_size) if page_size > 0 else 1
+
+        return {
+            "data": res.data, 
+            "count": total_count,
+            "total_pages": total_pages
+        }
 
     except Exception as e:
-        return {"error": str(e), "data": [], "count": 0}
+        return {"error": str(e), "data": [], "count": 0, "total_pages": 1}
 
 @app.get("/contactos")
 def get_contactos(
     page: int = 0,
-    page_size: int = 50,
+    page_size: int = 20,
     nombre: str | None = Query(default=None),
     ruc: str | None = Query(default=None),
     order_by: str | None = Query(default=None),
     order_dir: str = Query(default="asc"),
 ):
     try:
-        query = supabase_client.table("clientes").select("*")
+        query = supabase_client.table("clientes").select("*", count="exact")
 
         if nombre:
             query = query.ilike("nombre", f"%{nombre}%")
@@ -90,7 +96,15 @@ def get_contactos(
         end = start + page_size - 1
 
         res = query.range(start, end).execute()
-        return {"data": res.data, "count": len(res.data)}
+        
+        total_count = res.count if hasattr(res, "count") and res.count is not None else len(res.data)
+        total_pages = math.ceil(total_count / page_size) if page_size > 0 else 1
+
+        return {
+            "data": res.data, 
+            "count": total_count,
+            "total_pages": total_pages
+        }
 
     except Exception as e:
-        return {"error": str(e), "data": [], "count": 0}
+        return {"error": str(e), "data": [], "count": 0, "total_pages": 1}

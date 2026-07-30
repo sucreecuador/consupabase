@@ -9,60 +9,34 @@
 
 <body>
 
-<div style="margin-bottom: 15px;">
+<!-- Menú Superior -->
+<div style="margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 5px;">
     <button id="btnTabProductos" onclick="switchTab('productos')" 
-        style="background-color: #0056b3; color: white; padding: 10px 20px;
-        font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">
+        style="background-color: #0056b3; color: white; padding: 10px 20px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">
         Consulta de Productos
     </button>
 
     <button id="btnTabContactos" onclick="switchTab('contactos')" 
-        style="background-color: #6c757d; color: white; padding: 10px 20px;
-        font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">
+        style="background-color: #6c757d; color: white; padding: 10px 20px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">
         Consulta de Contactos
     </button>
 </div>
 
+<!-- Sección Productos -->
 <div id="seccionProductos">
     <h2>Consulta de Productos - Sucre</h2>
-
+    
     <div class="filter-container">
-        <label>Descripción: 
-            <input type="text" id="filtroDesc" placeholder="Buscar...">
-        </label>
-
-        <label>Código: 
-            <input type="text" id="filtroCodigo" placeholder="Buscar...">
-        </label>
-
-        <label>Marca: 
-            <input type="text" id="filtroMarca" placeholder="Buscar...">
-        </label>
-
-        <label>Proveedor: 
-            <input type="text" id="filtroProveedor" placeholder="Buscar...">
-        </label>
-
+        <label>Descripción: <input type="text" id="filtroDesc" placeholder="Buscar..."></label>
+        <label>Código: <input type="text" id="filtroCodigo" placeholder="Buscar..."></label>
+        <label>Marca: <input type="text" id="filtroMarca" placeholder="Buscar..."></label>
+        <label>Proveedor: <input type="text" id="filtroProveedor" placeholder="Buscar..."></label>
+        
         <div style="margin-top: 10px;">
-            <button onclick="buscar('productos','descripcion')">Buscar por descripción</button>
-            <button onclick="buscar('productos','codigo')">Buscar por código</button>
-            <button onclick="buscar('productos','marca')">Buscar por marca</button>
-            <button onclick="buscar('productos','proveedor')">Buscar por proveedor</button>
-            <button onclick="mostrarTodos('productos')">Mostrar todos</button>
-
-            <button id="btnProdVista1" onclick="cambiarVistaProductos(1)"
-                style="margin-left: 20px; background-color: #333; color: white;">
-                Vista 1
-            </button>
-
-            <button id="btnProdVista2" onclick="cambiarVistaProductos(2)"
-                style="background-color: #777; color: white;">
-                Vista 2
-            </button>
+            <button id="btnProdVista1" onclick="cambiarVistaProductos(1)" style="background-color: #333; color: white;">Vista 1</button>
+            <button id="btnProdVista2" onclick="cambiarVistaProductos(2)" style="background-color: #777; color: white;">Vista 2</button>
         </div>
     </div>
-
-    <div id="errorProductos" class="error-message" style="display:none;"></div>
 
     <div class="table-container">
         <table id="tablaProductos">
@@ -72,50 +46,16 @@
     </div>
 
     <div class="pagination">
-        <button onclick="cambiarPagina(-1)" id="btnAnterior">< Anterior</button>
+        <button onclick="cambiarPagina(-1)" id="btnAnterior">&lt; Anterior</button>
         <span id="infoPaginacion">Página 1 de 1</span>
-        <button onclick="cambiarPagina(1)" id="btnSiguiente">Siguiente ></button>
-
-        <label style="margin-left: 15px;">
-            Ir a página:
-            <input type="number" id="inputPagina" min="1" style="width: 60px; text-align:center;">
-        </label>
-
-        <button onclick="irAPagina()" id="btnIr" style="padding: 3px 10px; cursor:pointer;">Ir</button>
+        <button onclick="cambiarPagina(1)" id="btnSiguiente">Siguiente &gt;</button>
     </div>
 </div>
 
+<!-- Sección Contactos -->
 <div id="seccionContactos" style="display:none;">
     <h2>Consulta de Contactos - Sucre</h2>
-
-    <div class="filter-container">
-        <label>Nombre / Razón Social:
-            <input type="text" id="filtroNombreContacto" placeholder="Buscar...">
-        </label>
-
-        <label>Cédula o RUC:
-            <input type="text" id="filtroRucContacto" placeholder="Buscar...">
-        </label>
-
-        <div style="margin-top: 10px;">
-            <button onclick="buscar('contactos','nombre')">Buscar por nombre</button>
-            <button onclick="buscar('contactos','ruc')">Buscar por cédula o RUC</button>
-            <button onclick="mostrarTodos('contactos')">Mostrar todos</button>
-
-            <button id="btnContVista1" onclick="cambiarVistaContactos(1)"
-                style="margin-left: 20px; background-color: #333; color:white;">
-                Vista 1
-            </button>
-
-            <button id="btnContVista2" onclick="cambiarVistaContactos(2)"
-                style="background-color: #777; color:white;">
-                Vista 2
-            </button>
-        </div>
-    </div>
-
-    <div id="errorContactos" class="error-message" style="display:none;"></div>
-
+    
     <div class="table-container">
         <table id="tablaContactos">
             <thead></thead>
@@ -124,20 +64,12 @@
     </div>
 
     <div class="pagination">
-        <button onclick="cambiarPaginaContacto(-1)" id="btnAnteriorContacto"><- Anterior</button>
+        <button onclick="cambiarPaginaContacto(-1)" id="btnAnteriorContacto">&lt; Anterior</button>
         <span id="infoPaginacionContacto">Página 1 de 1</span>
-        <button onclick="cambiarPaginaContacto(1)" id="btnSiguienteContacto">Siguiente ></button>
-
-        <label style="margin-left: 15px;">
-            Ir a página:
-            <input type="number" id="inputPaginaContacto" min="1" style="width: 60px; text-align:center;">
-        </label>
-
-        <button onclick="irAPaginaContacto()" id="btnIrContacto" style="padding: 3px 10px; cursor:pointer;">Ir</button>
+        <button onclick="cambiarPaginaContacto(1)" id="btnSiguienteContacto">Siguiente &gt;</button>
     </div>
 </div>
 
 <script src="/static/app.js"></script>
-
 </body>
 </html>
