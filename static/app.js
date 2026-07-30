@@ -2,11 +2,11 @@
     const pagination = document.getElementById("pagination");
 
     pagination.innerHTML = `
-        <button id="prevPage" class="pagination-btn">Anterior</button>
-        <span class="pagination-info">Página ${currentPage} de ${totalPages}</span>
-        <button id="nextPage" class="pagination-btn">Siguiente</button>
-        <input id="gotoPage" type="number" class="pagination-input" min="1" max="${totalPages}">
-        <button id="goButton" class="pagination-btn">Ir</button>
+        <button id="prevPage">< Anterior</button>
+        Página ${currentPage} de ${totalPages}
+        <button id="nextPage">Siguiente ></button>
+        <input id="gotoPage" type="number" min="1" max="${totalPages}">
+        <button id="goButton">Ir</button>
     `;
 
     document.getElementById("prevPage").onclick = () => {
