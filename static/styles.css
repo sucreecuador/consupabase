@@ -2,11 +2,11 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding: 10px;
-    background-color: #d8d8d8; /* Fondo gris claro de interfaz clásica */
+    background-color: #d8d8d8;
     color: #000;
 }
 
-/* Pestañas superiores de módulo */
+/* Pestañas superiores */
 .module-nav {
     display: flex;
     gap: 4px;
@@ -38,7 +38,7 @@ h2 {
     margin: 0 0 10px 0;
 }
 
-/* Sección de Búsqueda y Filtros */
+/* Filtros */
 .filter-row {
     display: flex;
     align-items: center;
@@ -58,6 +58,7 @@ h2 {
     background-color: #fff;
 }
 
+/* Botón amarillo */
 .btn-yellow {
     background-color: #ffff00;
     color: #000;
@@ -68,7 +69,7 @@ h2 {
     font-size: 12px;
 }
 
-/* Botones Azules de Acción */
+/* Botones azules */
 .action-row {
     display: flex;
     gap: 6px;
@@ -90,7 +91,7 @@ h2 {
     background-color: #0052cc;
 }
 
-/* Tabla Clásica Grid */
+/* Tabla */
 .table-container {
     background-color: #fff;
     border: 1px solid #808080;
