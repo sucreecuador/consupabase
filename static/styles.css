@@ -1,7 +1,16 @@
+/* ===========================
+   TABLA CON ENCABEZADOS FIJOS
+   =========================== */
+
+.table-container {
+    max-height: 70vh;        /* Ajusta a tu pantalla */
+    overflow-y: auto;        /* Scroll vertical */
+    border: 1px solid #ccc;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
 }
 
 th, td {
@@ -10,21 +19,28 @@ th, td {
     text-align: left;
 }
 
+/* Encabezados fijos */
 th {
     background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
+/* Botones */
 button {
     padding: 6px 12px;
     margin: 4px;
     cursor: pointer;
 }
 
+/* Inputs */
 input[type="text"], input[type="number"] {
     padding: 6px;
     margin: 4px;
 }
 
+/* Paginación */
 .pagination {
     margin-top: 20px;
 }

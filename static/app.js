@@ -30,7 +30,8 @@ function irAPagina() {
 
 async function cargarProductos() {
     try {
-        const resp = await fetch(`/productos?page=${paginaActual - 1}&page_size=50`);
+        // REDUCIMOS A 20 FILAS POR PÁGINA
+        const resp = await fetch(`/productos?page=${paginaActual - 1}&page_size=20`);
         const data = await resp.json();
 
         totalPaginas = data.total_pages || 1;
@@ -47,7 +48,7 @@ async function cargarProductos() {
             return;
         }
 
-        // VISTA 1: costo_prom luego precio_venta
+        // VISTA 1 (9 columnas)
         const vista1 = [
             "codigo",
             "codigo_proveedor",
@@ -60,7 +61,7 @@ async function cargarProductos() {
             "saldo_temp"
         ];
 
-        // VISTA 2
+        // VISTA 2 (9 columnas)
         const vista2 = [
             "codigo",
             "codigo_proveedor",
@@ -116,7 +117,7 @@ function irAPaginaContacto() {
 
 async function cargarContactos() {
     try {
-        const resp = await fetch(`/contactos?page=${paginaActualContacto - 1}&page_size=50`);
+        const resp = await fetch(`/contactos?page=${paginaActualContacto - 1}&page_size=20`);
         const data = await resp.json();
 
         totalPaginasContacto = data.total_pages || 1;
