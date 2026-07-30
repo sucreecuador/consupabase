@@ -1,79 +1,107 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta - Sucre</title>
-<link rel="stylesheet" href="/static/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta - Sucre</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .tabs { margin-bottom: 15px; }
+    .tabs button { padding: 10px 15px; margin-right: 5px; cursor: pointer; color: white; border: none; }
+    .filtros { margin-bottom: 15px; }
+    .filtros input { margin-right: 10px; padding: 5px; }
+    .filtros button { padding: 6px 12px; margin-right: 5px; background-color: #0056b3; color: white; border: none; cursor: pointer; }
+    .vistas { margin-left: 10px; }
+    .vistas button { background-color: #333; color: white; padding: 6px 12px; border: none; cursor: pointer; }
+    .paginacion { margin-top: 15px; display: flex; align-items: center; gap: 10px; }
+    .paginacion button { padding: 6px 12px; background-color: #0056b3; color: white; border: none; cursor: pointer; }
+    .paginacion button:disabled { background-color: #ccc; cursor: not-allowed; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
 </head>
 <body>
 
-<div style="margin-bottom: 15px;">
-<button id="btnTabProductos" onclick="switchTab('productos')" style="
-background-color: #0056b3; color: white; padding: 10px 20px;
-font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">
-Consulta de Productos</button>
+  <!-- Botones Superiores de Pestañas -->
+  <div class="tabs">
+    <button id="btnTabProductos" onclick="switchTab('productos')" style="background-color: #0056b3;">Consulta de Productos</button>
+    <button id="btnTabContactos" onclick="switchTab('contactos')" style="background-color: #6c757d;">Consulta de Contactos</button>
+  </div>
 
-<button id="btnTabContactos" onclick="switchTab('contactos')" style="
-background-color: #6c757d; color: white; padding: 10px 20px;
-font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">
-Consulta de Contactos</button>
-</div>
+  <!-- SECCIÓN PRODUCTOS -->
+  <div id="seccionProductos">
+    <h2>Consulta de Productos - Sucre</h2>
 
-<div id="seccionProductos">
-<h2>Consulta de Productos - Sucre</h2>
+    <div class="filtros">
+      <label>Descripción: <input type="text" id="filtroDesc" placeholder="Buscar..."></label>
+      <label>Código: <input type="text" id="filtroCodigo" placeholder="Buscar..."></label>
+      <label>Marca: <input type="text" id="filtroMarca" placeholder="Buscar..."></label>
+      <label>Proveedor: <input type="text" id="filtroProveedor" placeholder="Buscar..."></label>
+      <br><br>
+      <button onclick="buscar('productos', 'descripcion')">Buscar por descripción</button>
+      <button onclick="buscar('productos', 'codigo')">Buscar por código</button>
+      <button onclick="buscar('productos', 'marca')">Buscar por marca</button>
+      <button onclick="buscar('productos', 'proveedor')">Buscar por proveedor</button>
+      <button onclick="mostrarTodos('productos')">Mostrar todos</button>
 
-<div class="filter-container">
-<label>Descripción: <input type="text" id="filtroDesc" placeholder="Buscar..."></label>
-<label>Código: <input type="text" id="filtroCodigo" placeholder="Buscar..."></label>
-<label>Marca: <input type="text" id="filtroMarca" placeholder="Buscar..."></label>
-<label>Proveedor: <input type="text" id="filtroProveedor" placeholder="Buscar..."></label>
+      <span class="vistas">
+        <button id="btnProdVista1" onclick="cambiarVistaProductos(1)">Vista 1</button>
+        <button id="btnProdVista2" onclick="cambiarVistaProductos(2)">Vista 2</button>
+      </span>
+    </div>
 
-<div style="margin-top: 10px;">
-<button onclick="buscar('productos','descripcion')">Buscar por descripción</button>
-<button onclick="buscar('productos','codigo')">Buscar por código</button>
-<button onclick="buscar('productos','marca')">Buscar por marca</button>
-<button onclick="buscar('productos','proveedor')">Buscar por proveedor</button>
-<button onclick="mostrarTodos('productos')">Mostrar todos</button>
+    <!-- Paginación Productos -->
+    <div class="paginacion">
+      <button id="btnAnterior" onclick="cambiarPagina(-1)">&lt; Anterior</button>
+      <span id="infoPaginacion">Página 1 de 1</span>
+      <button id="btnSiguiente" onclick="cambiarPagina(1)">Siguiente &gt;</button>
+      <label>Ir a página: <input type="number" id="inputPagina" style="width: 50px;"></label>
+      <button onclick="irAPagina()">Ir</button>
+    </div>
 
-<button id="btnProdVista1" onclick="cambiarVistaProductos(1)" class="btn-vista"
-style="margin-left: 20px; background-color: #333; color: white;">Vista 1</button>
+    <!-- Tabla Productos -->
+    <table id="tablaProductos">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-<button id="btnProdVista2" onclick="cambiarVistaProductos(2)" class="btn-vista"
-style="background-color: #777; color: white;">Vista 2</button>
-</div>
-</div>
+  <!-- SECCIÓN CONTACTOS -->
+  <div id="seccionContactos" style="display: none;">
+    <h2>Consulta de Contactos - Sucre</h2>
 
-<div class="table-container">
-<table id="tablaProductos">
-<thead></thead>
-<tbody></tbody>
-</table>
-</div>
+    <div class="filtros">
+      <label>Nombre: <input type="text" id="filtroNombreContacto" placeholder="Buscar..."></label>
+      <label>RUC: <input type="text" id="filtroRucContacto" placeholder="Buscar..."></label>
+      <br><br>
+      <button onclick="buscar('contactos', 'nombre')">Buscar por nombre</button>
+      <button onclick="buscar('contactos', 'ruc')">Buscar por RUC</button>
+      <button onclick="mostrarTodos('contactos')">Mostrar todos</button>
 
-<div class="pagination">
-<button onclick="cambiarPagina(-1)" id="btnAnterior">&lt; Anterior</button>
-<span id="infoPaginacion">Página 1 de 1</span>
-<button onclick="cambiarPagina(1)" id="btnSiguiente">Siguiente &gt;</button>
+      <span class="vistas">
+        <button id="btnContVista1" onclick="cambiarVistaContactos(1)">Vista 1</button>
+        <button id="btnContVista2" onclick="cambiarVistaContactos(2)">Vista 2</button>
+      </span>
+    </div>
 
-<label style="margin-left: 15px;">Ir a página:
-<input type="number" id="inputPagina" min="1" style="width: 60px; text-align:center;">
-</label>
-<button onclick="irAPagina()" id="btnIr">Ir</button>
-</div>
-</div>
+    <!-- Paginación Contactos -->
+    <div class="paginacion">
+      <button id="btnAnteriorContacto" onclick="cambiarPaginaContacto(-1)">&lt; Anterior</button>
+      <span id="infoPaginacionContacto">Página 1 de 1</span>
+      <button id="btnSiguienteContacto" onclick="cambiarPaginaContacto(1)">Siguiente &gt;</button>
+      <label>Ir a página: <input type="number" id="inputPaginaContacto" style="width: 50px;"></label>
+      <button onclick="irAPaginaContacto()">Ir</button>
+    </div>
 
-<div id="seccionContactos" style="display:none;">
-<h2>Consulta de Contactos - Sucre</h2>
+    <!-- Tabla Contactos -->
+    <table id="tablaContactos">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-<div class="filter-container">
-<label>Nombre / Razón Social: <input type="text" id="filtroNombreContacto" placeholder="Buscar..."></label>
-<label>Cédula o RUC: <input type="text" id="filtroRucContacto" placeholder="Buscar..."></label>
-
-<div style="margin-top: 10px;">
-<button onclick="buscar('contactos','nombre')">Buscar por nombre</button>
-<button onclick="buscar('contactos','ruc')">Buscar por cédula o RUC</button>
-<button onclick="mostrarTodos('contactos')">Mostrar todos</button>
-
-<button id="btnContVista1" onclick="cambiarVistaContactos(1)" class="btn-vista"
-style="margin-left: 20px; background-color
+  <!-- Carga del Script JS -->
+  <script src="script.js"></script>
+</body>
+</html>
