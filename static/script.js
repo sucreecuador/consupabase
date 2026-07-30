@@ -1,23 +1,53 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    // Si existen botones o elementos de navegación
-    const btnMostrarTodos = document.querySelector("button:contains('Mostrar todos')") || document.querySelectorAll("button")[4];
-    
-    // Carga inicial de productos
+    // Escuchar eventos en los botones
+    const btnTodos = Array.from(document.querySelectorAll("button")).find(b => b.textContent.includes("Mostrar todos"));
+    if (btnTodos) {
+        btnTodos.addEventListener("click", () => {
+            paginaActual = 0;
+            limpiarInputs();
+            cargarProductos();
+        });
+    }
+
+    const btnDesc = Array.from(document.querySelectorAll("button")).find(b => b.textContent.includes("Buscar por descripción"));
+    if (btnDesc) {
+        btnDesc.addEventListener("click", () => {
+            const val = document.querySelector("input[placeholder*='Buscar']")?.value || "";
+            paginaActual = 0;
+            cargarProductos(`descripcion=${encodeURIComponent(val)}`);
+        });
+    }
+
+    // Carga inicial
     cargarProductos();
 });
 
 let paginaActual = 0;
 const pageSize = 50;
 
+function limpiarInputs() {
+    document.querySelectorAll("input[type='text']").forEach(i => i.value = "");
+}
+
 async function cargarProductos(queryParams = "") {
     const tbody = document.querySelector("table tbody") || crearTbodySiNoExiste();
-    
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 15px;">Cargando...</td></tr>`;
+    }
+
     try {
-        const response = await fetch(`/productos?page=${paginaActual}&page_size=${pageSize}&${queryParams}`);
+        const url = queryParams 
+            ? `/productos?page=${paginaActual}&page_size=${pageSize}&${queryParams}`
+            : `/productos?page=${paginaActual}&page_size=${pageSize}`;
+
+        const response = await fetch(url);
         const result = await response.json();
 
-        if (result.error) {
-            console.error("Error en respuesta API:", result.error);
+        if (result.error_detalle || result.error) {
+            console.error("Error en respuesta API:", result.error_detalle || result.error);
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red; padding: 15px;">Error: ${result.error_detalle || result.error}</td></tr>`;
+            }
             return;
         }
 
@@ -26,15 +56,16 @@ async function cargarProductos(queryParams = "") {
 
     } catch (err) {
         console.error("Error al conectar con la API:", err);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red; padding: 15px;">Error de conexión con la API</td></tr>`;
+        }
     }
 }
 
 function renderizarTabla(datos) {
-    // Buscar la tabla en la página
     const tabla = document.querySelector("table");
     if (!tabla) return;
 
-    // Asegurar que exista un tbody
     let tbody = tabla.querySelector("tbody");
     if (!tbody) {
         tbody = document.createElement("tbody");
@@ -44,12 +75,11 @@ function renderizarTabla(datos) {
     tbody.innerHTML = "";
 
     if (datos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px;">No se encontraron registros</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 15px;">No se encontraron registros</td></tr>`;
         return;
     }
 
     datos.forEach(item => {
-        // Normalizar claves para soportar minúsculas y mayúsculas
         const codigo = item.codigo || item.CODIGO || item.cod || "";
         const descripcion = item.descripcion || item.DESCRIPCION || item.desc || "";
         const marca = item.marca || item.MARCA || "";
