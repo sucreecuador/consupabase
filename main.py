@@ -2,22 +2,24 @@
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
-import os
+import os, re
 
 app = FastAPI()
 
-# Normalizar SUPABASE_URL recortando '/rest/v1' o '/' si fue pegado de más en Render
-raw_url = os.getenv("SUPABASE_URL", "").strip()
-if raw_url.endswith("/"):
-    raw_url = raw_url[:-1]
-if raw_url.endswith("/rest/v1"):
-    raw_url = raw_url[:-8]
+# Extraer y limpiar URL de Supabase de forma estricta (DNS limpia)
+raw_url = os.getenv("SUPABASE_URL", "").strip().strip("'").strip('"')
 
-SUPABASE_URL = raw_url.rstrip("/")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
+# Extraer el protocolo y dominio base puro (ej: https://utcqgkeiyqvfxhjupfc.supabase.co)
+match = re.match(r"(https?://[^/]+)", raw_url)
+if match:
+    SUPABASE_URL = match.group(1)
+else:
+    SUPABASE_URL = raw_url
+
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip().strip("'").strip('"')
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    raise Exception("ERROR: Variables de entorno SUPABASE_URL o SUPABASE_ANON_KEY no están definidas.")
+    raise Exception("ERROR: Variables SUPABASE_URL o SUPABASE_ANON_KEY faltantes.")
 
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
