@@ -11,7 +11,6 @@ let contVistaActual = 1;
 
 let modoBusquedaActual = { tipo: "productos", campo: null };
 
-// Cambiar de pestaña principal
 function switchTab(tab) {
   const secProductos = document.getElementById("seccionProductos");
   const secContactos = document.getElementById("seccionContactos");
@@ -33,7 +32,6 @@ function switchTab(tab) {
   }
 }
 
-// Cambiar vistas de productos
 function cambiarVistaProductos(vista) {
   prodVistaActual = vista;
   document.getElementById("btnProdVista1").style.backgroundColor =
@@ -43,7 +41,6 @@ function cambiarVistaProductos(vista) {
   cargarDatos("productos");
 }
 
-// Cambiar vistas de contactos
 function cambiarVistaContactos(vista) {
   contVistaActual = vista;
   document.getElementById("btnContVista1").style.backgroundColor =
@@ -53,7 +50,6 @@ function cambiarVistaContactos(vista) {
   cargarDatos("contactos");
 }
 
-// Mostrar todos
 function mostrarTodos(tipo) {
   if (tipo === "productos") {
     paginaActualProducto = 0;
@@ -80,7 +76,6 @@ function mostrarTodos(tipo) {
   }
 }
 
-// Función general de búsqueda
 function buscar(tipo, campo) {
   modoBusquedaActual = { tipo, campo };
   if (tipo === "productos") {
@@ -92,7 +87,6 @@ function buscar(tipo, campo) {
   }
 }
 
-// Cargar datos desde la API
 function cargarDatos(tipo) {
   if (tipo === "productos") {
     let url = `/productos?page=${paginaActualProducto}&page_size=${pageSize}`;
@@ -108,19 +102,16 @@ function cargarDatos(tipo) {
       if (modoBusquedaActual.campo === "proveedor")
         val = document.getElementById("filtroProveedor").value;
 
-      if (val) {
-        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`;
-      }
+      if (val) url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`;
     }
 
-    if (ordenProdCol) {
+    if (ordenProdCol)
       url += `&order_by=${ordenProdCol}&order_dir=${ordenProdDir}`;
-    }
 
     fetch(url)
       .then((res) => res.json())
       .then((data) => renderizarProductos(data))
-      .catch((err) => console.error("Error cargando productos: ", err));
+      .catch((err) => console.error("Error cargando productos:", err));
   } else {
     let url = `/contactos?page=${paginaActualContacto}&page_size=${pageSize}`;
 
@@ -132,24 +123,21 @@ function cargarDatos(tipo) {
         val = document.getElementById("filtroRucContacto").value;
 
       if (val) {
-        const param =
-          modoBusquedaActual.campo === "nombre" ? "nombre" : "ruc";
+        const param = modoBusquedaActual.campo;
         url += `&${param}=${encodeURIComponent(val)}`;
       }
     }
 
-    if (ordenContCol) {
+    if (ordenContCol)
       url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`;
-    }
 
     fetch(url)
       .then((res) => res.json())
       .then((data) => renderizarContactos(data))
-      .catch((err) => console.error("Error cargando contactos: ", err));
+      .catch((err) => console.error("Error cargando contactos:", err));
   }
 }
 
-// Renderizar productos
 function renderizarProductos(result) {
   const thead = document.querySelector("#tablaProductos thead");
   const tbody = document.querySelector("#tablaProductos tbody");
@@ -159,21 +147,20 @@ function renderizarProductos(result) {
   const columnas =
     prodVistaActual === 1
       ? ["codigo", "descripcion", "marca", "proveedor"]
-      : ["codigo", "descripcion", "stock", "precio"];
+      : ["codigo", "descripcion", "saldo_bext", "precio_venta"];
 
   const headerRow = document.createElement("tr");
   columnas.forEach((col) => {
     const th = document.createElement("th");
     let texto = col.toUpperCase();
-    if (ordenProdCol === col) {
+    if (ordenProdCol === col)
       texto += ordenProdDir === "asc" ? " ▲" : " ▼";
-    }
     th.innerText = texto;
     th.style.cursor = "pointer";
     th.onclick = () => {
-      if (ordenProdCol === col) {
+      if (ordenProdCol === col)
         ordenProdDir = ordenProdDir === "asc" ? "desc" : "asc";
-      } else {
+      else {
         ordenProdCol = col;
         ordenProdDir = "asc";
       }
@@ -189,8 +176,7 @@ function renderizarProductos(result) {
       const tr = document.createElement("tr");
       columnas.forEach((col) => {
         const td = document.createElement("td");
-        const val = item[col] ?? "";
-        td.innerText = val;
+        td.innerText = item[col] ?? "";
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -207,7 +193,6 @@ function renderizarProductos(result) {
     paginaActualProducto + 1 >= totalPages;
 }
 
-// Renderizar contactos
 function renderizarContactos(result) {
   const thead = document.querySelector("#tablaContactos thead");
   const tbody = document.querySelector("#tablaContactos tbody");
@@ -224,15 +209,14 @@ function renderizarContactos(result) {
     const th = document.createElement("th");
     let texto = col.toUpperCase();
     if (col === "telefono1") texto = "TELEFONO";
-    if (ordenContCol === col) {
+    if (ordenContCol === col)
       texto += ordenContDir === "asc" ? " ▲" : " ▼";
-    }
     th.innerText = texto;
     th.style.cursor = "pointer";
     th.onclick = () => {
-      if (ordenContCol === col) {
+      if (ordenContCol === col)
         ordenContDir = ordenContDir === "asc" ? "desc" : "asc";
-      } else {
+      else {
         ordenContCol = col;
         ordenContDir = "asc";
       }
@@ -249,17 +233,14 @@ function renderizarContactos(result) {
       columnas.forEach((col) => {
         const td = document.createElement("td");
         let val = "";
-        if (col === "email") {
-          val = item["email"] || item["correo"] || "";
-        } else if (col === "telefono1") {
+        if (col === "email") val = item["email"] || item["correo"] || "";
+        else if (col === "telefono1")
           val =
             item["telefono1"] ||
             item["telefono"] ||
             item["celular"] ||
             "";
-        } else {
-          val = item[col] ?? "";
-        }
+        else val = item[col] ?? "";
         td.innerText = val;
         tr.appendChild(td);
       });
@@ -278,7 +259,6 @@ function renderizarContactos(result) {
     paginaActualContacto + 1 >= totalPages;
 }
 
-// Paginación productos
 function cambiarPagina(dir) {
   paginaActualProducto += dir;
   if (paginaActualProducto < 0) paginaActualProducto = 0;
@@ -293,7 +273,6 @@ function irAPagina() {
   }
 }
 
-// Paginación contactos
 function cambiarPaginaContacto(dir) {
   paginaActualContacto += dir;
   if (paginaActualContacto < 0) paginaActualContacto = 0;
@@ -311,7 +290,6 @@ function irAPaginaContacto() {
   }
 }
 
-// Carga inicial
 window.onload = () => {
   cargarDatos("productos");
 };

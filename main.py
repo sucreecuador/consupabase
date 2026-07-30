@@ -6,15 +6,12 @@ import os
 
 app = FastAPI()
 
-# Inicialización del cliente de Supabase
-SUPABASE_URL = os.getenv(
-    "SUPABASE_URL",
-    "https://utcqgkeiyqvfxfhjupfc.supabase.co"
-)
-SUPABASE_KEY = os.getenv(
-    "SUPABASE_ANON_KEY",
-    "TU_KEY_AQUI"
-)
+# Inicialización del cliente de Supabase (SIN fallback)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise Exception("ERROR: Variables de entorno SUPABASE_URL o SUPABASE_ANON_KEY no están definidas.")
 
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -23,7 +20,6 @@ if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# Ruta principal para cargar la interfaz web
 @app.get("/")
 def read_root():
     if os.path.exists("static/index.html"):
@@ -31,14 +27,9 @@ def read_root():
     elif os.path.exists("index.html"):
         return FileResponse("index.html")
     else:
-        if os.path.exists("static"):
-            html_files = [f for f in os.listdir("static") if f.endswith(".html")]
-            if html_files:
-                return FileResponse(f"static/{html_files[0]}")
         return {"mensaje": "API funcionando correctamente."}
 
 
-# Endpoint para la tabla de Productos
 @app.get("/productos")
 def get_productos(
     page: int = 0,
@@ -71,15 +62,12 @@ def get_productos(
         query = query.range(start, end)
 
         response = query.execute()
-        return {
-            "data": response.data,
-            "count": response.count,
-        }
+        return {"data": response.data, "count": response.count}
+
     except Exception as e:
         return {"error": str(e)}
 
 
-# Endpoint para la tabla de Contactos / Clientes
 @app.get("/contactos")
 def get_contactos(
     page: int = 0,
@@ -106,9 +94,7 @@ def get_contactos(
         query = query.range(start, end)
 
         response = query.execute()
-        return {
-            "data": response.data,
-            "count": response.count,
-        }
+        return {"data": response.data, "count": response.count}
+
     except Exception as e:
         return {"error": str(e)}
