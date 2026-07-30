@@ -1,7 +1,6 @@
 ﻿# ============================================================
 #  CI/CD Profesional: GitHub + Render
 #  Proyecto: consupabase
-#  Autor: Ricardo Almeida
 # ============================================================
 
 $projectPath = "C:\Users\Supervisor\consupabase"
@@ -52,7 +51,7 @@ Write-Host ""
 
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Write-Host "Creando commit..."
-git commit -m "Deteccion automatica de codigo y orden de columnas contactos - $fecha"
+git commit -m "Actualizacion de pestanas activas y columnas de contactos - $fecha"
 Write-Host ""
 
 Write-Host "Subiendo a GitHub..."
