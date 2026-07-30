@@ -1,5 +1,11 @@
 ﻿let paginaActual = 1;
 let totalPaginas = 1;
+let vistaProductos = 1; // 1 = Vista 1, 2 = Vista 2
+
+function cambiarVistaProductos(vista) {
+    vistaProductos = vista;
+    cargarProductos();
+}
 
 function renderPagination() {
     document.getElementById("infoPaginacion").innerText =
@@ -41,21 +47,42 @@ async function cargarProductos() {
             return;
         }
 
-        // SOLO 9 COLUMNAS REALES
-        const columnas = [
+        // ============================
+        // VISTA 1 (9 columnas)
+        // ============================
+        const vista1 = [
             "codigo",
             "codigo_proveedor",
             "marca",
             "descripcion",
-            "unidad",
+            "costo_prom",
+            "precio_venta",
             "saldo",
             "saldo_bext",
-            "saldo_temp",
-            "costo_prom"
+            "saldo_temp"
         ];
 
+        // ============================
+        // VISTA 2 (9 columnas)
+        // ============================
+        const vista2 = [
+            "codigo",
+            "codigo_proveedor",
+            "marca",
+            "descripcion",
+            "costo_prom",
+            "precio_venta",
+            "saldo",
+            "peso",
+            "medidas"
+        ];
+
+        const columnas = vistaProductos === 1 ? vista1 : vista2;
+
+        // Encabezados
         thead.innerHTML = "<tr>" + columnas.map(c => `<th>${c}</th>`).join("") + "</tr>";
 
+        // Filas
         data.data.forEach(item => {
             const fila = "<tr>" + columnas.map(c => `<td>${item[c]}</td>`).join("") + "</tr>";
             tbody.innerHTML += fila;
