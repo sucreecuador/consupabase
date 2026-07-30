@@ -48,10 +48,12 @@ def get_productos(
         if marca:
             query = query.ilike("marca", f"%{marca}%")
         if proveedor:
-            query = query.ilike("codigo_proveedor", f"%{proveedor}%")
+            query = query.ilike("proveedor", f"%{proveedor}%")
 
         if order_by:
-            query = query.order(order_by, desc=(order_dir == "desc"))
+            # Validar dirección de orden
+            is_desc = True if order_dir and order_dir.lower() == "desc" else False
+            query = query.order(order_by, desc=is_desc)
 
         start = page * page_size
         end = start + page_size - 1
@@ -90,7 +92,8 @@ def get_contactos(
             query = query.ilike("ruc", f"%{ruc}%")
 
         if order_by:
-            query = query.order(order_by, desc=(order_dir == "desc"))
+            is_desc = True if order_dir and order_dir.lower() == "desc" else False
+            query = query.order(order_by, desc=is_desc)
 
         start = page * page_size
         end = start + page_size - 1
