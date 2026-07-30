@@ -7,6 +7,22 @@ let ordenContCol = '';
 let ordenContDir = 'asc';
 let contVistaActual = 1;
 
+// Función para alternar entre pestañas (Productos y Contactos)
+function switchTab(tab) {
+    const secProductos = document.getElementById('seccionProductos');
+    const secContactos = document.getElementById('seccionContactos');
+
+    if (tab === 'productos') {
+        if (secProductos) secProductos.style.display = 'block';
+        if (secContactos) secContactos.style.display = 'none';
+        cargarDatos('productos');
+    } else if (tab === 'contactos') {
+        if (secProductos) secProductos.style.display = 'none';
+        if (secContactos) secContactos.style.display = 'block';
+        cargarDatos('contactos');
+    }
+}
+
 // Función central para cargar datos desde la API
 function cargarDatos(tipo) {
     if (tipo === 'productos') {
@@ -44,7 +60,6 @@ function mostrarTodos() {
     ordenProdCol = '';
     ordenProdDir = 'asc';
     
-    // Limpiar inputs de búsqueda si existen
     if(document.getElementById('inputDescProducto')) document.getElementById('inputDescProducto').value = '';
     if(document.getElementById('inputCodProducto')) document.getElementById('inputCodProducto').value = '';
     if(document.getElementById('inputMarcaProducto')) document.getElementById('inputMarcaProducto').value = '';
