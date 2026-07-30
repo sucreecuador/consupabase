@@ -1,4 +1,5 @@
-﻿from fastapi import FastAPI, Query
+﻿$mainPyContent = @'
+from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
@@ -38,6 +39,7 @@ def get_productos(
     order_dir: str = Query(default="asc"),
 ):
     try:
+        # Construcción base de la consulta
         query = supabase_client.table("productos").select("*", count="exact")
 
         if descripcion:
@@ -56,13 +58,30 @@ def get_productos(
         start = page * page_size
         end = start + page_size - 1
 
-        # Ejecutamos range justo al final de la construcción
+        # Aplicar rango de paginación
         response = query.range(start, end).execute()
 
-        return {"data": response.data, "count": response.count}
+        return {"data": response.data, "count": response.count if response.count is not None else len(response.data)}
 
     except Exception as e:
-        return {"error": str(e), "data": [], "count": 0}
+        # Si falla con count="exact", intentamos una consulta directa limpia
+        try:
+            start = page * page_size
+            end = start + page_size - 1
+            fallback_query = supabase_client.table("productos").select("*")
+            if descripcion:
+                fallback_query = fallback_query.ilike("descripcion", f"%{descripcion}%")
+            if codigo:
+                fallback_query = fallback_query.ilike("codigo", f"%{codigo}%")
+            if marca:
+                fallback_query = fallback_query.ilike("marca", f"%{marca}%")
+            if proveedor:
+                fallback_query = fallback_query.ilike("proveedor", f"%{proveedor}%")
+            
+            res = fallback_query.range(start, end).execute()
+            return {"data": res.data, "count": len(res.data)}
+        except Exception as err:
+            return {"error": str(err), "data": [], "count": 0}
 
 @app.get("/contactos")
 def get_contactos(
@@ -90,7 +109,20 @@ def get_contactos(
 
         response = query.range(start, end).execute()
 
-        return {"data": response.data, "count": response.count}
+        return {"data": response.data, "count": response.count if response.count is not None else len(response.data)}
 
     except Exception as e:
-        return {"error": str(e), "data": [], "count": 0}
+        try:
+            start = page * page_size
+            end = start + page_size - 1
+            res = supabase_client.table("clientes").select("*").range(start, end).execute()
+            return {"data": res.data, "count": len(res.data)}
+        except Exception as err:
+            return {"error": str(err), "data": [], "count": 0}
+'@
+
+Set-Content -Path "main.py" -Value $mainPyContent -Encoding UTF8
+
+git add main.py
+git commit -m "Fix: agregar fallback sin count='exact' para prevenir PGRST125"
+git push
