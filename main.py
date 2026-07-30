@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+﻿from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
@@ -55,9 +55,10 @@ def get_productos(
 
         start = page * page_size
         end = start + page_size - 1
-        query = query.range(start, end)
 
-        response = query.execute()
+        # Ejecutamos range justo al final de la construcción
+        response = query.range(start, end).execute()
+
         return {"data": response.data, "count": response.count}
 
     except Exception as e:
@@ -86,9 +87,9 @@ def get_contactos(
 
         start = page * page_size
         end = start + page_size - 1
-        query = query.range(start, end)
 
-        response = query.execute()
+        response = query.range(start, end).execute()
+
         return {"data": response.data, "count": response.count}
 
     except Exception as e:
