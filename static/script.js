@@ -1,284 +1,80 @@
-﻿let paginaActualProducto = 0;
-let pageSize = 50;
-let ordenProdCol = "";
-let ordenProdDir = "asc";
-let prodVistaActual = 1;
+﻿document.addEventListener("DOMContentLoaded", () => {
+    // Si existen botones o elementos de navegación
+    const btnMostrarTodos = document.querySelector("button:contains('Mostrar todos')") || document.querySelectorAll("button")[4];
+    
+    // Carga inicial de productos
+    cargarProductos();
+});
 
-let paginaActualContacto = 0;
-let ordenContCol = "";
-let ordenContDir = "asc";
-let contVistaActual = 1;
+let paginaActual = 0;
+const pageSize = 50;
 
-let modoBusquedaActual = { tipo: "productos", campo: null };
+async function cargarProductos(queryParams = "") {
+    const tbody = document.querySelector("table tbody") || crearTbodySiNoExiste();
+    
+    try {
+        const response = await fetch(`/productos?page=${paginaActual}&page_size=${pageSize}&${queryParams}`);
+        const result = await response.json();
 
-function switchTab(tab) {
-  const secProductos = document.getElementById("seccionProductos");
-  const secContactos = document.getElementById("seccionContactos");
-  const btnProd = document.getElementById("btnTabProductos");
-  const btnCont = document.getElementById("btnTabContactos");
-
-  if (tab === "productos") {
-    secProductos.style.display = "block";
-    secContactos.style.display = "none";
-    btnProd.style.backgroundColor = "#0056b3";
-    btnCont.style.backgroundColor = "#6c757d";
-    cargarDatos("productos");
-  } else {
-    secProductos.style.display = "none";
-    secContactos.style.display = "block";
-    btnProd.style.backgroundColor = "#6c757d";
-    btnCont.style.backgroundColor = "#0056b3";
-    cargarDatos("contactos");
-  }
-}
-
-function cambiarVistaProductos(vista) {
-  prodVistaActual = vista;
-  document.getElementById("btnProdVista1").style.backgroundColor = vista === 1 ? "#333" : "#777";
-  document.getElementById("btnProdVista2").style.backgroundColor = vista === 2 ? "#333" : "#777";
-  cargarDatos("productos");
-}
-
-function cambiarVistaContactos(vista) {
-  contVistaActual = vista;
-  document.getElementById("btnContVista1").style.backgroundColor = vista === 1 ? "#333" : "#777";
-  document.getElementById("btnContVista2").style.backgroundColor = vista === 2 ? "#333" : "#777";
-  cargarDatos("contactos");
-}
-
-function mostrarTodos(tipo) {
-  if (tipo === "productos") {
-    paginaActualProducto = 0;
-    ordenProdCol = "";
-    ordenProdDir = "asc";
-    modoBusquedaActual = { tipo: "productos", campo: null };
-
-    document.getElementById("filtroDesc").value = "";
-    document.getElementById("filtroCodigo").value = "";
-    document.getElementById("filtroMarca").value = "";
-    document.getElementById("filtroProveedor").value = "";
-
-    cargarDatos("productos");
-  } else {
-    paginaActualContacto = 0;
-    ordenContCol = "";
-    ordenContDir = "asc";
-    modoBusquedaActual = { tipo: "contactos", campo: null };
-
-    document.getElementById("filtroNombreContacto").value = "";
-    document.getElementById("filtroRucContacto").value = "";
-
-    cargarDatos("contactos");
-  }
-}
-
-function buscar(tipo, campo) {
-  modoBusquedaActual = { tipo, campo };
-  if (tipo === "productos") {
-    paginaActualProducto = 0;
-    cargarDatos("productos");
-  } else {
-    paginaActualContacto = 0;
-    cargarDatos("contactos");
-  }
-}
-
-function cargarDatos(tipo) {
-  if (tipo === "productos") {
-    let url = '/productos?page=' + paginaActualProducto + '&page_size=' + pageSize;
-
-    if (modoBusquedaActual.campo) {
-      let val = "";
-      if (modoBusquedaActual.campo === "descripcion") val = document.getElementById("filtroDesc").value;
-      if (modoBusquedaActual.campo === "codigo") val = document.getElementById("filtroCodigo").value;
-      if (modoBusquedaActual.campo === "marca") val = document.getElementById("filtroMarca").value;
-      if (modoBusquedaActual.campo === "proveedor") val = document.getElementById("filtroProveedor").value;
-
-      if (val.trim() !== "") {
-        url += '&' + modoBusquedaActual.campo + '=' + encodeURIComponent(val);
-      }
-    }
-
-    if (ordenProdCol) {
-      url += '&order_by=' + ordenProdCol + '&order_dir=' + ordenProdDir;
-    }
-
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          console.error("Error del servidor:", data.error);
+        if (result.error) {
+            console.error("Error en respuesta API:", result.error);
+            return;
         }
-        renderizarProductos(data);
-      })
-      .catch((err) => console.error("Error de red cargando productos:", err));
-  } else {
-    let url = '/contactos?page=' + paginaActualContacto + '&page_size=' + pageSize;
 
-    if (modoBusquedaActual.campo) {
-      let val = "";
-      if (modoBusquedaActual.campo === "nombre") val = document.getElementById("filtroNombreContacto").value;
-      if (modoBusquedaActual.campo === "ruc") val = document.getElementById("filtroRucContacto").value;
+        const datos = result.data || [];
+        renderizarTabla(datos);
 
-      if (val.trim() !== "") {
-        url += '&' + modoBusquedaActual.campo + '=' + encodeURIComponent(val);
-      }
+    } catch (err) {
+        console.error("Error al conectar con la API:", err);
+    }
+}
+
+function renderizarTabla(datos) {
+    // Buscar la tabla en la página
+    const tabla = document.querySelector("table");
+    if (!tabla) return;
+
+    // Asegurar que exista un tbody
+    let tbody = tabla.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        tabla.appendChild(tbody);
     }
 
-    if (ordenContCol) {
-      url += '&order_by=' + ordenContCol + '&order_dir=' + ordenContDir;
+    tbody.innerHTML = "";
+
+    if (datos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px;">No se encontraron registros</td></tr>`;
+        return;
     }
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          console.error("Error del servidor:", data.error);
+    datos.forEach(item => {
+        // Normalizar claves para soportar minúsculas y mayúsculas
+        const codigo = item.codigo || item.CODIGO || item.cod || "";
+        const descripcion = item.descripcion || item.DESCRIPCION || item.desc || "";
+        const marca = item.marca || item.MARCA || "";
+        const proveedor = item.proveedor || item.PROVEEDOR || item.prov || "";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td style="border: 1px solid #ddd; padding: 8px;">${codigo}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">${descripcion}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">${marca}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">${proveedor}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function crearTbodySiNoExiste() {
+    const tabla = document.querySelector("table");
+    if (tabla) {
+        let tbody = tabla.querySelector("tbody");
+        if (!tbody) {
+            tbody = document.createElement("tbody");
+            tabla.appendChild(tbody);
         }
-        renderizarContactos(data);
-      })
-      .catch((err) => console.error("Error de red cargando contactos:", err));
-  }
+        return tbody;
+    }
+    return null;
 }
-
-function renderizarProductos(result) {
-  const thead = document.querySelector("#tablaProductos thead");
-  const tbody = document.querySelector("#tablaProductos tbody");
-  thead.innerHTML = "";
-  tbody.innerHTML = "";
-
-  const columnas = prodVistaActual === 1 ? ["codigo", "descripcion", "marca", "proveedor"] : ["codigo", "descripcion", "saldo_bext", "precio_venta"];
-
-  const headerRow = document.createElement("tr");
-  columnas.forEach((col) => {
-    const th = document.createElement("th");
-    let texto = col.toUpperCase();
-    if (ordenProdCol === col) texto += ordenProdDir === "asc" ? " ▲" : " ▼";
-    th.innerText = texto;
-    th.style.cursor = "pointer";
-    th.onclick = () => {
-      if (ordenProdCol === col) ordenProdDir = ordenProdDir === "asc" ? "desc" : "asc";
-      else {
-        ordenProdCol = col;
-        ordenProdDir = "asc";
-      }
-      paginaActualProducto = 0;
-      cargarDatos("productos");
-    };
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-
-  if (result.data && Array.isArray(result.data)) {
-    result.data.forEach((item) => {
-      const tr = document.createElement("tr");
-      columnas.forEach((col) => {
-        const td = document.createElement("td");
-        td.innerText = item[col] ?? "";
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-  }
-
-  const count = result.count || 0;
-  const totalPages = Math.ceil(count / pageSize) || 1;
-  document.getElementById("infoPaginacion").innerText = 'Página ' + (paginaActualProducto + 1) + ' de ' + totalPages;
-  document.getElementById("btnAnterior").disabled = paginaActualProducto === 0;
-  document.getElementById("btnSiguiente").disabled = paginaActualProducto + 1 >= totalPages;
-}
-
-function renderizarContactos(result) {
-  const thead = document.querySelector("#tablaContactos thead");
-  const tbody = document.querySelector("#tablaContactos tbody");
-  thead.innerHTML = "";
-  tbody.innerHTML = "";
-
-  const columnas = contVistaActual === 1 ? ["codigo_cliente", "ruc", "nombre", "email", "ciudad"] : ["codigo_cliente", "ruc", "nombre", "direccion", "telefono1"];
-
-  const headerRow = document.createElement("tr");
-  columnas.forEach((col) => {
-    const th = document.createElement("th");
-    let texto = col.toUpperCase();
-    if (col === "telefono1") texto = "TELEFONO";
-    if (ordenContCol === col) texto += ordenContDir === "asc" ? " ▲" : " ▼";
-    th.innerText = texto;
-    th.style.cursor = "pointer";
-    th.onclick = () => {
-      if (ordenContCol === col) ordenContDir = ordenContDir === "asc" ? "desc" : "asc";
-      else {
-        ordenContCol = col;
-        ordenContDir = "asc";
-      }
-      paginaActualContacto = 0;
-      cargarDatos("contactos");
-    };
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-
-  if (result.data && Array.isArray(result.data)) {
-    result.data.forEach((item) => {
-      const tr = document.createElement("tr");
-      columnas.forEach((col) => {
-        const td = document.createElement("td");
-        let val = "";
-        if (col === "email") val = item["email"] || item["correo"] || "";
-        else if (col === "telefono1") val = item["telefono1"] || item["telefono"] || item["celular"] || "";
-        else val = item[col] ?? "";
-        td.innerText = val;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-  }
-
-  const count = result.count || 0;
-  const totalPages = Math.ceil(count / pageSize) || 1;
-  document.getElementById("infoPaginacionContacto").innerText = 'Página ' + (paginaActualContacto + 1) + ' de ' + totalPages;
-  document.getElementById("btnAnteriorContacto").disabled = paginaActualContacto === 0;
-  document.getElementById("btnSiguienteContacto").disabled = paginaActualContacto + 1 >= totalPages;
-}
-
-function cambiarPagina(dir) {
-  paginaActualProducto += dir;
-  if (paginaActualProducto < 0) paginaActualProducto = 0;
-  cargarDatos("productos");
-}
-
-function irAPagina() {
-  const pag = parseInt(document.getElementById("inputPagina").value, 10);
-  if (pag > 0) {
-    paginaActualProducto = pag - 1;
-    cargarDatos("productos");
-  }
-}
-
-function cambiarPaginaContacto(dir) {
-  paginaActualContacto += dir;
-  if (paginaActualContacto < 0) paginaActualContacto = 0;
-  cargarDatos("contactos");
-}
-
-function irAPaginaContacto() {
-  const pag = parseInt(document.getElementById("inputPaginaContacto").value, 10);
-  if (pag > 0) {
-    paginaActualContacto = pag - 1;
-    cargarDatos("contactos");
-  }
-}
-
-window.onload = () => {
-  cargarDatos("productos");
-};
-
-// Exposición global explícita
-window.switchTab = switchTab;
-window.cambiarVistaProductos = cambiarVistaProductos;
-window.cambiarVistaContactos = cambiarVistaContactos;
-window.mostrarTodos = mostrarTodos;
-window.buscar = buscar;
-window.cambiarPagina = cambiarPagina;
-window.irAPagina = irAPagina;
-window.cambiarPaginaContacto = cambiarPaginaContacto;
-window.irAPaginaContacto = irAPaginaContacto;
