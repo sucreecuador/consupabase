@@ -1,102 +1,294 @@
-from fastapi import FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from supabase import create_client, Client
-import os
+let paginaActual = 0;
+let paginaActualContacto = 0;
+const pageSize = 50;
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+let prodVistaActual = 1;
+let contVistaActual = 1;
 
-supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+let busquedaProdCriterio = '';
+let busquedaContCriterio = '';
 
-app = FastAPI()
+let ordenProdCol = '';
+let ordenProdDir = 'asc';
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+let ordenContCol = '';
+let ordenContDir = 'asc';
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+document.addEventListener("DOMContentLoaded", () => {
+    cargarDatos('productos');
+});
 
-@app.get("/")
-def root():
-    return FileResponse("static/index.html")
+function switchTab(tab) {
+    if (tab === 'productos') {
+        document.getElementById('seccionProductos').style.display = 'block';
+        document.getElementById('seccionContactos').style.display = 'none';
+        document.getElementById('btnTabProductos').style.backgroundColor = '#0056b3';
+        document.getElementById('btnTabContactos').style.backgroundColor = '#6c757d';
+        cargarDatos('productos');
+    } else {
+        document.getElementById('seccionProductos').style.display = 'none';
+        document.getElementById('seccionContactos').style.display = 'block';
+        document.getElementById('btnTabProductos').style.backgroundColor = '#6c757d';
+        document.getElementById('btnTabContactos').style.backgroundColor = '#0056b3';
+        cargarDatos('contactos');
+    }
+}
 
+function cambiarVistaProductos(vista) {
+    prodVistaActual = vista;
+    document.getElementById('btnProdVista1').style.backgroundColor = vista === 1 ? '#333' : '#777';
+    document.getElementById('btnProdVista2').style.backgroundColor = vista === 2 ? '#333' : '#777';
+    ordenProdCol = '';
+    ordenProdDir = 'asc';
+    cargarDatos('productos');
+}
 
-@app.get("/productos")
-def get_productos(
-    page: int = 0,
-    page_size: int = 50,
-    descripcion: str = Query(None),
-    codigo: str = Query(None),
-    marca: str = Query(None),
-    proveedor: str = Query(None),
-    order_by: str = Query(None),
-    order_dir: str = Query("asc")
-):
-    query = supabase_client.table("productos")
+function cambiarVistaContactos(vista) {
+    contVistaActual = vista;
+    document.getElementById('btnContVista1').style.backgroundColor = vista === 1 ? '#333' : '#777';
+    document.getElementById('btnContVista2').style.backgroundColor = vista === 2 ? '#333' : '#777';
+    ordenContCol = '';
+    ordenContDir = 'asc';
+    cargarDatos('contactos');
+}
 
-    if descripcion:
-        query = query.ilike("descripcion", f"%{descripcion}%")
-    if codigo:
-        query = query.ilike("codigo", f"%{codigo}%")
-    if marca:
-        query = query.ilike("marca", f"%{marca}%")
-    if proveedor:
-        query = query.ilike("codigo_proveedor", f"%{proveedor}%")
+function buscar(tipo, criterio) {
+    if (tipo === 'productos') {
+        paginaActual = 0;
+        busquedaProdCriterio = criterio;
+    } else {
+        paginaActualContacto = 0;
+        busquedaContCriterio = criterio;
+    }
+    cargarDatos(tipo);
+}
 
-    if order_by:
-        query = query.order(order_by, desc=(order_dir == "desc"))
+function mostrarTodos(tipo) {
+    if (tipo === 'productos') {
+        paginaActual = 0;
+        busquedaProdCriterio = '';
+        document.getElementById('filtroDesc').value = '';
+        document.getElementById('filtroCodigo').value = '';
+        document.getElementById('filtroMarca').value = '';
+        document.getElementById('filtroProveedor').value = '';
+    } else {
+        paginaActualContacto = 0;
+        busquedaContCriterio = '';
+        document.getElementById('filtroNombreContacto').value = '';
+        document.getElementById('filtroRucContacto').value = '';
+    }
+    cargarDatos(tipo);
+}
 
-    start = page * page_size
+function cambiarPagina(direccion) {
+    paginaActual += direccion;
+    cargarDatos('productos');
+}
 
-    # SDK nuevo: usar limit + offset
-    result = query.limit(page_size).offset(start).execute()
+function irAPagina() {
+    const input = document.getElementById('inputPagina').value;
+    const pag = parseInt(input) - 1;
+    if (!isNaN(pag) && pag >= 0) {
+        paginaActual = pag;
+        cargarDatos('productos');
+    }
+}
 
-    total_result = supabase_client.table("productos").select("codigo", count="exact").execute()
-    total = total_result.count
-    total_pages = (total // page_size) + 1
+function cambiarPaginaContacto(direccion) {
+    paginaActualContacto += direccion;
+    cargarDatos('contactos');
+}
 
-    return {
-        "data": result.data,
-        "total": total,
-        "total_pages": total_pages
+function irAPaginaContacto() {
+    const input = document.getElementById('inputPaginaContacto').value;
+    const pag = parseInt(input) - 1;
+    if (!isNaN(pag) && pag >= 0) {
+        paginaActualContacto = pag;
+        cargarDatos('contactos');
+    }
+}
+
+async function cargarDatos(tipo) {
+    let url = '';
+    
+    if (tipo === 'productos') {
+        url = `/productos?page=${paginaActual}&page_size=${pageSize}`;
+        let val = '';
+        if (busquedaProdCriterio === 'descripcion') val = document.getElementById('filtroDesc').value;
+        if (busquedaProdCriterio === 'codigo') val = document.getElementById('filtroCodigo').value;
+        if (busquedaProdCriterio === 'marca') val = document.getElementById('filtroMarca').value;
+        if (busquedaProdCriterio === 'proveedor') val = document.getElementById('filtroProveedor').value;
+
+        if (busquedaProdCriterio && val) {
+            url += `&${busquedaProdCriterio}=${encodeURIComponent(val)}`;
+        }
+        if (ordenProdCol) {
+            url += `&order_by=${ordenProdCol}&order_dir=${ordenProdDir}`;
+        }
+    } else {
+        url = `/contactos?page=${paginaActualContacto}&page_size=${pageSize}`;
+        let val = '';
+        if (busquedaContCriterio === 'nombre') val = document.getElementById('filtroNombreContacto').value;
+        if (busquedaContCriterio === 'ruc') val = document.getElementById('filtroRucContacto').value;
+
+        if (busquedaContCriterio && val) {
+            url += `&${busquedaContCriterio}=${encodeURIComponent(val)}`;
+        }
+        if (ordenContCol) {
+            url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`;
+        }
     }
 
+    try {
+        const response = await fetch(url);
+        const textResponse = await response.text();
+        
+        let result;
+        try {
+            result = JSON.parse(textResponse);
+        } catch (e) {
+            throw new Error(`Respuesta no válida del servidor: ${textResponse}`);
+        }
 
-@app.get("/contactos")
-def get_contactos(
-    page: int = 0,
-    page_size: int = 50,
-    nombre: str = Query(None),
-    ruc: str = Query(None),
-    order_by: str = Query(None),
-    order_dir: str = Query("asc")
-):
-    query = supabase_client.table("clientes")
+        if (!response.ok) throw new Error(result.detail || "Error al cargar datos");
 
-    if nombre:
-        query = query.ilike("nombre", f"%{nombre}%")
-    if ruc:
-        query = query.ilike("ruc", f"%{ruc}%")
-
-    if order_by:
-        query = query.order(order_by, desc=(order_dir == "desc"))
-
-    start = page * page_size
-
-    result = query.limit(page_size).offset(start).execute()
-
-    total_result = supabase_client.table("clientes").select("codigo_cliente", count="exact").execute()
-    total = total_result.count
-    total_pages = (total // page_size) + 1
-
-    return {
-        "data": result.data,
-        "total": total,
-        "total_pages": total_pages
+        if (tipo === 'productos') {
+            document.getElementById('errorProductos').style.display = 'none';
+            renderizarProductos(result);
+        } else {
+            document.getElementById('errorContactos').style.display = 'none';
+            renderizarContactos(result);
+        }
+    } catch (error) {
+        if (tipo === 'productos') {
+            const errDiv = document.getElementById('errorProductos');
+            errDiv.style.display = 'block';
+            errDiv.innerText = `Error: ${error.message}`;
+        } else {
+            const errDiv = document.getElementById('errorContactos');
+            errDiv.style.display = 'block';
+            errDiv.innerText = `Error: ${error.message}`;
+        }
     }
+}
+
+function renderizarProductos(result) {
+    const thead = document.querySelector('#tablaProductos thead');
+    const tbody = document.querySelector('#tablaProductos tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    let columnas = [];
+    if (prodVistaActual === 1) {
+        columnas = ['codigo', 'codigo_proveedor', 'marca', 'descripcion', 'precio_venta', 'costo_prom', 'saldo', 'saldo_bext', 'saldo_temp'];
+    } else {
+        columnas = ['codigo', 'codigo_proveedor', 'marca', 'descripcion', 'precio_venta', 'costo_prom', 'saldo', 'peso', 'medidas'];
+    }
+
+    let headerRow = document.createElement('tr');
+    columnas.forEach(col => {
+        let th = document.createElement('th');
+        let texto = col.toUpperCase();
+        if (ordenProdCol === col) {
+            texto += (ordenProdDir === 'asc' ? ' ▲' : ' ▼');
+        }
+        th.innerText = texto;
+        th.style.cursor = 'pointer';
+        th.title = `Ordenar por ${col}`;
+        th.onclick = () => {
+            if (ordenProdCol === col) {
+                ordenProdDir = ordenProdDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenProdCol = col;
+                ordenProdDir = 'asc';
+            }
+            paginaActual = 0;
+            cargarDatos('productos');
+        };
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    result.data.forEach(item => {
+        let tr = document.createElement('tr');
+        columnas.forEach(col => {
+            let td = document.createElement('td');
+            let val = item[col];
+            if (val === null || val === undefined) val = '';
+            
+            if (col === 'precio_venta' || col === 'costo_prom') {
+                val = `$${Number(val).toFixed(2)}`;
+                td.style.textAlign = 'right';
+            }
+            td.innerText = val;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    const totalPages = result.total_pages || 1;
+    document.getElementById('infoPaginacion').innerText = `Página ${paginaActual + 1} de ${totalPages}`;
+    document.getElementById('btnAnterior').disabled = paginaActual === 0;
+    document.getElementById('btnSiguiente').disabled = (paginaActual + 1) >= totalPages;
+}
+
+function renderizarContactos(result) {
+    const thead = document.querySelector('#tablaContactos thead');
+    const tbody = document.querySelector('#tablaContactos tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    let columnas = [];
+    if (contVistaActual === 1) {
+        columnas = ['codigo_cliente', 'ruc', 'nombre', 'correo', 'ciudad'];
+    } else {
+        columnas = ['codigo_cliente', 'ruc', 'nombre', 'direccion', 'telefono'];
+    }
+
+    let headerRow = document.createElement('tr');
+    columnas.forEach(col => {
+        let th = document.createElement('th');
+        let texto = col.toUpperCase();
+        if (ordenContCol === col) {
+            texto += (ordenContDir === 'asc' ? ' ▲' : ' ▼');
+        }
+        th.innerText = texto;
+        th.style.cursor = 'pointer';
+        th.title = `Ordenar por ${col}`;
+        th.onclick = () => {
+            if (ordenContCol === col) {
+                ordenContDir = ordenContDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenContCol = col;
+                ordenContDir = 'asc';
+            }
+            paginaActualContacto = 0;
+            cargarDatos('contactos');
+        };
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    result.data.forEach(item => {
+        let tr = document.createElement('tr');
+        columnas.forEach(col => {
+            let td = document.createElement('td');
+            
+            // Verificamos posibles nombres alternativos para el correo si la columna se llama diferente en Supabase
+            let val = item[col];
+            if ((col === 'correo') && (val === undefined || val === null)) {
+                val = item['email'] || item['correo_electronico'] || '';
+            }
+
+            if (val === null || val === undefined) val = '';
+            td.innerText = val;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    const totalPages = result.total_pages || 1;
+    document.getElementById('infoPaginacionContacto').innerText = `Página ${paginaActualContacto + 1} de ${totalPages}`;
+    document.getElementById('btnAnteriorContacto').disabled = paginaActualContacto === 0;
+    document.getElementById('btnSiguienteContacto').disabled = (paginaActualContacto + 1) >= totalPages;
+}
