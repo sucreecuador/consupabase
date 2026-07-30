@@ -13,6 +13,25 @@ let orderByCont = null;
 let orderDirCont = "asc";
 
 function formatearNombreColumna(nombre) {
+    // Diccionario para dar nombres limpios y estéticos a las cabeceras
+    const mapaNombres = {
+        "codigo": "COD. CONTACTO",
+        "cod_contacto": "COD. CONTACTO",
+        "id": "COD. CONTACTO",
+        "ruc": "C.C. o R.U.C.",
+        "cedula": "C.C. o R.U.C.",
+        "nombre": "NOMBRE APELLIDO",
+        "direccion": "CALLE Y NUMERO",
+        "telefono": "TELEFONO",
+        "email": "CORR. ELECTRONICO",
+        "ciudad": "CIUDAD",
+        "tipo": "CATEGORIA",
+        "categoria": "CATEGORIA"
+    };
+    
+    if (mapaNombres[nombre.toLowerCase()]) {
+        return mapaNombres[nombre.toLowerCase()];
+    }
     return nombre.replace(/_/g, " ").toUpperCase();
 }
 
@@ -215,12 +234,19 @@ async function cargarContactos() {
             return;
         }
 
-        // Orden exacto de columnas de contactos según la imagen proporcionada
-        const vista1Cont = ["codigo", "ruc", "nombre", "direccion", "telefono", "email", "ciudad", "tipo"];
+        // Detección automática del campo de código disponible en tu tabla de Supabase
+        const keysDisponibles = Object.keys(data.data[0]);
+        let campoCodigoReal = "codigo";
+        if (!keysDisponibles.includes("codigo")) {
+            if (keysDisponibles.includes("cod_contacto")) campoCodigoReal = "cod_contacto";
+            else if (keysDisponibles.includes("id")) campoCodigoReal = "id";
+        }
+
+        // Orden estricto basado en la imagen de referencia
+        const vista1Cont = [campoCodigoReal, "ruc", "nombre", "direccion", "telefono", "email", "ciudad", "tipo"];
         const vista2Cont = ["nombre", "ruc", "contacto", "vendedor", "limite_credito", "plazo", "banco", "observaciones"];
 
         const columnas = vistaContactos === 1 ? vista1Cont : vista2Cont;
-        const keysDisponibles = Object.keys(data.data[0]);
         const columnasValidas = columnas.filter(c => keysDisponibles.includes(c));
         const finalCols = columnasValidas.length > 0 ? columnasValidas : columnas;
 
