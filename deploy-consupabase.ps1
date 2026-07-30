@@ -77,15 +77,13 @@ $deployUrl = "https://api.render.com/v1/services/$renderServiceId/deploys"
 
 $headers = @{
     "Authorization" = "Bearer $renderKey"
-    "Content-Type"  = "application/json"
+    "Accept"        = "application/json"
 }
 
-$body = @{
-    "clearCache" = $true
-} | ConvertTo-Json
+$body = '{"clearCache": true}'
 
 try {
-    $response = Invoke-RestMethod -Uri $deployUrl -Method Post -Headers $headers -Body $body
+    $response = Invoke-RestMethod -Uri $deployUrl -Method Post -Headers $headers -Body $body -ContentType "application/json"
     Write-Host "Render aceptó el deploy."
     Write-Host "ID del deploy: $($response.id)"
     Write-Host "Estado inicial: $($response.status)"
