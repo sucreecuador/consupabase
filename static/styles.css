@@ -1,146 +1,30 @@
-/* ============================================
-   ESTILOS GENERALES DE BOTONES
-   ============================================ */
+/* ===== PAGINACIÓN ===== */
 
-button {
-    background-color: #0056b3;
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-}
-
-button:hover {
-    background-color: #004085;
-}
-
-button:disabled {
-    background-color: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
-}
-
-/* ============================================
-   BOTONES AMARILLOS (Vista 1 / Vista 2)
-   ============================================ */
-
-.btn-vista {
-    background-color: #ffc107; /* Amarillo */
-    color: #000000; /* Texto oscuro */
-    border: none;
+.pagination-btn {
+    background-color: #005bbb;   /* azul fuerte */
+    color: white;                /* texto blanco */
     padding: 6px 12px;
+    border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    margin: 4px;
 }
 
-.btn-vista:hover {
-    background-color: #e0a800; /* Amarillo más oscuro */
+.pagination-btn:hover {
+    background-color: #004799;   /* azul más oscuro */
 }
 
-/* ============================================
-   TABLA EMPRESARIAL NIVEL 2
-   ============================================ */
-
-.table-container {
-    max-height: 70vh;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-shadow: 0px 2px 6px rgba(0,0,0,0.15);
-}
-
-/* Cabecera fija con sombra */
-#tablaProductos thead th,
-#tablaContactos thead th {
-    position: sticky;
-    top: 0;
-    background-color: #0056b3;
-    color: white;
-    padding: 10px;
+.pagination-info {
     font-weight: bold;
-    z-index: 2;
-    box-shadow: 0px 2px 4px rgba(0,0,0,0.25);
+    color: #222;
+    margin: 0 10px;
 }
 
-/* Filas alternadas */
-#tablaProductos tbody tr:nth-child(odd),
-#tablaContactos tbody tr:nth-child(odd) {
-    background-color: #f8f9fa;
-}
-
-#tablaProductos tbody tr:nth-child(even),
-#tablaContactos tbody tr:nth-child(even) {
-    background-color: #ffffff;
-}
-
-/* Hover elegante */
-#tablaProductos tbody tr:hover,
-#tablaContactos tbody tr:hover {
-    background-color: #e2e6ea;
-    cursor: pointer;
-}
-
-/* Fila seleccionada */
-tr.selected-row {
-    background-color: #ffe08a !important;
-}
-
-/* Celdas */
-#tablaProductos td,
-#tablaProductos th,
-#tablaContactos td,
-#tablaContactos th {
-    padding: 6px 10px;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px;
-}
-
-/* Columnas numéricas alineadas */
-td.num {
-    text-align: right;
-    font-weight: 600;
-}
-
-/* Descripción con tooltip */
-td.desc {
-    max-width: 350px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Tooltip */
-td.desc:hover::after,
-td.medidas:hover::after,
-td.peso:hover::after {
-    content: attr(data-full);
-    position: absolute;
-    background: #333;
-    color: #fff;
-    padding: 6px 10px;
+.pagination-input {
+    width: 60px;
+    padding: 4px;
     border-radius: 4px;
-    white-space: nowrap;
-    z-index: 10;
-    transform: translateY(-28px);
-    font-size: 13px;
-}
-
-/* Colores por stock */
-.stock-verde {
-    color: #0a7a0a;
-    font-weight: bold;
-}
-
-.stock-amarillo {
-    color: #c7a400;
-    font-weight: bold;
-}
-
-.stock-rojo {
-    color: #b30000;
-    font-weight: bold;
+    border: 1px solid #aaa;
+    margin-left: 10px;
 }
