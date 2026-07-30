@@ -1,6 +1,49 @@
-/* ============================
+/* ============================================
+   ESTILOS GENERALES DE BOTONES
+   ============================================ */
+
+button {
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #004085;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   BOTONES AMARILLOS (Vista 1 / Vista 2)
+   ============================================ */
+
+.btn-vista {
+    background-color: #ffc107; /* Amarillo */
+    color: #000000; /* Texto oscuro */
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-vista:hover {
+    background-color: #e0a800; /* Amarillo más oscuro */
+}
+
+/* ============================================
    TABLA EMPRESARIAL NIVEL 2
-   ============================ */
+   ============================================ */
 
 .table-container {
     max-height: 70vh;
@@ -86,7 +129,7 @@ td.peso:hover::after {
     font-size: 13px;
 }
 
-/* Stock colores */
+/* Colores por stock */
 .stock-verde {
     color: #0a7a0a;
     font-weight: bold;
