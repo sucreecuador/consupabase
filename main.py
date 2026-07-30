@@ -6,7 +6,6 @@ import os
 
 app = FastAPI()
 
-# Inicialización del cliente de Supabase (SIN fallback)
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 
@@ -15,10 +14,8 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Servir archivos estáticos (HTML, CSS, JS)
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
-
 
 @app.get("/")
 def read_root():
@@ -28,7 +25,6 @@ def read_root():
         return FileResponse("index.html")
     else:
         return {"mensaje": "API funcionando correctamente."}
-
 
 @app.get("/productos")
 def get_productos(
@@ -65,8 +61,7 @@ def get_productos(
         return {"data": response.data, "count": response.count}
 
     except Exception as e:
-        return {"error": str(e)}
-
+        return {"error": str(e), "data": [], "count": 0}
 
 @app.get("/contactos")
 def get_contactos(
@@ -97,4 +92,4 @@ def get_contactos(
         return {"data": response.data, "count": response.count}
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": str(e), "data": [], "count": 0}
