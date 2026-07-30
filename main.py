@@ -6,17 +6,29 @@ import os
 
 app = FastAPI()
 
-# Inicialización del cliente de Supabase
+# Configuración del cliente de Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://utcqgkeiyqvfxfhjupfc.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzNjc0MDIsImV4cCI6MjA1NTk0MzQwMn0.GvX_...") # Si usas variable de entorno en Render, puedes dejarlo con os.getenv
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Montar archivos estáticos para que carguen el CSS, JS, etc.
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Servir carpeta estática (imágenes, css, js)
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Ruta principal: intenta cargar index.html o el primer HTML que encuentre en static
 @app.get("/")
-def read_index():
-    return FileResponse("static/index.html")
+def read_root():
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    elif os.path.exists("index.html"):
+        return FileResponse("index.html")
+    else:
+        # Busca cualquier archivo .html en la carpeta static si no se llama index.html
+        if os.path.exists("static"):
+            html_files = [f for f in os.listdir("static") if f.endswith(".html")]
+            if html_files:
+                return FileResponse(f"static/{html_files[0]}")
+    return {"mensaje": "API de Supabase funcionando. Visita /contactos para ver los datos."}
 
 @app.get("/contactos")
 def get_contactos(
@@ -39,7 +51,6 @@ def get_contactos(
             is_desc = (order_dir.lower() == "desc")
             query = query.order(order_by, desc=is_desc)
 
-        # Paginación
         start = page * page_size
         end = start + page_size - 1
         query = query.range(start, end)
