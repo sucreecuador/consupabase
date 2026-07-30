@@ -23,13 +23,11 @@
 </head>
 <body>
 
-  <!-- Botones Superiores de Pestañas -->
   <div class="tabs">
     <button id="btnTabProductos" onclick="switchTab('productos')" style="background-color: #0056b3;">Consulta de Productos</button>
     <button id="btnTabContactos" onclick="switchTab('contactos')" style="background-color: #6c757d;">Consulta de Contactos</button>
   </div>
 
-  <!-- SECCIÓN PRODUCTOS -->
   <div id="seccionProductos">
     <h2>Consulta de Productos - Sucre</h2>
 
@@ -51,7 +49,6 @@
       </span>
     </div>
 
-    <!-- Paginación Productos -->
     <div class="paginacion">
       <button id="btnAnterior" onclick="cambiarPagina(-1)">&lt; Anterior</button>
       <span id="infoPaginacion">Página 1 de 1</span>
@@ -60,14 +57,12 @@
       <button onclick="irAPagina()">Ir</button>
     </div>
 
-    <!-- Tabla Productos -->
     <table id="tablaProductos">
       <thead></thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <!-- SECCIÓN CONTACTOS -->
   <div id="seccionContactos" style="display: none;">
     <h2>Consulta de Contactos - Sucre</h2>
 
@@ -85,7 +80,6 @@
       </span>
     </div>
 
-    <!-- Paginación Contactos -->
     <div class="paginacion">
       <button id="btnAnteriorContacto" onclick="cambiarPaginaContacto(-1)">&lt; Anterior</button>
       <span id="infoPaginacionContacto">Página 1 de 1</span>
@@ -94,14 +88,12 @@
       <button onclick="irAPaginaContacto()">Ir</button>
     </div>
 
-    <!-- Tabla Contactos -->
     <table id="tablaContactos">
       <thead></thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <!-- Carga del Script JS -->
-  <script src="script.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>

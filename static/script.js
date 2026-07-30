@@ -1,4 +1,4 @@
-let paginaActualProducto = 0;
+﻿let paginaActualProducto = 0;
 let pageSize = 50;
 let ordenProdCol = "";
 let ordenProdDir = "asc";
@@ -85,7 +85,7 @@ function buscar(tipo, campo) {
 
 function cargarDatos(tipo) {
   if (tipo === "productos") {
-    let url = `/productos?page=${paginaActualProducto}&page_size=${pageSize}`;
+    let url = /productos?page= + paginaActualProducto + &page_size= + pageSize;
 
     if (modoBusquedaActual.campo) {
       let val = "";
@@ -95,12 +95,12 @@ function cargarDatos(tipo) {
       if (modoBusquedaActual.campo === "proveedor") val = document.getElementById("filtroProveedor").value;
 
       if (val.trim() !== "") {
-        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`;
+        url += & + modoBusquedaActual.campo + = + encodeURIComponent(val);
       }
     }
 
     if (ordenProdCol) {
-      url += `&order_by=${ordenProdCol}&order_dir=${ordenProdDir}`;
+      url += &order_by= + ordenProdCol + &order_dir= + ordenProdDir;
     }
 
     fetch(url)
@@ -113,7 +113,7 @@ function cargarDatos(tipo) {
       })
       .catch((err) => console.error("Error de red cargando productos:", err));
   } else {
-    let url = `/contactos?page=${paginaActualContacto}&page_size=${pageSize}`;
+    let url = /contactos?page= + paginaActualContacto + &page_size= + pageSize;
 
     if (modoBusquedaActual.campo) {
       let val = "";
@@ -121,12 +121,12 @@ function cargarDatos(tipo) {
       if (modoBusquedaActual.campo === "ruc") val = document.getElementById("filtroRucContacto").value;
 
       if (val.trim() !== "") {
-        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`;
+        url += & + modoBusquedaActual.campo + = + encodeURIComponent(val);
       }
     }
 
     if (ordenContCol) {
-      url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`;
+      url += &order_by= + ordenContCol + &order_dir= + ordenContDir;
     }
 
     fetch(url)
@@ -183,7 +183,7 @@ function renderizarProductos(result) {
 
   const count = result.count || 0;
   const totalPages = Math.ceil(count / pageSize) || 1;
-  document.getElementById("infoPaginacion").innerText = `Página ${paginaActualProducto + 1} de ${totalPages}`;
+  document.getElementById("infoPaginacion").innerText = Página  + (paginaActualProducto + 1) +  de  + totalPages;
   document.getElementById("btnAnterior").disabled = paginaActualProducto === 0;
   document.getElementById("btnSiguiente").disabled = paginaActualProducto + 1 >= totalPages;
 }
@@ -235,7 +235,7 @@ function renderizarContactos(result) {
 
   const count = result.count || 0;
   const totalPages = Math.ceil(count / pageSize) || 1;
-  document.getElementById("infoPaginacionContacto").innerText = `Página ${paginaActualContacto + 1} de ${totalPages}`;
+  document.getElementById("infoPaginacionContacto").innerText = Página  + (paginaActualContacto + 1) +  de  + totalPages;
   document.getElementById("btnAnteriorContacto").disabled = paginaActualContacto === 0;
   document.getElementById("btnSiguienteContacto").disabled = paginaActualContacto + 1 >= totalPages;
 }
@@ -272,10 +272,7 @@ window.onload = () => {
   cargarDatos("productos");
 };
 
-// =========================================================================
-// SOLUCIÓN: Exponer todas las funciones al objeto global 'window' para
-// que el HTML pueda ejecutarlas a través de los eventos onclick=""
-// =========================================================================
+// Exposición global explícita
 window.switchTab = switchTab;
 window.cambiarVistaProductos = cambiarVistaProductos;
 window.cambiarVistaContactos = cambiarVistaContactos;
