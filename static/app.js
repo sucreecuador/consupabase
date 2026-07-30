@@ -41,7 +41,7 @@ async function cargarProductos() {
             return;
         }
 
-        // SOLO 9 COLUMNAS
+        // SOLO 9 COLUMNAS REALES
         const columnas = [
             "codigo",
             "codigo_proveedor",
@@ -51,7 +51,7 @@ async function cargarProductos() {
             "saldo",
             "saldo_bext",
             "saldo_temp",
-            "costo_u"
+            "costo_prom"
         ];
 
         thead.innerHTML = "<tr>" + columnas.map(c => `<th>${c}</th>`).join("") + "</tr>";
