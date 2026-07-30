@@ -2,27 +2,21 @@
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
-import os, re
+import os
 
 app = FastAPI()
 
-# Extraer y limpiar URL de Supabase de forma estricta (DNS limpia)
-raw_url = os.getenv("SUPABASE_URL", "").strip().strip("'").strip('"')
-
-# Extraer el protocolo y dominio base puro (ej: https://utcqgkeiyqvfxhjupfc.supabase.co)
-match = re.match(r"(https?://[^/]+)", raw_url)
-if match:
-    SUPABASE_URL = match.group(1)
-else:
-    SUPABASE_URL = raw_url
-
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip().strip("'").strip('"')
+# Leer variables tal como vienen
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise Exception("ERROR: Variables SUPABASE_URL o SUPABASE_ANON_KEY faltantes.")
 
+# Crear cliente Supabase
 supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Servir archivos estáticos
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
