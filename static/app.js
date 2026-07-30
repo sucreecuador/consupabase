@@ -29,7 +29,7 @@ function cambiarVistaContactos(vista) {
 }
 
 function renderPagination() {
-    document.getElementById("infoPaginacion").innerText = `Página ${paginaActual} de ${totalPaginas}`;
+    document.getElementById("infoPaginacion").innerText = `Pág. ${paginaActual}/${totalPaginas}`;
     document.getElementById("inputPagina").value = paginaActual;
 }
 
@@ -142,7 +142,7 @@ async function cargarProductos() {
 
 /* CONTACTOS */
 function renderPaginationContacto() {
-    document.getElementById("infoPaginacionContacto").innerText = `Página ${paginaActualContacto} de ${totalPaginasContacto}`;
+    document.getElementById("infoPaginacionContacto").innerText = `Pág. ${paginaActualContacto}/${totalPaginasContacto}`;
     document.getElementById("inputPaginaContacto").value = paginaActualContacto;
 }
 
@@ -215,13 +215,14 @@ async function cargarContactos() {
             return;
         }
 
-        const vista1Cont = ["nombre", "ruc", "telefono", "direccion", "email", "ciudad", "tipo", "saldo_pendiente"];
+        // Orden exacto de columnas de contactos según la imagen proporcionada
+        const vista1Cont = ["codigo", "ruc", "nombre", "direccion", "telefono", "email", "ciudad", "tipo"];
         const vista2Cont = ["nombre", "ruc", "contacto", "vendedor", "limite_credito", "plazo", "banco", "observaciones"];
 
         const columnas = vistaContactos === 1 ? vista1Cont : vista2Cont;
         const keysDisponibles = Object.keys(data.data[0]);
         const columnasValidas = columnas.filter(c => keysDisponibles.includes(c));
-        const finalCols = columnasValidas.length > 0 ? columnasValidas : keysDisponibles;
+        const finalCols = columnasValidas.length > 0 ? columnasValidas : columnas;
 
         let headHtml = "<tr>";
         finalCols.forEach(c => {
