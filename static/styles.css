@@ -2,13 +2,14 @@
    ESTILOS DE PAGINACIÓN VERDE
    =========================== */
 
-.pagination-container {
+#pagination {
+    margin-top: 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 12px;
 }
 
+/* Botones verdes visibles */
 .pagination-btn {
     background-color: #00c22b !important;   /* VERDE FUERTE */
     color: #ffffff !important;              /* TEXTO BLANCO */
@@ -25,12 +26,14 @@
     background-color: #009e23 !important;   /* VERDE MÁS OSCURO */
 }
 
+/* Texto de paginación */
 .pagination-info {
     font-weight: bold !important;
     color: #006b1a !important;
     font-size: 16px !important;
 }
 
+/* Input de número */
 .pagination-input {
     width: 70px !important;
     padding: 8px !important;
