@@ -1,7 +1,22 @@
 from fastapi import FastAPI, Query
-# Asegúrate de mantener tus demás importaciones arriba (como supabase_client, etc.)
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from supabase import create_client, Client
+import os
 
 app = FastAPI()
+
+# Inicialización del cliente de Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://utcqgkeiyqvfxfhjupfc.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzNjc0MDIsImV4cCI6MjA1NTk0MzQwMn0.GvX_...") # Si usas variable de entorno en Render, puedes dejarlo con os.getenv
+supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Montar archivos estáticos para que carguen el CSS, JS, etc.
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def read_index():
+    return FileResponse("static/index.html")
 
 @app.get("/contactos")
 def get_contactos(
@@ -21,8 +36,6 @@ def get_contactos(
             query = query.ilike("ruc", f"%{ruc}%")
 
         if order_by:
-            # Mapeamos por si el nombre en la vista difiere de la columna real en la BD
-            # Usamos order_by directamente o ajustamos según corresponda
             is_desc = (order_dir.lower() == "desc")
             query = query.order(order_by, desc=is_desc)
 
