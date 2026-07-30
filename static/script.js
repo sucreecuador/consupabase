@@ -95,12 +95,12 @@ function cargarDatos(tipo) {
       if (modoBusquedaActual.campo === "proveedor") val = document.getElementById("filtroProveedor").value;
 
       if (val.trim() !== "") {
-        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`[cite: 4];
+        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`;
       }
     }
 
     if (ordenProdCol) {
-      url += `&order_by=${ordenProdCol}&order_dir=${ordenProdDir}`[cite: 4];
+      url += `&order_by=${ordenProdCol}&order_dir=${ordenProdDir}`;
     }
 
     fetch(url)
@@ -121,12 +121,12 @@ function cargarDatos(tipo) {
       if (modoBusquedaActual.campo === "ruc") val = document.getElementById("filtroRucContacto").value;
 
       if (val.trim() !== "") {
-        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`[cite: 4];
+        url += `&${modoBusquedaActual.campo}=${encodeURIComponent(val)}`;
       }
     }
 
     if (ordenContCol) {
-      url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`[cite: 4];
+      url += `&order_by=${ordenContCol}&order_dir=${ordenContDir}`;
     }
 
     fetch(url)
@@ -271,3 +271,17 @@ function irAPaginaContacto() {
 window.onload = () => {
   cargarDatos("productos");
 };
+
+// =========================================================================
+// SOLUCIÓN: Exponer todas las funciones al objeto global 'window' para
+// que el HTML pueda ejecutarlas a través de los eventos onclick=""
+// =========================================================================
+window.switchTab = switchTab;
+window.cambiarVistaProductos = cambiarVistaProductos;
+window.cambiarVistaContactos = cambiarVistaContactos;
+window.mostrarTodos = mostrarTodos;
+window.buscar = buscar;
+window.cambiarPagina = cambiarPagina;
+window.irAPagina = irAPagina;
+window.cambiarPaginaContacto = cambiarPaginaContacto;
+window.irAPaginaContacto = irAPaginaContacto;
