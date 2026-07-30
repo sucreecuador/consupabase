@@ -71,7 +71,7 @@ $renderKey = [System.Net.NetworkCredential]::new("", $secureKey).Password
 Write-Host "API Key cargada."
 Write-Host ""
 
-Write-Host "Enviando Clear Cache y Deploy a Render..."
+Write-Host "Enviando Deploy a Render..."
 
 $deployUrl = "https://api.render.com/v1/services/$renderServiceId/deploys"
 
@@ -80,10 +80,8 @@ $headers = @{
     "Accept"        = "application/json"
 }
 
-$body = '{"clearCache": true}'
-
 try {
-    $response = Invoke-RestMethod -Uri $deployUrl -Method Post -Headers $headers -Body $body -ContentType "application/json"
+    $response = Invoke-RestMethod -Uri $deployUrl -Method Post -Headers $headers
     Write-Host "Render aceptó el deploy."
     Write-Host "ID del deploy: $($response.id)"
     Write-Host "Estado inicial: $($response.status)"
