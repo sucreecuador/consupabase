@@ -240,9 +240,9 @@ function renderizarContactos(result) {
 
     let columnas = [];
     if (contVistaActual === 1) {
-        columnas = ['codigo_cliente', 'ruc', 'nombre', 'correo', 'ciudad'];
+        columnas = ['codigo_cliente', 'ruc', 'nombre', 'email', 'ciudad'];
     } else {
-        columnas = ['codigo_cliente', 'ruc', 'nombre', 'direccion', 'telefono'];
+        columnas = ['codigo_cliente', 'ruc', 'nombre', 'direccion', 'telefono1'];
     }
 
     let headerRow = document.createElement('tr');
@@ -256,8 +256,7 @@ function renderizarContactos(result) {
         th.style.cursor = 'pointer';
         th.title = `Ordenar por ${col}`;
         th.onclick = () => {
-            // Evitamos ordenar por columnas que sabemos que no existen físicamente para prevenir errores
-            if (col === 'correo' || col === 'telefono') return; 
+            if (col === 'email' || col === 'telefono1') return;
 
             if (ordenContCol === col) {
                 ordenContDir = ordenContDir === 'asc' ? 'desc' : 'asc';
@@ -278,10 +277,10 @@ function renderizarContactos(result) {
             let td = document.createElement('td');
             
             let val = '';
-            if (col === 'correo') {
-                val = item['correo'] || item['email'] || item['correo_electronico'] || '';
-            } else if (col === 'telefono') {
-                val = item['telefono'] || item['celular'] || item['fono'] || '';
+            if (col === 'email') {
+                val = item['email'] || item['correo'] || item['correo_electronico'] || '';
+            } else if (col === 'telefono1') {
+                val = item['telefono1'] || item['telefono'] || item['celular'] || '';
             } else {
                 val = item[col];
             }
