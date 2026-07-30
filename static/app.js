@@ -256,8 +256,6 @@ function renderizarContactos(result) {
         th.style.cursor = 'pointer';
         th.title = `Ordenar por ${col}`;
         th.onclick = () => {
-            if (col === 'email' || col === 'telefono1') return;
-
             if (ordenContCol === col) {
                 ordenContDir = ordenContDir === 'asc' ? 'desc' : 'asc';
             } else {
