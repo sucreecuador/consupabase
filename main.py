@@ -57,8 +57,8 @@ def get_productos(
 
     result = query.range(start, end).execute()
 
-    # Obtener total correctamente
-    total_result = supabase_client.table("productos").select("*", count="exact").execute()
+    # Conteo correcto usando columna existente
+    total_result = supabase_client.table("productos").select("codigo", count="exact").execute()
     total = total_result.count
     total_pages = (total // page_size) + 1
 
@@ -93,7 +93,7 @@ def get_contactos(
 
     result = query.range(start, end).execute()
 
-    total_result = supabase_client.table("clientes").select("*", count="exact").execute()
+    total_result = supabase_client.table("clientes").select("codigo_cliente", count="exact").execute()
     total = total_result.count
     total_pages = (total // page_size) + 1
 
