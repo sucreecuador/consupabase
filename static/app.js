@@ -31,7 +31,9 @@ function formatearNombreColumna(nombre) {
         "limite_credito": "LIMITE CREDITO",
         "plazo": "PLAZO",
         "banco": "BANCO",
-        "observaciones": "OBSERVACIONES"
+        "observaciones": "OBSERVACIONES",
+        "ubicacion": "UBICACION",
+        "costo_prom": "COSTO PROM"
     };
     
     if (mapaNombres[nombre.toLowerCase()]) {
@@ -133,7 +135,8 @@ async function cargarProductos() {
         }
 
         const vista1 = ["codigo", "codigo_proveedor", "marca", "descripcion", "costo_prom", "precio_venta", "saldo", "saldo_bext", "saldo_temp"];
-        const vista2 = ["codigo", "codigo_proveedor", "marca", "descripcion", "costo_prom", "precio_venta", "saldo", "peso", "medidas"];
+        // Vista 2 reemplaza costo_prom por ubicacion
+        const vista2 = ["codigo", "codigo_proveedor", "marca", "descripcion", "ubicacion", "precio_venta", "saldo", "peso", "medidas"];
 
         const columnas = vistaProductos === 1 ? vista1 : vista2;
 
