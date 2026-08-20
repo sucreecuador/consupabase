@@ -1,5 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from supabase import create_client
 from typing import Optional
@@ -16,7 +18,19 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# ============================================================
+#  INICIALIZAR FASTAPI
+# ============================================================
+
 app = FastAPI()
+
+# Servir carpeta /static
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Página principal
+@app.get("/")
+def home():
+    return FileResponse("static/index.html")
 
 
 # ============================================================
