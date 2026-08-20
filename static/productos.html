@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos - CONSUPABASE</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #005bbb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        th {
+            background: #005bbb;
+            color: white;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .nav button {
+            padding: 10px 15px;
+            background: #005bbb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="nav">
+    <button onclick="window.location.href='index.html'">← Volver</button>
+</div>
+
+<h1>Productos</h1>
+
+<table id="tabla-productos">
+    <thead>
+        <tr>
+            <th>COD CONTACTO</th>
+            <th>COD PROVEEDOR</th>
+            <th>MARCA</th>
+            <th>DESCRIPCIÓN</th>
+            <th>COSTO PROM</th>
+            <th>PRECIO VENTA</th>
+            <th>SALDO</th>
+            <th>SALDO BEXT</th>
+            <th>SALDO TEMP</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+async function cargarProductos() {
+    const url = "https://consupabase-api.onrender.com/productos?page=0&page_size=200";
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const tbody = document.querySelector("#tabla-productos tbody");
+
+    data.forEach(p => {
+        const fila = `
+            <tr>
+                <td>${p.cod_contacto}</td>
+                <td>${p.codigo_proveedor}</td>
+                <td>${p.marca}</td>
+                <td>${p.descripcion}</td>
+                <td>${p.costo_prom}</td>
+                <td>${p.precio_venta}</td>
+                <td>${p.saldo}</td>
+                <td>${p.saldo_bext}</td>
+                <td>${p.saldo_temp}</td>
+            </tr>
+        `;
+        tbody.innerHTML += fila;
+    });
+}
+
+cargarProductos();
+</script>
+
+</body>
+</html>

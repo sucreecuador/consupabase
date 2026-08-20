@@ -22,11 +22,11 @@ if (-Not (Test-Path "$projectPath\static")) {
     New-Item -ItemType Directory -Path "$projectPath\static" | Out-Null
 }
 
-Write-Host "Forzando inclusión de archivos estáticos..."
+Write-Host "Incluyendo archivos estáticos..."
 git add static/*
 
 # ============================================================
-# 2. Commit forzado
+# 2. Commit automático
 # ============================================================
 
 $gitStatus = git status --porcelain
@@ -35,7 +35,7 @@ if ($gitStatus) {
     Write-Host "Cambios detectados. Realizando commit..."
     git commit -am "Deploy automático - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 } else {
-    Write-Host "ADVERTENCIA: Git no detecta cambios. Forzando commit..."
+    Write-Host "Sin cambios detectados. Forzando commit..."
     git commit --allow-empty -m "Forzando deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 }
 

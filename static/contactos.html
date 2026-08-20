@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contactos - CONSUPABASE</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #005bbb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        th {
+            background: #005bbb;
+            color: white;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .nav button {
+            padding: 10px 15px;
+            background: #005bbb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="nav">
+    <button onclick="window.location.href='index.html'">← Volver</button>
+</div>
+
+<h1>Contactos</h1>
+
+<table id="tabla-contactos">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>NOMBRE</th>
+            <th>TIPO</th>
+            <th>TELEFONO</th>
+            <th>EMAIL</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+async function cargarContactos() {
+    const url = "https://consupabase-api.onrender.com/contactos?page=0&page_size=200";
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const tbody = document.querySelector("#tabla-contactos tbody");
+
+    data.forEach(c => {
+        const fila = `
+            <tr>
+                <td>${c.id}</td>
+                <td>${c.nombre}</td>
+                <td>${c.tipo}</td>
+                <td>${c.telefono}</td>
+                <td>${c.email}</td>
+            </tr>
+        `;
+        tbody.innerHTML += fila;
+    });
+}
+
+cargarContactos();
+</script>
+
+</body>
+</html>

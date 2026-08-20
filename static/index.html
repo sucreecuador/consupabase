@@ -2,72 +2,85 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Productos - Sucre</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>CONSUPABASE - Inicio</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background: #005bbb;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .inicio-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 350px;
+            margin: 50px auto;
+        }
+
+        .btn-menu {
+            padding: 18px;
+            font-size: 20px;
+            background-color: #0073ff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-menu:hover {
+            background-color: #0056c7;
+        }
+
+        footer {
+            margin-top: 60px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div class="main-tabs">
-        <button class="tab-btn active-tab" onclick="mostrarProductos()">PRODUCTOS</button>
-        <button class="tab-btn" onclick="mostrarContactos()">CONTACTOS</button>
-    </div>
+<header>
+    CONSUPABASE - Panel Principal
+</header>
 
-    <div class="acciones-container">
-        <div class="acciones-derecha">
-            <button class="btn-verde" onclick="abrirNuevo()">➕ Ingresar</button>
-            <button class="btn-naranja" onclick="abrirModificar()">✏️ Modificar</button>
-            <button class="btn-rojo" onclick="abrirEliminar()">🗑️ Eliminar</button>
-        </div>
-    </div>
+<div class="inicio-menu">
 
-    <div class="filter-container">
-        <div class="filter-grid">
-            <label>Descripción
-                <input id="descripcion" onkeyup="buscarDescripcion()">
-            </label>
-            <label>Código
-                <input id="codigo" onkeyup="buscarCodigo()">
-            </label>
-            <label>Marca
-                <input id="marca" onkeyup="buscarMarca()">
-            </label>
-            <label>Proveedor
-                <input id="proveedor" onkeyup="buscarProveedor()">
-            </label>
-        </div>
+    <button class="btn-menu" onclick="window.location.href='productos.html'">
+        Productos
+    </button>
 
-        <button class="btn-naranja" onclick="mostrarTodos()">Mostrar Todos</button>
-    </div>
+    <button class="btn-menu" onclick="window.location.href='contactos.html'">
+        Contactos
+    </button>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>CODIGO</th>
-                    <th>DESCRIPCION</th>
-                    <th>MARCA</th>
-                    <th>PROVEEDOR</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-body"></tbody>
-        </table>
-    </div>
+    <button class="btn-menu" onclick="window.location.href='inventario.html'">
+        Inventario
+    </button>
 
-    <div class="pagination">
-        <div class="pagination-controls">
-            <button class="btn-naranja" onclick="anteriorPagina()">Anterior</button>
-            <span id="pagina-info" class="pagination-info"></span>
-            <button class="btn-verde" onclick="siguientePagina()">Siguiente</button>
-        </div>
+    <button class="btn-menu" onclick="window.location.href='reportes.html'">
+        Reportes
+    </button>
 
-        <div class="pagination-jump">
-            Ir a página:
-            <input id="ir-input" type="number" min="1">
-            <button class="btn-verde" onclick="irPagina()">Ir</button>
-        </div>
-    </div>
+</div>
 
-    <script src="script.js"></script>
+<footer>
+    © 2026 CONSUPABASE - Importadora Sucre
+</footer>
+
 </body>
 </html>
