@@ -36,99 +36,15 @@ body {
     background-color: #0056b3;
 }
 
-.section-container {
+.acciones-container {
     width: 100%;
-}
-
-.header-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.section-title {
-    font-size: 16px;
-    margin: 0;
-}
-
-.filter-container {
-    background: #fdfdfd;
-    padding: 8px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
     margin-bottom: 10px;
 }
 
-.filter-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-}
-
-.filter-grid label {
+.acciones-derecha {
     display: flex;
-    flex-direction: column;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.filter-grid input {
-    margin-top: 3px;
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    width: 100%;
-}
-
-.table-container {
-    max-height: 50vh;
-    overflow-x: auto;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border-radius: 4px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    white-space: nowrap;
-}
-
-th {
-    background-color: #ffeb3b !important;
-    color: #000000;
-    font-weight: bold;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    text-align: left;
-    font-size: 12px;
-}
-
-td {
-    padding: 7px 10px;
-    border: 1px solid #e0e0e0;
-    font-size: 13px;
-}
-
-tbody tr:nth-child(even) { background-color: #f9f9f9; }
-tbody tr:nth-child(odd) { background-color: #ffffff; }
-
-.btn-naranja {
-    background-color: #ff9800;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 12px;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .btn-verde {
@@ -142,55 +58,71 @@ tbody tr:nth-child(odd) { background-color: #ffffff; }
     font-size: 12px;
 }
 
-.pagination {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    background: #fff;
-    padding: 8px;
-    border: 1px solid #e0e0e0;
+.btn-naranja {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 6px 10px;
     border-radius: 4px;
-}
-
-.pagination-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.pagination-info {
+    cursor: pointer;
     font-weight: bold;
-    font-size: 13px;
-}
-
-.pagination-jump {
-    display: flex;
-    align-items: center;
-    gap: 5px;
     font-size: 12px;
 }
 
-.pagination-jump input {
-    width: 50px;
-    text-align: center;
-    padding: 4px;
-    border: 1px solid #ccc;
+.btn-rojo {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 6px 10px;
     border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
 }
 
-@media (min-width: 600px) {
-    body { padding: 15px; }
-    .filter-grid { grid-template-columns: repeat(2, 1fr); }
-    .table-container { max-height: 65vh; }
-    .pagination { flex-direction: row; justify-content: space-between; }
-    .pagination-controls { width: auto; gap: 10px; }
-    .tab-btn, .btn-naranja, .btn-verde { font-size: 13px; padding: 8px 14px; }
-    .section-title { font-size: 18px; }
+.filter-container {
+    background: #fdfdfd;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 10px;
 }
 
-@media (min-width: 900px) {
-    .filter-grid { grid-template-columns: repeat(4, 1fr); }
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.table-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #ffeb3b;
+    padding: 8px;
+    border: 1px solid #ccc;
+    position: sticky;
+    top: 0;
+}
+
+td {
+    padding: 7px;
+    border: 1px solid #e0e0e0;
+}
+
+.pagination {
+    margin-top: 10px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
 }

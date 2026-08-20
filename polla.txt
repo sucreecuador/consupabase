@@ -1,1 +1,5 @@
 Sirve para consultar los productos y clientes
+
+1. Los dartos en SUPABASE
+2. los programas en GitHub
+3. Corre con RENDER

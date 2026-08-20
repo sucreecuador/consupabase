@@ -1,110 +1,73 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Consulta - Sucre</title>
-<link rel="stylesheet" href="/static/styles.css">
+    <meta charset="UTF-8">
+    <title>Productos - Sucre</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-<!-- Menú Superior de Pestañas -->
-<div class="main-tabs">
-    <div>
-        <button id="btnTabProductos" onclick="switchTab('productos')" class="tab-btn active-tab">
-            Productos
-        </button>
-        <button id="btnTabContactos" onclick="switchTab('contactos')" class="tab-btn">
-            Contactos
-        </button>
-    </div>
-</div>
-
-<!-- Sección Productos -->
-<div id="seccionProductos" class="section-container">
-    <div class="header-flex">
-        <h2 class="section-title">Productos - Sucre</h2>
-        <div class="vista-btns">
-            <button id="btnProdVista1" onclick="cambiarVistaProductos(1)" class="btn-naranja">Vista 1</button>
-            <button id="btnProdVista2" onclick="cambiarVistaProductos(2)" class="btn-naranja">Vista 2</button>
-        </div>
-    </div>
-    
-    <div class="filter-container">
-        <div class="filter-grid">
-            <label>Descripción: <input type="text" id="filtroDesc" placeholder="Buscar..." oninput="filtrarDatos()"></label>
-            <label>Código: <input type="text" id="filtroCodigo" placeholder="Buscar..." oninput="filtrarDatos()"></label>
-            <label>Marca: <input type="text" id="filtroMarca" placeholder="Buscar..." oninput="filtrarDatos()"></label>
-            <label>Proveedor: <input type="text" id="filtroProveedor" placeholder="Buscar..." oninput="filtrarDatos()"></label>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="mostrarTodosProductos()" class="btn-verde" style="background-color: #17a2b8; width: 100%;">Mostrar Todos</button>
-        </div>
+    <div class="main-tabs">
+        <button class="tab-btn active-tab" onclick="mostrarProductos()">PRODUCTOS</button>
+        <button class="tab-btn" onclick="mostrarContactos()">CONTACTOS</button>
     </div>
 
-    <div class="table-container">
-        <table id="tablaProductos">
-            <thead></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <!-- Paginación Productos -->
-    <div class="pagination">
-        <div class="pagination-controls">
-            <button onclick="cambiarPagina(-1)" id="btnAnterior" class="btn-verde">&lt; Ant</button>
-            <span id="infoPaginacion" class="pagination-info">Pág. 1/1</span>
-            <button onclick="cambiarPagina(1)" id="btnSiguiente" class="btn-verde">Sig &gt;</button>
-        </div>
-        <div class="pagination-jump">
-            <label>Ir a: <input type="number" id="inputPagina" min="1" value="1"></label>
-            <button onclick="irAPagina()" class="btn-verde">Ir</button>
-        </div>
-    </div>
-</div>
-
-<!-- Sección Contactos -->
-<div id="seccionContactos" class="section-container" style="display:none;">
-    <div class="header-flex">
-        <h2 class="section-title">Contactos - Sucre</h2>
-        <div class="vista-btns">
-            <button id="btnContVista1" onclick="cambiarVistaContactos(1)" class="btn-naranja">Vista 1</button>
-            <button id="btnContVista2" onclick="cambiarVistaContactos(2)" class="btn-naranja">Vista 2</button>
+    <div class="acciones-container">
+        <div class="acciones-derecha">
+            <button class="btn-verde" onclick="abrirNuevo()">➕ Ingresar</button>
+            <button class="btn-naranja" onclick="abrirModificar()">✏️ Modificar</button>
+            <button class="btn-rojo" onclick="abrirEliminar()">🗑️ Eliminar</button>
         </div>
     </div>
 
     <div class="filter-container">
         <div class="filter-grid">
-            <label>Nombre: <input type="text" id="filtroNombreContacto" placeholder="Buscar..." oninput="filtrarDatosContactos()"></label>
-            <label>RUC/Cédula: <input type="text" id="filtroRucContacto" placeholder="Buscar..." oninput="filtrarDatosContactos()"></label>
+            <label>Descripción
+                <input id="descripcion" onkeyup="buscarDescripcion()">
+            </label>
+            <label>Código
+                <input id="codigo" onkeyup="buscarCodigo()">
+            </label>
+            <label>Marca
+                <input id="marca" onkeyup="buscarMarca()">
+            </label>
+            <label>Proveedor
+                <input id="proveedor" onkeyup="buscarProveedor()">
+            </label>
         </div>
-        <div style="margin-top: 10px;">
-            <button onclick="mostrarTodosContactos()" class="btn-verde" style="background-color: #17a2b8; width: 100%;">Mostrar Todos</button>
-        </div>
+
+        <button class="btn-naranja" onclick="mostrarTodos()">Mostrar Todos</button>
     </div>
 
     <div class="table-container">
-        <table id="tablaContactos">
-            <thead></thead>
-            <tbody></tbody>
+        <table>
+            <thead>
+                <tr>
+                    <th>CODIGO</th>
+                    <th>DESCRIPCION</th>
+                    <th>MARCA</th>
+                    <th>PROVEEDOR</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-body"></tbody>
         </table>
     </div>
 
-    <!-- Paginación Contactos -->
     <div class="pagination">
         <div class="pagination-controls">
-            <button onclick="cambiarPaginaContacto(-1)" id="btnAnteriorContacto" class="btn-verde">&lt; Ant</button>
-            <span id="infoPaginacionContacto" class="pagination-info">Pág. 1/1</span>
-            <button onclick="cambiarPaginaContacto(1)" id="btnSiguienteContacto" class="btn-verde">Sig &gt;</button>
+            <button class="btn-naranja" onclick="anteriorPagina()">Anterior</button>
+            <span id="pagina-info" class="pagination-info"></span>
+            <button class="btn-verde" onclick="siguientePagina()">Siguiente</button>
         </div>
+
         <div class="pagination-jump">
-            <label>Ir a: <input type="number" id="inputPaginaContacto" min="1" value="1"></label>
-            <button onclick="irAPaginaContacto()" class="btn-verde">Ir</button>
+            Ir a página:
+            <input id="ir-input" type="number" min="1">
+            <button class="btn-verde" onclick="irPagina()">Ir</button>
         </div>
     </div>
-</div>
 
-<script src="/static/app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -1,56 +1,30 @@
-﻿// ===============================
-//  CONFIGURACIÓN
-// ===============================
-const API_URL = "/productos";
+﻿const API_URL = "/productos";
 let currentPage = 0;
 let pageSize = 50;
 
-// ===============================
-//  FUNCIÓN PRINCIPAL DE CONSULTA
-// ===============================
 async function fetchProductos(params = "") {
-    try {
-        const response = await fetch(`${API_URL}?page=${currentPage}&page_size=${pageSize}${params}`);
-        const data = await response.json();
-
-        if (data.error) {
-            console.error("Error en respuesta API:", data.error);
-            alert("Error: " + data.error);
-            return;
-        }
-
-        renderTable(data.data);
-        updatePagination(data.count);
-    } catch (error) {
-        console.error("Error general:", error);
-        alert("Error general: " + error);
-    }
+    const response = await fetch(`${API_URL}?page=${currentPage}&page_size=${pageSize}${params}`);
+    const data = await response.json();
+    renderTable(data.data);
+    updatePagination(data.count);
 }
 
-// ===============================
-//  RENDER DE TABLA
-// ===============================
 function renderTable(items) {
     const tbody = document.getElementById("tabla-body");
     tbody.innerHTML = "";
 
     items.forEach(item => {
         const row = document.createElement("tr");
-
         row.innerHTML = `
-            <td>${item.codigo ?? ""}</td>
-            <td>${item.descripcion ?? ""}</td>
-            <td>${item.marca ?? ""}</td>
-            <td>${item.proveedor ?? ""}</td>
+            <td>${item.codigo}</td>
+            <td>${item.descripcion}</td>
+            <td>${item.marca}</td>
+            <td>${item.proveedor}</td>
         `;
-
         tbody.appendChild(row);
     });
 }
 
-// ===============================
-//  PAGINACIÓN
-// ===============================
 function updatePagination(count) {
     document.getElementById("pagina-info").innerText = `Página ${currentPage + 1}`;
 }
@@ -73,9 +47,6 @@ function irPagina() {
     }
 }
 
-// ===============================
-//  FILTROS
-// ===============================
 function buscarDescripcion() {
     const val = document.getElementById("descripcion").value;
     fetchProductos(`&descripcion=${encodeURIComponent(val)}`);
@@ -100,9 +71,41 @@ function mostrarTodos() {
     fetchProductos("");
 }
 
-// ===============================
-//  INICIO AUTOMÁTICO
-// ===============================
+// CRUD botones
+function abrirNuevo() {
+    const codigo = prompt("Código:");
+    const descripcion = prompt("Descripción:");
+    const marca = prompt("Marca:");
+    const proveedor = prompt("Proveedor:");
+
+    fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codigo, descripcion, marca, proveedor })
+    }).then(() => fetchProductos());
+}
+
+function abrirModificar() {
+    const codigo = prompt("Código a modificar:");
+    const descripcion = prompt("Nueva descripción:");
+    const marca = prompt("Nueva marca:");
+    const proveedor = prompt("Nuevo proveedor:");
+
+    fetch(`${API_URL}/${codigo}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ descripcion, marca, proveedor })
+    }).then(() => fetchProductos());
+}
+
+function abrirEliminar() {
+    const codigo = prompt("Código a eliminar:");
+
+    fetch(`${API_URL}/${codigo}`, {
+        method: "DELETE"
+    }).then(() => fetchProductos());
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     fetchProductos();
 });
