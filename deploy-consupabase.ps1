@@ -1,97 +1,74 @@
-﻿# ============================================================
-#  CI/CD Profesional: GitHub + Render
-#  Proyecto: consupabase
-# ============================================================
-
-$projectPath = "C:\Users\Supervisor\consupabase"
-$repoUrl = "https://github.com/sucreecuador/consupabase.git"
-$renderServiceId = "srv-d9l24qdaeets73ad9fvg"
-$keyPath = "$env:USERPROFILE\.render_api_key.secure"
-
-Write-Host ""
-Write-Host "Iniciando CI/CD del Proyecto CONSUPABASE"
+﻿Write-Host ""
+Write-Host "Iniciando CI/CD del Proyecto CONSUPABASE" -ForegroundColor Cyan
 Write-Host "============================================================"
-Write-Host ""
 
-Write-Host "Verificando ruta del proyecto..."
-if (-Not (Test-Path $projectPath)) {
-    Write-Host "ERROR: La ruta $projectPath no existe."
-    exit
-}
+# Ruta del proyecto
+$projectPath = "C:\Users\Supervisor\consupabase"
 Set-Location $projectPath
 Write-Host "Ruta establecida: $projectPath"
-Write-Host ""
 
-if (-Not (Test-Path ".git")) {
-    Write-Host "Inicializando repositorio Git..."
-    git init
-} else {
-    Write-Host "Git ya está inicializado."
+# Asegurar que static/ está dentro del repo
+Write-Host "Verificando carpeta static..." -ForegroundColor Yellow
+if (!(Test-Path "$projectPath\static")) {
+    Write-Host "ERROR: La carpeta static NO existe en el proyecto." -ForegroundColor Red
+    exit
 }
-Write-Host ""
 
-Write-Host "Configurando rama main..."
-git branch -M main
-Write-Host ""
+# Forzar a Git a incluir archivos estáticos
+Write-Host "Forzando inclusión de archivos estáticos..." -ForegroundColor Yellow
+git add static/index.html --force
+git add static/script.js --force
+git add static/styles.css --force
 
-Write-Host "Verificando remote origin..."
-$remoteExists = git remote | Select-String "origin"
-
-if ($remoteExists) {
-    Write-Host "Remote 'origin' ya existe."
-} else {
-    Write-Host "Agregando remote origin..."
-    git remote add origin $repoUrl
-}
-Write-Host ""
-
-Write-Host "Agregando archivos..."
+# Agregar todo lo demás
 git add .
-Write-Host ""
 
-$fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-Write-Host "Creando commit..."
-git commit -m "Cambio costo_prom por ubicacion en Vista 2 de productos - $fecha"
-Write-Host ""
+# Verificar cambios
+$status = git status
+Write-Host $status
 
-Write-Host "Subiendo a GitHub..."
-git push -u origin main
-Write-Host "Push completado."
-Write-Host ""
+if ($status -match "nothing to commit") {
+    Write-Host "ADVERTENCIA: Git no detecta cambios. Forzando commit..." -ForegroundColor Yellow
 
-Write-Host "Recuperando Render API Key..."
-if (-Not (Test-Path $keyPath)) {
-    Write-Host "ERROR: No se encontró la API Key encriptada."
+    # Forzar commit vacío para obligar a Render a reconstruir
+    git commit --allow-empty -m "Forzando deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+} else {
+    Write-Host "Creando commit con cambios detectados..." -ForegroundColor Green
+    git commit -m "Deploy automático - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+}
+
+# Subir a GitHub
+Write-Host "Subiendo a GitHub..." -ForegroundColor Cyan
+git push origin main
+
+Write-Host "Push completado." -ForegroundColor Green
+
+# Render Deploy
+Write-Host ""
+Write-Host "Recuperando Render API Key..." -ForegroundColor Cyan
+$renderKey = $env:RENDER_API_KEY
+
+if (!$renderKey) {
+    Write-Host "ERROR: No existe RENDER_API_KEY en variables de entorno." -ForegroundColor Red
     exit
 }
 
-$secureKey = Get-Content $keyPath | ConvertTo-SecureString
-$renderKey = [System.Net.NetworkCredential]::new("", $secureKey).Password
-Write-Host "API Key cargada."
-Write-Host ""
+Write-Host "API Key cargada." -ForegroundColor Green
 
-Write-Host "Enviando Deploy a Render..."
+Write-Host "Enviando Deploy a Render..." -ForegroundColor Cyan
 
-$deployUrl = "https://api.render.com/v1/services/$renderServiceId/deploys"
+$serviceId = "srv-xxxxxxxxxxxxxxxxxxxx"   # ← reemplaza con tu Service ID real
 
-$headers = @{
-    "Authorization" = "Bearer $renderKey"
-    "Accept"        = "application/json"
-}
+$deploy = Invoke-RestMethod `
+    -Method POST `
+    -Uri "https://api.render.com/v1/services/$serviceId/deploys" `
+    -Headers @{ "Authorization" = "Bearer $renderKey" }
 
-try {
-    $response = Invoke-RestMethod -Uri $deployUrl -Method Post -Headers $headers
-    Write-Host "Render aceptó el deploy."
-    Write-Host "ID del deploy: $($response.id)"
-    Write-Host "Estado inicial: $($response.status)"
-} catch {
-    Write-Host "ERROR al desplegar en Render."
-    Write-Host $_
-    exit
-}
+Write-Host "Render aceptó el deploy." -ForegroundColor Green
+Write-Host "ID del deploy: $($deploy.id)"
+Write-Host "Estado inicial: $($deploy.status)"
 
 Write-Host ""
-Write-Host "CI/CD COMPLETO: GitHub + Render"
+Write-Host "CI/CD COMPLETO: GitHub + Render" -ForegroundColor Cyan
 Write-Host "============================================================"
 Write-Host "FIN DEL DEPLOY"
-Write-Host ""
