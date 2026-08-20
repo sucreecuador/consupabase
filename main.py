@@ -1,110 +1,108 @@
-﻿from fastapi import FastAPI, Query
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from supabase import create_client, Client
 import os
-import math
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
+from supabase import create_client
+from typing import Optional
+
+# ============================================================
+#  CONFIGURACIÓN SUPABASE (Render → Variables de Entorno)
+# ============================================================
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise Exception("ERROR: Debes configurar SUPABASE_URL y SUPABASE_KEY en Render.")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise Exception("ERROR: Variables SUPABASE_URL o SUPABASE_ANON_KEY faltantes.")
+# ============================================================
+#  MODELO DE PRODUCTO
+# ============================================================
 
-supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+class Producto(BaseModel):
+    codigo: str
+    descripcion: Optional[str] = None
+    marca: Optional[str] = None
+    proveedor: Optional[str] = None
 
-if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/")
-def read_root():
-    if os.path.exists("static/index.html"):
-        return FileResponse("static/index.html")
-    elif os.path.exists("index.html"):
-        return FileResponse("index.html")
-    else:
-        return {"mensaje": "API funcionando correctamente."}
+# ============================================================
+#  LISTAR PRODUCTOS (con filtros + paginación)
+# ============================================================
 
 @app.get("/productos")
-def get_productos(
-    page: int = 0,
-    page_size: int = 20,
-    descripcion: str | None = Query(default=None),
-    codigo: str | None = Query(default=None),
-    marca: str | None = Query(default=None),
-    proveedor: str | None = Query(default=None),
-    order_by: str | None = Query(default=None),
-    order_dir: str = Query(default="asc"),
+def listar_productos(
+    page: int = Query(0, ge=0),
+    page_size: int = Query(50, ge=1, le=500),
+    descripcion: Optional[str] = None,
+    codigo: Optional[str] = None,
+    marca: Optional[str] = None,
+    proveedor: Optional[str] = None,
 ):
-    try:
-        query = supabase_client.table("productos").select("*", count="exact")
+    query = supabase.table("productos").select("*")
 
-        if descripcion:
-            query = query.ilike("descripcion", f"%{descripcion}%")
-        if codigo:
-            query = query.ilike("codigo", f"%{codigo}%")
-        if marca:
-            query = query.ilike("marca", f"%{marca}%")
-        if proveedor:
-            query = query.ilike("proveedor", f"%{proveedor}%")
+    if descripcion:
+        query = query.ilike("descripcion", f"%{descripcion}%")
+    if codigo:
+        query = query.ilike("codigo", f"%{codigo}%")
+    if marca:
+        query = query.ilike("marca", f"%{marca}%")
+    if proveedor:
+        query = query.ilike("proveedor", f"%{proveedor}%")
 
-        if order_by:
-            is_desc = order_dir.lower() == "desc"
-            query = query.order(order_by, desc=is_desc)
+    # Total de registros
+    total_res = query.execute()
+    total = len(total_res.data)
 
-        start = page * page_size
-        end = start + page_size - 1
+    # Paginación
+    from_idx = page * page_size
+    to_idx = from_idx + page_size - 1
 
-        res = query.range(start, end).execute()
-        
-        total_count = res.count if hasattr(res, "count") and res.count is not None else len(res.data)
-        total_pages = math.ceil(total_count / page_size) if page_size > 0 else 1
+    page_res = query.range(from_idx, to_idx).execute()
 
-        return {
-            "data": res.data, 
-            "count": total_count,
-            "total_pages": total_pages
-        }
+    return {
+        "data": page_res.data,
+        "count": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
-    except Exception as e:
-        return {"error": str(e), "data": [], "count": 0, "total_pages": 1}
 
-@app.get("/contactos")
-def get_contactos(
-    page: int = 0,
-    page_size: int = 20,
-    nombre: str | None = Query(default=None),
-    ruc: str | None = Query(default=None),
-    order_by: str | None = Query(default=None),
-    order_dir: str = Query(default="asc"),
-):
-    try:
-        query = supabase_client.table("clientes").select("*", count="exact")
+# ============================================================
+#  CREAR PRODUCTO
+# ============================================================
 
-        if nombre:
-            query = query.ilike("nombre", f"%{nombre}%")
-        if ruc:
-            query = query.ilike("ruc", f"%{ruc}%")
+@app.post("/productos")
+def crear_producto(prod: Producto):
+    res = supabase.table("productos").insert(prod.dict()).execute()
+    if res.error:
+        raise HTTPException(status_code=400, detail=res.error.message)
+    return {"status": "ok", "data": res.data}
 
-        if order_by:
-            is_desc = order_dir.lower() == "desc"
-            query = query.order(order_by, desc=is_desc)
 
-        start = page * page_size
-        end = start + page_size - 1
+# ============================================================
+#  MODIFICAR PRODUCTO
+# ============================================================
 
-        res = query.range(start, end).execute()
-        
-        total_count = res.count if hasattr(res, "count") and res.count is not None else len(res.data)
-        total_pages = math.ceil(total_count / page_size) if page_size > 0 else 1
+@app.put("/productos/{codigo}")
+def modificar_producto(codigo: str, prod: Producto):
+    res = supabase.table("productos").update(prod.dict()).eq("codigo", codigo).execute()
+    if res.error:
+        raise HTTPException(status_code=400, detail=res.error.message)
+    return {"status": "ok", "data": res.data}
 
-        return {
-            "data": res.data, 
-            "count": total_count,
-            "total_pages": total_pages
-        }
 
-    except Exception as e:
-        return {"error": str(e), "data": [], "count": 0, "total_pages": 1}
+# ============================================================
+#  ELIMINAR PRODUCTO
+# ============================================================
+
+@app.delete("/productos/{codigo}")
+def eliminar_producto(codigo: str):
+    res = supabase.table("productos").delete().eq("codigo", codigo).execute()
+    if res.error:
+        raise HTTPException(status_code=400, detail=res.error.message)
+    return {"status": "ok"}
