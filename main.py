@@ -1,13 +1,10 @@
 import os
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from supabase import create_client
-from typing import Optional
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from supabase import create_client, Client
 
 # ============================================================
-#  CONFIGURACIÓN SUPABASE (Render → Variables de Entorno)
+# VALIDACIÓN DE VARIABLES DE ENTORNO
 # ============================================================
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -16,107 +13,79 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise Exception("ERROR: Debes configurar SUPABASE_URL y SUPABASE_KEY en Render.")
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 # ============================================================
-#  INICIALIZAR FASTAPI
+# CLIENTE SUPABASE
 # ============================================================
 
-app = FastAPI()
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Servir carpeta /static
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# ============================================================
+# FASTAPI
+# ============================================================
 
-# Página principal
+app = FastAPI(title="CONSUPABASE API")
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ============================================================
+# ENDPOINTS
+# ============================================================
+
 @app.get("/")
-def home():
-    return FileResponse("static/index.html")
+def root():
+    return {"status": "ok", "message": "API CONSUPABASE funcionando"}
 
-
-# ============================================================
-#  MODELO DE PRODUCTO
-# ============================================================
-
-class Producto(BaseModel):
-    codigo: str
-    descripcion: Optional[str] = None
-    marca: Optional[str] = None
-    proveedor: Optional[str] = None
-
-
-# ============================================================
-#  LISTAR PRODUCTOS (con filtros + paginación)
-# ============================================================
+# ---------------------- PRODUCTOS ---------------------------
 
 @app.get("/productos")
-def listar_productos(
-    page: int = Query(0, ge=0),
-    page_size: int = Query(50, ge=1, le=500),
-    descripcion: Optional[str] = None,
-    codigo: Optional[str] = None,
-    marca: Optional[str] = None,
-    proveedor: Optional[str] = None,
-):
-    query = supabase.table("productos").select("*")
+def get_productos(page: int = 0, page_size: int = 20):
+    try:
+        start = page * page_size
+        end = start + page_size
 
-    if descripcion:
-        query = query.ilike("descripcion", f"%{descripcion}%")
-    if codigo:
-        query = query.ilike("codigo", f"%{codigo}%")
-    if marca:
-        query = query.ilike("marca", f"%{marca}%")
-    if proveedor:
-        query = query.ilike("proveedor", f"%{proveedor}%")
+        data = (
+            supabase.table("productos")
+            .select("*")
+            .range(start, end)
+            .execute()
+        )
 
-    # Total de registros
-    total_res = query.execute()
-    total = len(total_res.data)
+        return data.data
 
-    # Paginación
-    from_idx = page * page_size
-    to_idx = from_idx + page_size - 1
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    page_res = query.range(from_idx, to_idx).execute()
+# ---------------------- CONTACTOS ---------------------------
 
-    return {
-        "data": page_res.data,
-        "count": total,
-        "page": page,
-        "page_size": page_size,
-    }
+@app.get("/contactos")
+def get_contactos(page: int = 0, page_size: int = 20):
+    try:
+        start = page * page_size
+        end = start + page_size
 
+        data = (
+            supabase.table("contactos")
+            .select("*")
+            .range(start, end)
+            .execute()
+        )
 
-# ============================================================
-#  CREAR PRODUCTO
-# ============================================================
+        return data.data
 
-@app.post("/productos")
-def crear_producto(prod: Producto):
-    res = supabase.table("productos").insert(prod.dict()).execute()
-    if res.error:
-        raise HTTPException(status_code=400, detail=res.error.message)
-    return {"status": "ok", "data": res.data}
-
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================
-#  MODIFICAR PRODUCTO
+# EJECUCIÓN UVICORN (solo local)
 # ============================================================
 
-@app.put("/productos/{codigo}")
-def modificar_producto(codigo: str, prod: Producto):
-    res = supabase.table("productos").update(prod.dict()).eq("codigo", codigo).execute()
-    if res.error:
-        raise HTTPException(status_code=400, detail=res.error.message)
-    return {"status": "ok", "data": res.data}
-
-
-# ============================================================
-#  ELIMINAR PRODUCTO
-# ============================================================
-
-@app.delete("/productos/{codigo}")
-def eliminar_producto(codigo: str):
-    res = supabase.table("productos").delete().eq("codigo", codigo).execute()
-    if res.error:
-        raise HTTPException(status_code=400, detail=res.error.message)
-    return {"status": "ok"}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
