@@ -1,40 +1,72 @@
-<div id="erp-sidebar">
-    <div class="erp-logo">
-        <img src="/web/assets/logo.png" alt="ERP Logo">
-        <h2>CONSUPABASE ERP</h2>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sidebar ERP</title>
+    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
+</head>
+
+<body>
+
+    <div id="erp-sidebar">
+
+        <!-- LOGO -->
+        <div class="erp-logo">
+            <img src="/web/assets/logo.png" alt="ERP Logo">
+            <h2>CONSUPABASE ERP</h2>
+        </div>
+
+        <!-- GENERAL -->
+        <div class="erp-section-title">General</div>
+        <ul class="erp-menu">
+            <li onclick="sendNavigate('/web/dashboard/dashboard-module.html')">
+                <span>🏠</span> Dashboard
+            </li>
+        </ul>
+
+        <!-- GESTIÓN -->
+        <div class="erp-section-title">Gestión</div>
+        <ul class="erp-menu">
+            <li onclick="sendNavigate('/web/productos/productos.html')">
+                <span>📦</span> Productos
+            </li>
+
+            <li onclick="sendNavigate('/web/contactos/contactos.html')">
+                <span>👥</span> Contactos
+            </li>
+
+            <li onclick="sendNavigate('/web/inventario/inventario.html')">
+                <span>📊</span> Inventario
+            </li>
+        </ul>
+
+        <!-- ANÁLISIS -->
+        <div class="erp-section-title">Análisis</div>
+        <ul class="erp-menu">
+            <li onclick="sendNavigate('/web/reportes/reportes.html')">
+                <span>📈</span> Reportes
+            </li>
+        </ul>
+
+        <!-- ADMINISTRACIÓN -->
+        <div class="erp-section-title">Administración</div>
+        <ul class="erp-menu">
+            <li onclick="sendNavigate('/web/usuarios/usuarios.html')">
+                <span>🔐</span> Usuarios
+            </li>
+        </ul>
+
     </div>
 
-    <div class="erp-section-title">General</div>
-    <ul class="erp-menu">
-        <li onclick="navigate('/web/dashboard/dashboard.html')">
-            <span>🏠</span> Dashboard
-        </li>
-    </ul>
+    <!-- JS DE NAVEGACIÓN -->
+    <script>
+        function sendNavigate(url) {
+            window.parent.postMessage(
+                { action: "navigate", url: url },
+                "*"
+            );
+        }
+    </script>
 
-    <div class="erp-section-title">Gestión</div>
-    <ul class="erp-menu">
-        <li onclick="navigate('/web/productos/productos.html')">
-            <span>📦</span> Productos
-        </li>
-        <li onclick="navigate('/web/contactos/contactos.html')">
-            <span>👥</span> Contactos
-        </li>
-        <li onclick="navigate('/web/inventario/inventario.html')">
-            <span>📊</span> Inventario
-        </li>
-    </ul>
-
-    <div class="erp-section-title">Análisis</div>
-    <ul class="erp-menu">
-        <li onclick="navigate('/web/reportes/reportes.html')">
-            <span>📈</span> Reportes
-        </li>
-    </ul>
-
-    <div class="erp-section-title">Administración</div>
-    <ul class="erp-menu">
-        <li onclick="navigate('/web/usuarios/usuarios.html')">
-            <span>🔐</span> Usuarios
-        </li>
-    </ul>
-</div>
+</body>
+</html>
