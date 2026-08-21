@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tablero de Control - ERP Sucre</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="dashboard.js" defer></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Tablero de Control</h1>
+        <p>Resumen ejecutivo del ERP Sucre.</p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <h3>Ventas del día</h3>
+            <p class="kpi-value" id="kpiVentasDia">$0.00</p>
+        </div>
+        <div class="kpi-card">
+            <h3>Facturas del día</h3>
+            <p class="kpi-value" id="kpiFacturasDia">0</p>
+        </div>
+        <div class="kpi-card">
+            <h3>Stock crítico</h3>
+            <p class="kpi-value" id="kpiStockCritico">0</p>
+        </div>
+        <div class="kpi-card">
+            <h3>Clientes activos</h3>
+            <p class="kpi-value" id="kpiClientesActivos">0</p>
+        </div>
+    </div>
+
+    <!-- Paneles -->
+    <div class="panel-grid">
+
+        <div class="panel-card">
+            <h2>Últimas facturas</h2>
+            <table class="erp-table">
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaUltimasFacturas"></tbody>
+            </table>
+        </div>
+
+        <div class="panel-card">
+            <h2>Productos con stock bajo</h2>
+            <table class="erp-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaStockBajo"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>

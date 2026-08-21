@@ -1,50 +1,48 @@
-// ============================================================
-//  CONSUPABASE ERP - Dashboard JS
-//  Integración dinámica con el menú lateral (sidebar)
-//  Estilo SAP/Odoo
-// ============================================================
+const API = "https://consupabase-api.onrender.com/dashboard";
 
-// Escuchar mensajes enviados desde el sidebar (iframe)
-window.addEventListener("message", (event) => {
-    if (!event.data || !event.data.action) return;
+const kpiVentasDia = document.getElementById("kpiVentasDia");
+const kpiFacturasDia = document.getElementById("kpiFacturasDia");
+const kpiStockCritico = document.getElementById("kpiStockCritico");
+const kpiClientesActivos = document.getElementById("kpiClientesActivos");
 
-    if (event.data.action === "navigate") {
-        loadModule(event.data.url);
-    }
-});
+const tablaUltimasFacturas = document.getElementById("tablaUltimasFacturas");
+const tablaStockBajo = document.getElementById("tablaStockBajo");
 
-// Cargar módulo dentro del contenedor #erp-content
-function loadModule(url) {
-    const content = document.getElementById("erp-content");
+// Cargar tablero
+async function cargarDashboard() {
+    const res = await fetch(API);
+    const json = await res.json();
 
-    // Mostrar estado de carga
-    content.innerHTML = `
-        <div class="erp-loading">
-            ⏳ Cargando módulo...
-        </div>
-    `;
+    // KPIs
+    kpiVentasDia.innerText = `$${json.kpis.ventas_dia.toFixed(2)}`;
+    kpiFacturasDia.innerText = json.kpis.facturas_dia;
+    kpiStockCritico.innerText = json.kpis.stock_critico;
+    kpiClientesActivos.innerText = json.kpis.clientes_activos;
 
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("No se pudo cargar el módulo: " + url);
-            }
-            return response.text();
-        })
-        .then(html => {
-            content.innerHTML = html;
-        })
-        .catch(error => {
-            content.innerHTML = `
-                <div style="color:#e74c3c;">
-                    <h2>Error cargando módulo</h2>
-                    <p>${error}</p>
-                </div>
-            `;
-        });
+    // Últimas facturas
+    tablaUltimasFacturas.innerHTML = "";
+    json.ultimas_facturas.forEach(f => {
+        tablaUltimasFacturas.innerHTML += `
+            <tr>
+                <td>${f.numero}</td>
+                <td>${f.cliente}</td>
+                <td>${f.fecha}</td>
+                <td>$${f.total.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    // Stock bajo
+    tablaStockBajo.innerHTML = "";
+    json.stock_bajo.forEach(p => {
+        tablaStockBajo.innerHTML += `
+            <tr>
+                <td>${p.descripcion}</td>
+                <td>${p.stock}</td>
+            </tr>
+        `;
+    });
 }
 
-// Cargar módulo inicial (Dashboard)
-document.addEventListener("DOMContentLoaded", () => {
-    loadModule("/web/dashboard/dashboard-module.html");
-});
+// Inicial
+cargarDashboard();

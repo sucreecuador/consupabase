@@ -30,7 +30,7 @@ if (Test-Path "$projectPath\web") {
     Write-Host "El backend se desplegará igual, pero sin frontend."
 }
 
-# Verificar módulos
+# Verificar módulos del ERP
 $modules = @(
     "dashboard",
     "productos",
