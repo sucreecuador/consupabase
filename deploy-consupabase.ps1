@@ -1,9 +1,9 @@
 ﻿# ============================================================
-# CI/CD Automático para CONSUPABASE
-# GitHub + Render API Deploy
+# CI/CD Automático para CONSUPABASE ERP
+# Backend (app/) + Frontend (web/) + Render
 # ============================================================
 
-Write-Host "Iniciando CI/CD del Proyecto CONSUPABASE"
+Write-Host "Iniciando CI/CD del Proyecto CONSUPABASE ERP"
 Write-Host "============================================================"
 
 # Ruta del proyecto
@@ -12,43 +12,67 @@ Set-Location $projectPath
 Write-Host "Ruta establecida: $projectPath"
 
 # ============================================================
-# 1. Verificar carpeta static
+# 1. Verificar carpetas clave
 # ============================================================
 
-Write-Host "Verificando carpeta static..."
+Write-Host "Verificando estructura de ERP..."
 
-if (-Not (Test-Path "$projectPath\static")) {
-    Write-Host "ERROR: La carpeta static no existe. Creándola..."
-    New-Item -ItemType Directory -Path "$projectPath\static" | Out-Null
+$paths = @(
+    "$projectPath\app",
+    "$projectPath\web",
+    "$projectPath\web\components",
+    "$projectPath\web\components\sidebar"
+)
+
+foreach ($p in $paths) {
+    if (-Not (Test-Path $p)) {
+        Write-Host "ADVERTENCIA: No existe $p"
+    }
 }
 
-Write-Host "Incluyendo archivos estáticos..."
-git add static/*
+# ============================================================
+# 2. Incluir archivos del ERP en Git
+# ============================================================
+
+Write-Host "Incluyendo archivos del backend (app/)..."
+git add app/*
+
+Write-Host "Incluyendo archivos del frontend (web/)..."
+git add web/*
+
+Write-Host "Incluyendo script de deploy..."
+git add deploy-consupabase.ps1
+
+# Si aún tienes static/, lo incluimos por compatibilidad
+if (Test-Path "$projectPath\static") {
+    Write-Host "Incluyendo carpeta static (compatibilidad)..."
+    git add static/*
+}
 
 # ============================================================
-# 2. Commit automático
+# 3. Commit automático
 # ============================================================
 
 $gitStatus = git status --porcelain
 
 if ($gitStatus) {
     Write-Host "Cambios detectados. Realizando commit..."
-    git commit -am "Deploy automático - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    git commit -am "ERP Deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 } else {
     Write-Host "Sin cambios detectados. Forzando commit..."
-    git commit --allow-empty -m "Forzando deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    git commit --allow-empty -m "ERP Forzando deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 }
 
 # ============================================================
-# 3. Push a GitHub
+# 4. Push a GitHub
 # ============================================================
 
-Write-Host "Subiendo a GitHub..."
+Write-Host "Subiendo a GitHub (branch main)..."
 git push origin main
 Write-Host "Push completado.`n"
 
 # ============================================================
-# 4. Render API Deploy
+# 5. Render API Deploy
 # ============================================================
 
 Write-Host "Recuperando Render API Key..."
@@ -60,8 +84,8 @@ if (-Not $env:RENDER_API_KEY) {
 
 Write-Host "API Key cargada."
 
-# Service ID REAL del Web Service en Render
-$serviceId = "srv-d9l24qdaeets73ad9fvg"
+# Service ID del Web Service en Render (consupabase-api)
+$serviceId = "srv-d9l924qdaeets73ad9fvg"
 
 # Endpoint de Render
 $renderApiUrl = "https://api.render.com/v1/services/$serviceId/deploys"
@@ -76,15 +100,19 @@ try {
         -ContentType "application/json" `
         -Body "{}"
 
-    Write-Host "Render aceptó el deploy."
-    Write-Host "ID del deploy: $($deploy.id)"
-    Write-Host "Estado inicial: $($deploy.status)"
+    if ($deploy -and $deploy.id) {
+        Write-Host "Render aceptó el deploy."
+        Write-Host "ID del deploy: $($deploy.id)"
+        Write-Host "Estado inicial: $($deploy.status)"
+    } else {
+        Write-Host "Render aceptó el deploy, pero no devolvió ID (respuesta vacía)."
+    }
 }
 catch {
     Write-Host "ERROR al enviar deploy:"
     Write-Host $_.Exception.Message
 }
 
-Write-Host "`nCI/CD COMPLETO: GitHub + Render"
+Write-Host "`nCI/CD COMPLETO: Backend app/ + Frontend web/ + Render"
 Write-Host "============================================================"
 Write-Host "FIN DEL DEPLOY"

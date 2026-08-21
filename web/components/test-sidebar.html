@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba Sidebar - ERP</title>
+
+    <!-- CSS del sidebar -->
+    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
+
+    <!-- JS del sidebar -->
+    <script src="/web/components/sidebar/sidebar.js"></script>
+
+    <style>
+        /* Contenido de prueba */
+        .content {
+            padding: 30px;
+        }
+
+        h1 {
+            color: #003366;
+            font-size: 28px;
+        }
+
+        p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Contenedor donde se cargará el sidebar -->
+<div id="sidebar-container"></div>
+
+<script>
+    // Cargar el sidebar dinámicamente
+    fetch('/web/components/sidebar/sidebar.html')
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('sidebar-container').innerHTML = html;
+        });
+</script>
+
+<!-- Contenido de prueba -->
+<div class="content">
+    <h1>Prueba del Sidebar</h1>
+    <p>Si ves el menú lateral a la izquierda, ¡todo está funcionando correctamente!</p>
+    <p>Haz clic en los módulos para verificar la navegación.</p>
+</div>
+
+</body>
+</html>
