@@ -1,6 +1,5 @@
 ﻿# ============================================================
 #  DEPLOY AUTOMÁTICO DEL FRONTEND ERP-WEB A RENDER
-#  Proyecto: CONSUPABASE ERP
 # ============================================================
 
 Write-Host "============================================================"
@@ -48,8 +47,8 @@ if (-not $apiKey) {
     exit
 }
 
-# ID del servicio frontend en Render (CAMBIAR ESTE)
-$serviceId = "srv-xxxxxxxxxxxxxxxxxxxx"   # ← PON AQUÍ TU SERVICE ID DEL FRONTEND ERP-WEB
+# ID del servicio frontend en Render (TU ID REAL)
+$serviceId = "srv-abc123def456ghi789"
 
 # Endpoint de Render
 $renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
