@@ -12,7 +12,7 @@ Set-Location $projectPath
 Write-Host "Ruta establecida: $projectPath"
 
 # ============================================================
-# 1. Verificar carpetas clave
+# 1. Verificar estructura del ERP
 # ============================================================
 
 Write-Host "Verificando estructura de ERP..."
@@ -31,19 +31,18 @@ foreach ($p in $paths) {
 }
 
 # ============================================================
-# 2. Incluir archivos del ERP en Git
+# 2. Incluir archivos en Git
 # ============================================================
 
-Write-Host "Incluyendo archivos del backend (app/)..."
-git add app/*
+Write-Host "Incluyendo backend (app/)..."
+git add app/* 2>$null
 
-Write-Host "Incluyendo archivos del frontend (web/)..."
+Write-Host "Incluyendo frontend (web/)..."
 git add web/*
 
 Write-Host "Incluyendo script de deploy..."
 git add deploy-consupabase.ps1
 
-# Si aún tienes static/, lo incluimos por compatibilidad
 if (Test-Path "$projectPath\static") {
     Write-Host "Incluyendo carpeta static (compatibilidad)..."
     git add static/*
@@ -67,7 +66,7 @@ if ($gitStatus) {
 # 4. Push a GitHub
 # ============================================================
 
-Write-Host "Subiendo a GitHub (branch main)..."
+Write-Host "Subiendo a GitHub..."
 git push origin main
 Write-Host "Push completado.`n"
 
@@ -84,10 +83,9 @@ if (-Not $env:RENDER_API_KEY) {
 
 Write-Host "API Key cargada."
 
-# Service ID del Web Service en Render (consupabase-api)
+# *** SERVICE ID CORRECTO ***
 $serviceId = "srv-d9l924qdaeets73ad9fvg"
 
-# Endpoint de Render
 $renderApiUrl = "https://api.render.com/v1/services/$serviceId/deploys"
 
 Write-Host "Enviando Deploy a Render..."
@@ -113,6 +111,6 @@ catch {
     Write-Host $_.Exception.Message
 }
 
-Write-Host "`nCI/CD COMPLETO: Backend app/ + Frontend web/ + Render"
+Write-Host "`nCI/CD COMPLETO: Backend + Frontend + Render"
 Write-Host "============================================================"
 Write-Host "FIN DEL DEPLOY"
