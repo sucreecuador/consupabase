@@ -1,36 +1,21 @@
-.dashboard-container {
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f6fa;
+}
+
+/* Sidebar embebido */
+#sidebar-frame {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    border: none;
+}
+
+/* Área de contenido */
+#erp-content {
+    margin-left: 260px;
     padding: 30px;
-    margin-left: 240px;
-}
-
-h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-}
-
-.cards {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.card {
-    background: white;
-    padding: 20px;
-    width: 250px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.card h2 {
-    margin-bottom: 10px;
-}
-
-.chart-section {
-    margin-top: 40px;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 600px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }

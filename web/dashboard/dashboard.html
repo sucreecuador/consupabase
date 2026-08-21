@@ -2,69 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard ERP</title>
+    <title>CONSUPABASE ERP</title>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Sidebar CSS -->
-    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
-
-    <!-- Dashboard CSS -->
     <link rel="stylesheet" href="/web/dashboard/dashboard.css">
+    <script src="/web/dashboard/dashboard.js" defer></script>
 </head>
 
 <body>
 
     <!-- Sidebar -->
-    <div id="sidebar-container"></div>
+    <iframe id="sidebar-frame" src="/web/components/sidebar/sidebar.html"></iframe>
 
-    <!-- Contenido -->
-    <div class="dashboard-container">
-        <h1>Dashboard del ERP</h1>
-
-        <div class="cards">
-            <div class="card">
-                <h2>📦 Productos</h2>
-                <p id="productos-count">Cargando...</p>
-            </div>
-
-            <div class="card">
-                <h2>👥 Contactos</h2>
-                <p id="contactos-count">Cargando...</p>
-            </div>
-
-            <div class="card">
-                <h2>📊 Inventario</h2>
-                <p id="inventario-count">Cargando...</p>
-            </div>
-
-            <div class="card">
-                <h2>📈 Reportes</h2>
-                <p>Genera reportes desde el menú</p>
-            </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>Rotación de Inventario</h2>
-            <canvas id="chart-rotacion"></canvas>
-        </div>
+    <!-- Contenido dinámico -->
+    <div id="erp-content">
+        <h1>Dashboard ERP</h1>
+        <p>Bienvenido al panel principal.</p>
     </div>
-
-    <!-- Cargar Sidebar -->
-    <script>
-        fetch('/web/components/sidebar/sidebar.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('sidebar-container').innerHTML = html;
-            });
-    </script>
-
-    <!-- Sidebar JS -->
-    <script src="/web/components/sidebar/sidebar.js"></script>
-
-    <!-- Dashboard JS -->
-    <script src="/web/dashboard/dashboard.js"></script>
 
 </body>
 </html>
