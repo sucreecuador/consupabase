@@ -1,11 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>ERP Sucre</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #1f2937;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            margin: 8px 0;
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 18px;
+            border-radius: 6px;
+        }
+
+        .sidebar a:hover {
+            background: #374151;
+            color: white;
+        }
+
+        /* Main content */
+        .main {
+            margin-left: 260px;
+            padding: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h1 {
+            margin-top: 0;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .card p {
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenido al ERP Sucre</h1>
-    <a href="/web/dashboard/index.html">Dashboard</a><br>
-    <a href="/web/productos/index.html">Productos</a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>ERP Sucre</h2>
+        <a href="/web/dashboard/index.html">Dashboard</a>
+        <a href="/web/productos/index.html">Productos</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+        <div class="card">
+            <h1>Bienvenido al ERP Sucre</h1>
+            <p>Selecciona una opción del menú para comenzar.</p>
+        </div>
+    </div>
+
 </body>
 </html>
