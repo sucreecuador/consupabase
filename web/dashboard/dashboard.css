@@ -1,3 +1,7 @@
+/* ============================================================
+   CONSUPABASE ERP - Dashboard estilo SAP/Odoo
+   ============================================================ */
+
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
@@ -14,8 +18,104 @@ body {
     border: none;
 }
 
-/* Área de contenido */
-#erp-content {
+/* Área principal del ERP */
+#erp-main {
     margin-left: 260px;
-    padding: 30px;
+    padding: 20px 30px;
+}
+
+/* Encabezado superior */
+#erp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.erp-header-left h1 {
+    margin: 0;
+    font-size: 26px;
+    color: #0A1A2F;
+}
+
+.erp-header-left p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.erp-header-right .erp-user {
+    background: #0A1A2F;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+/* Tarjetas KPI */
+#erp-kpi {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 15px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-left: 4px solid #123456;
+}
+
+.kpi-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #777;
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #0A1A2F;
+    margin-bottom: 4px;
+}
+
+.kpi-sub {
+    font-size: 12px;
+    color: #999;
+}
+
+/* Colores específicos por KPI */
+.kpi-ventas {
+    border-left-color: #2ecc71;
+}
+
+.kpi-inventario {
+    border-left-color: #3498db;
+}
+
+.kpi-clientes {
+    border-left-color: #9b59b6;
+}
+
+.kpi-alertas {
+    border-left-color: #e74c3c;
+}
+
+/* Contenido dinámico (módulos) */
+#erp-content {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-height: 260px;
+}
+
+/* Loader simple */
+.erp-loading {
+    font-size: 16px;
+    color: #555;
 }

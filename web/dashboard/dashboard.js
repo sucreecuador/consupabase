@@ -1,6 +1,7 @@
 // ============================================================
 //  CONSUPABASE ERP - Dashboard JS
 //  Integración dinámica con el menú lateral (sidebar)
+//  Estilo SAP/Odoo
 // ============================================================
 
 // Escuchar mensajes enviados desde el sidebar (iframe)
@@ -12,21 +13,17 @@ window.addEventListener("message", (event) => {
     }
 });
 
-// ============================================================
-//  Cargar módulo dentro del dashboard
-// ============================================================
-
+// Cargar módulo dentro del contenedor #erp-content
 function loadModule(url) {
     const content = document.getElementById("erp-content");
 
     // Mostrar estado de carga
     content.innerHTML = `
-        <div style="padding:20px;font-size:18px;">
+        <div class="erp-loading">
             ⏳ Cargando módulo...
         </div>
     `;
 
-    // Petición del módulo
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -39,7 +36,7 @@ function loadModule(url) {
         })
         .catch(error => {
             content.innerHTML = `
-                <div style="padding:20px;color:red;">
+                <div style="color:#e74c3c;">
                     <h2>Error cargando módulo</h2>
                     <p>${error}</p>
                 </div>
@@ -47,10 +44,7 @@ function loadModule(url) {
         });
 }
 
-// ============================================================
-//  Cargar módulo inicial (Dashboard)
-// ============================================================
-
+// Cargar módulo inicial (Dashboard)
 document.addEventListener("DOMContentLoaded", () => {
     loadModule("/web/dashboard/dashboard-module.html");
 });
