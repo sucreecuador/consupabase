@@ -4,46 +4,23 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# ============================================================
-# CORS (permite que el frontend cargue recursos sin bloqueo)
-# ============================================================
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],       # Puedes restringirlo si deseas
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ============================================================
-# Servir carpeta web/ (HTML, CSS, JS, imágenes)
-# ============================================================
+# Servir carpeta web/
 app.mount("/web", StaticFiles(directory="web"), name="web")
 
-# ============================================================
-# Endpoint raíz
-# ============================================================
 @app.get("/")
 def root():
     return {
         "status": "ERP CONSUPABASE funcionando",
         "version": "1.0",
-        "frontend": "/web/index.html",
+        "dashboard": "/web/dashboard/dashboard.html",
         "sidebar": "/web/components/sidebar/sidebar.html"
     }
-
-# ============================================================
-# Ejemplo de endpoint API (puedes agregar más)
-# ============================================================
-@app.get("/api/ping")
-def ping():
-    return {"pong": True}
-
-# ============================================================
-# Aquí puedes agregar tus módulos:
-# /api/productos
-# /api/contactos
-# /api/inventario
-# /api/reportes
-# /api/usuarios
-# ============================================================
