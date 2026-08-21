@@ -84,7 +84,7 @@ if (-Not $env:RENDER_API_KEY) {
 Write-Host "API Key cargada."
 
 # *** SERVICE ID CORRECTO ***
-$serviceId = "srv-d9l924qdaeets73ad9fvg"
+$serviceId = "srv-d9l24qdaeets73ad9fvg"
 
 $renderApiUrl = "https://api.render.com/v1/services/$serviceId/deploys"
 
