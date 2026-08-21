@@ -15,62 +15,48 @@ Set-Location $projectPath
 # ============================================================
 
 Write-Host "`n🔍 Verificando main.py..."
-if (Test-Path "$projectPath\main.py") {
-    Write-Host "✔ OK: main.py encontrado"
-} else {
+if (!(Test-Path "$projectPath\main.py")) {
     Write-Host "❌ ERROR: No existe main.py"
     exit
 }
+Write-Host "✔ OK: main.py encontrado"
 
 Write-Host "`n🔍 Verificando carpeta web..."
-if (Test-Path "$projectPath\web") {
-    Write-Host "✔ OK: carpeta web encontrada (frontend ERP)"
+if (!(Test-Path "$projectPath\web")) {
+    Write-Host "❌ ERROR: No existe carpeta web/"
+    exit
+}
+Write-Host "✔ OK: carpeta web encontrada"
+
+# ============================================================
+#  GIT: AGREGAR CAMBIOS Y CREAR COMMIT SOLO SI HAY CAMBIOS
+# ============================================================
+
+Write-Host "`n📦 Verificando si hay cambios pendientes..."
+
+$changes = git status --porcelain
+
+if ($changes) {
+    Write-Host "✔ Cambios detectados, creando commit..."
+
+    git add .
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    git commit -m "ERP Sucre Deploy - $timestamp"
+
+    Write-Host "⬆ Subiendo cambios a GitHub..."
+    git push
 } else {
-    Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
-    Write-Host "El backend se desplegará igual, pero sin frontend."
-}
-
-# Verificar módulos del ERP
-$modules = @(
-    "dashboard",
-    "productos",
-    "contactos",
-    "inventario",
-    "reportes",
-    "facturacion",
-    "configuracion"
-)
-
-Write-Host "`n🔍 Verificando módulos del ERP..."
-foreach ($m in $modules) {
-    if (Test-Path "$projectPath\web\$m") {
-        Write-Host "✔ $m OK"
-    } else {
-        Write-Host "⚠ Módulo faltante: $m"
-    }
+    Write-Host "⚠ No hay cambios en Git. Render NO reconstruirá nada."
+    Write-Host "   → Forzando deploy manual igualmente..."
 }
 
 # ============================================================
-#  GIT: AGREGAR CAMBIOS Y CREAR COMMIT
+#  RENDER: ENVIAR DEPLOY
 # ============================================================
 
-Write-Host "`n📦 Agregando archivos al commit..."
-git add .
+Write-Host "`n🚀 Enviando deploy a Render..."
 
-Write-Host "📝 Creando commit..."
-$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "ERP Sucre Deploy - $timestamp"
-
-Write-Host "`n⬆ Subiendo cambios a GitHub..."
-git push
-
-# ============================================================
-#  RENDER: ENVIAR DEPLOY DEL BACKEND
-# ============================================================
-
-Write-Host "`n🚀 Enviando deploy del backend a Render..."
-
-# Render API Key desde variable de entorno
 $apiKey = $env:RENDER_API_KEY
 
 if (-not $apiKey) {
@@ -78,10 +64,9 @@ if (-not $apiKey) {
     exit
 }
 
-# ID del servicio backend en Render (TU ID REAL)
+# ID del servicio backend en Render
 $serviceId = "srv-d9l24qdaeets73ad9fvg"
 
-# Endpoint de Render
 $renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
 
 try {
@@ -93,13 +78,14 @@ try {
         -Body "{}"
 
     Write-Host "`n============================================================"
-    Write-Host "   ✔ Render aceptó el deploy del backend"
+    Write-Host "   ✔ Render aceptó el deploy"
     Write-Host "============================================================"
     Write-Host "🆔 ID del deploy: $($deploy.id)"
     Write-Host "📌 Estado inicial: $($deploy.status)"
+    Write-Host "🔗 Logs: https://dashboard.render.com/services/$serviceId/deploys/$($deploy.id)"
 }
 catch {
-    Write-Host "❌ ERROR al enviar el deploy del backend a Render."
+    Write-Host "❌ ERROR al enviar el deploy a Render."
     Write-Host $_
 }
 
