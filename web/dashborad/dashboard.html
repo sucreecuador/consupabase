@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Dashboard ERP</title>
 
-    <!-- Chart.js (necesario para el gráfico) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Sidebar CSS -->
@@ -19,7 +19,7 @@
     <!-- Sidebar -->
     <div id="sidebar-container"></div>
 
-    <!-- Contenido principal -->
+    <!-- Contenido -->
     <div class="dashboard-container">
         <h1>Dashboard del ERP</h1>
 
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <!-- Cargar Sidebar HTML -->
+    <!-- Cargar Sidebar -->
     <script>
         fetch('/web/components/sidebar/sidebar.html')
             .then(res => res.text())

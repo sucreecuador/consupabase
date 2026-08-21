@@ -1,9 +1,9 @@
-// Datos simulados (luego los conectamos a tu API)
+// Datos simulados
 document.getElementById("productos-count").innerText = "128 productos";
 document.getElementById("contactos-count").innerText = "54 contactos";
 document.getElementById("inventario-count").innerText = "3,240 unidades";
 
-// Gráfico de rotación (Chart.js)
+// Gráfico con Chart.js
 const ctx = document.getElementById('chart-rotacion');
 
 new Chart(ctx, {
