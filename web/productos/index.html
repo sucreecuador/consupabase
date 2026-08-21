@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos - ERP Sucre</title>
+    <link rel="stylesheet" href="productos.css">
+    <script src="productos.js" defer></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Productos</h1>
+        <p>Gestión de catálogo, precios y stock.</p>
+    </div>
+
+    <div class="actions">
+        <input type="text" id="buscar" placeholder="Buscar producto...">
+        <button id="btnNuevo">➕ Nuevo Producto</button>
+    </div>
+
+    <table class="erp-table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Marca</th>
+                <th>Proveedor</th>
+                <th>Stock</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tablaProductos"></tbody>
+    </table>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitulo">Nuevo Producto</h2>
+
+            <label>Código</label>
+            <input type="text" id="prodCodigo">
+
+            <label>Descripción</label>
+            <input type="text" id="prodDescripcion">
+
+            <label>Marca</label>
+            <input type="text" id="prodMarca">
+
+            <label>Proveedor</label>
+            <input type="text" id="prodProveedor">
+
+            <label>Stock</label>
+            <input type="number" id="prodStock">
+
+            <label>Precio</label>
+            <input type="number" id="prodPrecio" step="0.01">
+
+            <div class="modal-actions">
+                <button id="btnGuardar">Guardar</button>
+                <button id="btnCerrar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

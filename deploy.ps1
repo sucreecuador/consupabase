@@ -1,10 +1,9 @@
 ﻿# ============================================================
-#  DEPLOY AUTOMÁTICO COMPLETO: BACKEND + FRONTEND (FastAPI)
-#  Proyecto: CONSUPABASE ERP
+#  DEPLOY COMPLETO DEL ERP SUCRE (BACKEND + FRONTEND)
 # ============================================================
 
 Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP (BACKEND + FRONTEND)"
+Write-Host "   🚀 INICIANDO DEPLOY DEL ERP SUCRE"
 Write-Host "============================================================"
 
 # Ruta del proyecto
@@ -25,7 +24,7 @@ if (Test-Path "$projectPath\main.py") {
 
 Write-Host "`n🔍 Verificando carpeta web..."
 if (Test-Path "$projectPath\web") {
-    Write-Host "✔ OK: carpeta web encontrada (frontend servido por FastAPI)"
+    Write-Host "✔ OK: carpeta web encontrada (frontend ERP)"
 } else {
     Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
     Write-Host "El backend se desplegará igual, pero sin frontend."
@@ -40,7 +39,7 @@ git add .
 
 Write-Host "📝 Creando commit..."
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Deploy ALL (Backend + Frontend) - $timestamp"
+git commit -m "ERP Deploy - $timestamp"
 
 Write-Host "`n⬆ Subiendo cambios a GitHub..."
 git push
