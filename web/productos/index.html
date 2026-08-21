@@ -14,29 +14,35 @@
         <p>Gestión de catálogo, precios y stock.</p>
     </div>
 
+    <!-- Buscador y botón -->
     <div class="actions">
         <input type="text" id="buscar" placeholder="Buscar producto...">
         <button id="btnNuevo">➕ Nuevo Producto</button>
     </div>
 
+    <!-- Tabla -->
     <table class="erp-table">
         <thead>
             <tr>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Marca</th>
-                <th>Proveedor</th>
-                <th>Stock</th>
-                <th>Precio</th>
+                <th onclick="ordenar('codigo')">Código</th>
+                <th onclick="ordenar('descripcion')">Descripción</th>
+                <th onclick="ordenar('marca')">Marca</th>
+                <th onclick="ordenar('proveedor')">Proveedor</th>
+                <th onclick="ordenar('stock')">Stock</th>
+                <th onclick="ordenar('precio')">Precio</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody id="tablaProductos"></tbody>
     </table>
 
+    <!-- Paginación -->
+    <div id="paginacion"></div>
+
     <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
+
             <h2 id="modalTitulo">Nuevo Producto</h2>
 
             <label>Código</label>
@@ -61,6 +67,7 @@
                 <button id="btnGuardar">Guardar</button>
                 <button id="btnCerrar">Cancelar</button>
             </div>
+
         </div>
     </div>
 
