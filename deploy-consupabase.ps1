@@ -21,7 +21,8 @@ $paths = @(
     "$projectPath\app",
     "$projectPath\web",
     "$projectPath\web\components",
-    "$projectPath\web\components\sidebar"
+    "$projectPath\web\components\sidebar",
+    "$projectPath\web\dashboard"
 )
 
 foreach ($p in $paths) {
