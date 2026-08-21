@@ -1,5 +1,5 @@
 ﻿# ============================================================
-#  🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND + FRONTEND)
+#  🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND)
 # ============================================================
 
 Write-Host "============================================================"
@@ -23,16 +23,16 @@ Write-Host "✔ OK: main.py encontrado"
 
 Write-Host "`n🔍 Verificando carpeta web..."
 if (!(Test-Path "$projectPath\web")) {
-    Write-Host "❌ ERROR: No existe carpeta web/"
-    exit
+    Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
+} else {
+    Write-Host "✔ OK: carpeta web encontrada"
 }
-Write-Host "✔ OK: carpeta web encontrada"
 
 # ============================================================
-#  GIT: AGREGAR CAMBIOS Y CREAR COMMIT SOLO SI HAY CAMBIOS
+#  GIT: AGREGAR CAMBIOS SOLO SI EXISTEN
 # ============================================================
 
-Write-Host "`n📦 Verificando si hay cambios pendientes..."
+Write-Host "`n📦 Verificando cambios pendientes..."
 
 $changes = git status --porcelain
 
@@ -42,13 +42,14 @@ if ($changes) {
     git add .
 
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    git commit -m "ERP Sucre Deploy - $timestamp"
+    git commit -m "Deploy ERP Sucre - $timestamp"
 
     Write-Host "⬆ Subiendo cambios a GitHub..."
     git push
 } else {
-    Write-Host "⚠ No hay cambios en Git. Render NO reconstruirá nada."
-    Write-Host "   → Forzando deploy manual igualmente..."
+    Write-Host "⚠ No hay cambios en Git."
+    Write-Host "   → Render NO reconstruirá automáticamente."
+    Write-Host "   → Se enviará un deploy manual igualmente."
 }
 
 # ============================================================
@@ -67,6 +68,7 @@ if (-not $apiKey) {
 # ID del servicio backend en Render
 $serviceId = "srv-d9l24qdaeets73ad9fvg"
 
+# Endpoint de Render
 $renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
 
 try {
