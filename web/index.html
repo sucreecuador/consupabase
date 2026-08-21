@@ -12,7 +12,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 240px;
+            width: 260px;
             height: 100vh;
             background: #1f2937;
             color: white;
@@ -24,7 +24,7 @@
 
         .sidebar h2 {
             margin-top: 0;
-            font-size: 22px;
+            font-size: 24px;
             text-align: center;
             margin-bottom: 30px;
         }
@@ -32,7 +32,7 @@
         .sidebar a {
             display: block;
             padding: 12px;
-            margin: 8px 0;
+            margin: 10px 0;
             color: #d1d5db;
             text-decoration: none;
             font-size: 18px;
@@ -46,25 +46,54 @@
 
         /* Main content */
         .main {
-            margin-left: 260px;
+            margin-left: 280px;
             padding: 40px;
         }
 
-        .card {
+        .header {
             background: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
 
-        .card h1 {
-            margin-top: 0;
+        .header h1 {
+            margin: 0;
             font-size: 28px;
             color: #333;
         }
 
+        /* Cards */
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            width: 260px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            color: #333;
+        }
+
         .card p {
-            font-size: 18px;
+            margin: 0;
+            font-size: 15px;
             color: #555;
         }
     </style>
@@ -76,14 +105,59 @@
         <h2>ERP Sucre</h2>
         <a href="/web/dashboard/index.html">Dashboard</a>
         <a href="/web/productos/index.html">Productos</a>
+        <a href="/web/inventario/index.html">Inventario</a>
+        <a href="/web/contactos/index.html">Contactos</a>
+        <a href="/web/reportes/index.html">Reportes</a>
+        <a href="/web/usuarios/index.html">Usuarios</a>
+        <a href="/web/configuracion/index.html">Configuración</a>
     </div>
 
     <!-- Main content -->
     <div class="main">
-        <div class="card">
+
+        <div class="header">
             <h1>Bienvenido al ERP Sucre</h1>
-            <p>Selecciona una opción del menú para comenzar.</p>
         </div>
+
+        <div class="cards">
+
+            <div class="card" onclick="location.href='/web/dashboard/index.html'">
+                <h3>Dashboard</h3>
+                <p>Indicadores, métricas y resumen general.</p>
+            </div>
+
+            <div class="card" onclick="location.href='/web/productos/index.html'">
+                <h3>Productos</h3>
+                <p>Gestión de catálogo, precios y stock.</p>
+            </div>
+
+            <div class="card" onclick="location.href='/web/inventario/index.html'">
+                <h3>Inventario</h3>
+                <p>Movimientos, entradas y salidas.</p>
+            </div>
+
+            <div class="card" onclick="location.href='/web/contactos/index.html'">
+                <h3>Contactos</h3>
+                <p>Clientes, proveedores y empresas.</p>
+            </div>
+
+            <div class="card" onclick="location.href='/web/reportes/index.html'">
+                <h3>Reportes</h3>
+                <p>Informes PDF, Excel y análisis.</p>
+            </div>
+
+            <div class="card" onclick="location.href='/web/usuarios/index.html'">
+                <h3>Usuarios</h3>
+                <p>Roles, permisos y seguridad.</p>
+            </div>
+
+            <div class="card" onclick="location.href='/web/configuracion/index.html'">
+                <h3>Configuración</h3>
+                <p>Preferencias del sistema y ajustes.</p>
+            </div>
+
+        </div>
+
     </div>
 
 </body>
