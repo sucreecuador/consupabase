@@ -1,4 +1,5 @@
-const API = "https://consupabase-api.onrender.com/contactos";
+// API corregida: ahora apunta a /clientes
+const API = "https://consupabase-api.onrender.com/clientes";
 
 const tabla = document.getElementById("tablaContactos");
 const buscar = document.getElementById("buscar");
@@ -14,6 +15,13 @@ let editId = null;
 btnNuevo.onclick = () => {
     editId = null;
     document.getElementById("modalTitulo").innerText = "Nuevo Contacto";
+
+    document.getElementById("conNombre").value = "";
+    document.getElementById("conEmpresa").value = "";
+    document.getElementById("conTelefono").value = "";
+    document.getElementById("conEmail").value = "";
+    document.getElementById("conTipo").value = "Cliente";
+
     modal.style.display = "flex";
 };
 
@@ -24,10 +32,10 @@ btnCerrar.onclick = () => modal.style.display = "none";
 btnGuardar.onclick = async () => {
     const data = {
         nombre: document.getElementById("conNombre").value,
-        empresa: document.getElementById("conEmpresa").value,
-        telefono: document.getElementById("conTelefono").value,
+        razon_social: document.getElementById("conEmpresa").value,
+        telefono1: document.getElementById("conTelefono").value,
         email: document.getElementById("conEmail").value,
-        tipo: document.getElementById("conTipo").value
+        categoria: document.getElementById("conTipo").value
     };
 
     if (editId) {
