@@ -1,15 +1,40 @@
-<div id="sidebar">
-    <div class="logo">
+<div id="erp-sidebar">
+    <div class="erp-logo">
         <img src="/web/assets/logo.png" alt="ERP Logo">
         <h2>CONSUPABASE ERP</h2>
     </div>
 
-    <ul class="menu">
-        <li onclick="navigate('/web/index.html')">🏠 Dashboard</li>
-        <li onclick="navigate('/web/productos/productos.html')">📦 Productos</li>
-        <li onclick="navigate('/web/contactos/contactos.html')">👥 Contactos</li>
-        <li onclick="navigate('/web/inventario/inventario.html')">📊 Inventario</li>
-        <li onclick="navigate('/web/reportes/reportes.html')">📈 Reportes</li>
-        <li onclick="navigate('/web/usuarios/usuarios.html')">🔐 Usuarios</li>
+    <div class="erp-section-title">General</div>
+    <ul class="erp-menu">
+        <li onclick="navigate('/web/dashboard/dashboard.html')">
+            <span>🏠</span> Dashboard
+        </li>
+    </ul>
+
+    <div class="erp-section-title">Gestión</div>
+    <ul class="erp-menu">
+        <li onclick="navigate('/web/productos/productos.html')">
+            <span>📦</span> Productos
+        </li>
+        <li onclick="navigate('/web/contactos/contactos.html')">
+            <span>👥</span> Contactos
+        </li>
+        <li onclick="navigate('/web/inventario/inventario.html')">
+            <span>📊</span> Inventario
+        </li>
+    </ul>
+
+    <div class="erp-section-title">Análisis</div>
+    <ul class="erp-menu">
+        <li onclick="navigate('/web/reportes/reportes.html')">
+            <span>📈</span> Reportes
+        </li>
+    </ul>
+
+    <div class="erp-section-title">Administración</div>
+    <ul class="erp-menu">
+        <li onclick="navigate('/web/usuarios/usuarios.html')">
+            <span>🔐</span> Usuarios
+        </li>
     </ul>
 </div>

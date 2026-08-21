@@ -1,50 +1,63 @@
-#sidebar {
+#erp-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #0A1A2F;
+    color: #ffffff;
     position: fixed;
     left: 0;
     top: 0;
-    width: 240px;
-    height: 100vh;
-    background: #003366;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+    padding: 25px 20px;
+    box-shadow: 3px 0 12px rgba(0,0,0,0.25);
+    font-family: 'Segoe UI', sans-serif;
 }
 
-#sidebar .logo {
+.erp-logo {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
-#sidebar .logo img {
-    width: 80px;
-    height: 80px;
+.erp-logo img {
+    width: 70px;
+    height: 70px;
     border-radius: 10px;
 }
 
-#sidebar .logo h2 {
-    font-size: 18px;
+.erp-logo h2 {
     margin-top: 10px;
+    font-size: 18px;
+    font-weight: 600;
 }
 
-#sidebar .menu {
+.erp-section-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin: 20px 0 10px;
+    letter-spacing: 1px;
+}
+
+.erp-menu {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-#sidebar .menu li {
-    padding: 15px 20px;
-    font-size: 18px;
+.erp-menu li {
+    padding: 12px 10px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     cursor: pointer;
-    transition: 0.2s;
+    border-radius: 8px;
+    transition: 0.25s;
 }
 
-#sidebar .menu li:hover {
-    background: #005bbb;
+.erp-menu li:hover {
+    background: #123456;
+    transform: translateX(4px);
 }
 
-body {
-    margin-left: 240px;
+.erp-menu li span {
+    font-size: 18px;
 }

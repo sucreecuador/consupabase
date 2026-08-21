@@ -1,48 +1,68 @@
 ﻿# ============================================================
 # CI/CD Automático para CONSUPABASE ERP
-# Backend (app/) + Frontend (web/) + Render
+# Backend (main.py) + Frontend (web/) + Render Deploy Trigger
 # ============================================================
 
-Write-Host "Iniciando CI/CD del Proyecto CONSUPABASE ERP"
+Write-Host ""
 Write-Host "============================================================"
+Write-Host "   🚀 INICIANDO DEPLOY DEL ERP CONSUPABASE"
+Write-Host "============================================================"
+Write-Host ""
 
+# Ruta del proyecto
 $projectPath = "C:\Users\Supervisor\consupabase"
 Set-Location $projectPath
 
+# Carpetas que deben existir
 $paths = @(
-    "$projectPath\app",
     "$projectPath\web",
+    "$projectPath\web\dashboard",
     "$projectPath\web\components",
     "$projectPath\web\components\sidebar",
-    "$projectPath\web\dashboard"
+    "$projectPath\static"
 )
 
+Write-Host "🔍 Verificando estructura del proyecto..."
 foreach ($p in $paths) {
-    if (-Not (Test-Path $p)) {
-        Write-Host "ADVERTENCIA: No existe $p"
+    if (Test-Path $p) {
+        Write-Host "✔ OK: $p"
+    } else {
+        Write-Host "⚠ ADVERTENCIA: Falta $p"
     }
 }
 
-git add app/* 2>$null
+Write-Host ""
+Write-Host "📦 Agregando archivos al commit..."
+
+git add main.py
 git add web/*
+git add static/*
+git add Procfile
+git add requirements.txt
 git add deploy-consupabase.ps1
 
-if (Test-Path "$projectPath\static") {
-    git add static/*
-}
-
+# Verificar si hay cambios
 $gitStatus = git status --porcelain
 
 if ($gitStatus) {
+    Write-Host "📝 Commit con cambios detectados..."
     git commit -am "ERP Deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 } else {
-    git commit --allow-empty -m "ERP Forzando deploy - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    Write-Host "📝 Commit vacío (forzando deploy)..."
+    git commit --allow-empty -m "ERP Deploy (forced) - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 }
 
+Write-Host ""
+Write-Host "⬆ Subiendo cambios a GitHub..."
 git push origin main
 
+Write-Host ""
+Write-Host "🚀 Enviando deploy a Render..."
+
 if (-Not $env:RENDER_API_KEY) {
-    Write-Host "ERROR: La variable de entorno RENDER_API_KEY no está definida."
+    Write-Host "❌ ERROR: La variable de entorno RENDER_API_KEY no está definida."
+    Write-Host "Define la variable así:"
+    Write-Host '$env:RENDER_API_KEY = "tu_api_key_de_render"'
     exit
 }
 
@@ -58,14 +78,22 @@ try {
         -Body "{}"
 
     if ($deploy -and $deploy.id) {
-        Write-Host "Render aceptó el deploy."
-        Write-Host "ID del deploy: $($deploy.id)"
-        Write-Host "Estado inicial: $($deploy.status)"
+        Write-Host ""
+        Write-Host "============================================================"
+        Write-Host "   ✔ Render aceptó el deploy"
+        Write-Host "============================================================"
+        Write-Host "🆔 ID del deploy: $($deploy.id)"
+        Write-Host "📌 Estado inicial: $($deploy.status)"
+        Write-Host ""
     }
 }
 catch {
-    Write-Host "ERROR al enviar deploy:"
+    Write-Host "❌ ERROR al enviar deploy a Render:"
     Write-Host $_.Exception.Message
 }
 
-Write-Host "FIN DEL DEPLOY"
+Write-Host ""
+Write-Host "============================================================"
+Write-Host "   🎉 DEPLOY COMPLETO"
+Write-Host "============================================================"
+Write-Host ""
