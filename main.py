@@ -1,95 +1,119 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+import os
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
+from supabase import create_client
+from typing import Optional
 
 # ============================================================
-# Inicialización del ERP
+#  CONFIGURACIÓN SUPABASE (Railway → Variables de Entorno)
 # ============================================================
 
-app = FastAPI(
-    title="CONSUPABASE ERP",
-    description="Backend del ERP CONSUPABASE",
-    version="1.0.0"
-)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise Exception("ERROR: Debes configurar SUPABASE_URL y SUPABASE_KEY en Railway.")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+app = FastAPI()
+
 
 # ============================================================
-# CORS
+#  MODELO DE PRODUCTO
 # ============================================================
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],       # Puedes restringirlo si deseas
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+class Producto(BaseModel):
+    codigo: str
+    descripcion: Optional[str] = None
+    marca: Optional[str] = None
+    proveedor: Optional[str] = None
+
 
 # ============================================================
-# Servir carpeta web (HTML, CSS, JS)
+#  LISTAR PRODUCTOS (con filtros + paginación)
 # ============================================================
 
-app.mount("/web", StaticFiles(directory="web"), name="web")
+@app.get("/productos")
+def listar_productos(
+    page: int = Query(0, ge=0),
+    page_size: int = Query(50, ge=1, le=500),
+    descripcion: Optional[str] = None,
+    codigo: Optional[str] = None,
+    marca: Optional[str] = None,
+    proveedor: Optional[str] = None,
+):
+    query = supabase.table("productos").select("*")
 
-# ============================================================
-# Rutas base
-# ============================================================
+    if descripcion:
+        query = query.ilike("descripcion", f"%{descripcion}%")
+    if codigo:
+        query = query.ilike("codigo", f"%{codigo}%")
+    if marca:
+        query = query.ilike("marca", f"%{marca}%")
+    if proveedor:
+        query = query.ilike("proveedor", f"%{proveedor}%")
 
-@app.get("/")
-def root():
+    total_res = query.execute()
+    total = len(total_res.data)
+
+    from_idx = page * page_size
+    to_idx = from_idx + page_size - 1
+
+    page_res = query.range(from_idx, to_idx).execute()
+
     return {
-        "status": "ERP CONSUPABASE funcionando",
-        "version": "1.0",
-        "dashboard": "/web/dashboard/dashboard.html",
-        "sidebar": "/web/components/sidebar/sidebar.html"
+        "data": page_res.data,
+        "count": total,
+        "page": page,
+        "page_size": page_size,
     }
 
-@app.get("/api/ping")
-def ping():
-    return {"pong": True}
 
 # ============================================================
-# Módulo: Productos (estructura lista)
+#  CREAR PRODUCTO
 # ============================================================
 
-@app.get("/api/productos")
-def listar_productos():
-    return JSONResponse({
-        "status": "ok",
-        "data": []
-    })
+@app.post("/productos")
+def crear_producto(prod: Producto):
+    res = supabase.table("productos").insert(prod.dict()).execute()
+    if res.error:
+        raise HTTPException(status_code=400, detail=res.error.message)
+    return {"status": "ok", "data": res.data}
 
-@app.post("/api/productos")
-def crear_producto(producto: dict):
-    return JSONResponse({
-        "status": "creado",
-        "producto": producto
-    })
 
 # ============================================================
-# Módulo: Contactos
+#  MODIFICAR PRODUCTO
 # ============================================================
 
-@app.get("/api/contactos")
-def listar_contactos():
-    return {"status": "ok", "data": []}
+@app.put("/productos/{codigo}")
+def modificar_producto(codigo: str, prod: Producto):
+    res = supabase.table("productos").update(prod.dict()).eq("codigo", codigo).execute()
+    if res.error:
+        raise HTTPException(status_code=400, detail=res.error.message)
+    return {"status": "ok", "data": res.data}
+
 
 # ============================================================
-# Módulo: Inventario
+#  ELIMINAR PRODUCTO
 # ============================================================
 
-@app.get("/api/inventario")
-def inventario():
-    return {"status": "ok", "data": []}
+@app.delete("/productos/{codigo}")
+def eliminar_producto(codigo: str):
+    res = supabase.table("productos").delete().eq("codigo", codigo).execute()
+    if res.error:
+        raise HTTPException(status_code=400, detail=res.error.message)
+    return {"status": "ok"}
+
 
 # ============================================================
-# Módulo: Usuarios
+#  SERVIDOR UVICORN PARA RAILWAY
 # ============================================================
 
-@app.get("/api/usuarios")
-def usuarios():
-    return {"status": "ok", "data": []}
-
-# ============================================================
-# Fin del archivo
-# ============================================================
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8000))
+    )
