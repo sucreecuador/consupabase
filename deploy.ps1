@@ -1,21 +1,21 @@
 ﻿# ============================================================
-#  DEPLOY AUTOMÁTICO DEL FRONTEND ERP-WEB A RENDER
+#  DEPLOY AUTOMÁTICO DEL BACKEND CONSUPABASE-API A RENDER
 # ============================================================
 
 Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY DEL FRONTEND ERP-WEB"
+Write-Host "   🚀 INICIANDO DEPLOY DEL BACKEND CONSUPABASE-API"
 Write-Host "============================================================"
 
 # Ruta del proyecto
 $projectPath = "C:\Users\Supervisor\consupabase"
 Set-Location $projectPath
 
-Write-Host "`n🔍 Verificando carpeta web..."
+Write-Host "`n🔍 Verificando main.py..."
 
-if (Test-Path "$projectPath\web") {
-    Write-Host "✔ OK: carpeta web encontrada"
+if (Test-Path "$projectPath\main.py") {
+    Write-Host "✔ OK: main.py encontrado"
 } else {
-    Write-Host "❌ ERROR: No existe la carpeta web/"
+    Write-Host "❌ ERROR: No existe main.py en el proyecto"
     exit
 }
 
@@ -28,16 +28,16 @@ git add .
 
 Write-Host "📝 Creando commit..."
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Frontend ERP-WEB Deploy - $timestamp"
+git commit -m "Backend Deploy - $timestamp"
 
 Write-Host "`n⬆ Subiendo cambios a GitHub..."
 git push
 
 # ============================================================
-#  RENDER: ENVIAR DEPLOY DEL FRONTEND
+#  RENDER: ENVIAR DEPLOY DEL BACKEND
 # ============================================================
 
-Write-Host "`n🚀 Enviando deploy del frontend a Render..."
+Write-Host "`n🚀 Enviando deploy del backend a Render..."
 
 # Render API Key desde variable de entorno
 $apiKey = $env:RENDER_API_KEY
@@ -47,8 +47,8 @@ if (-not $apiKey) {
     exit
 }
 
-# ID del servicio frontend en Render (TU ID REAL)
-$serviceId = "srv-abc123def456ghi789"
+# ID del servicio backend en Render (TU ID REAL)
+$serviceId = "srv-d9l24qdaeets73ad9fvg"
 
 # Endpoint de Render
 $renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
@@ -62,16 +62,16 @@ try {
         -Body "{}"
 
     Write-Host "`n============================================================"
-    Write-Host "   ✔ Render aceptó el deploy del frontend"
+    Write-Host "   ✔ Render aceptó el deploy del backend"
     Write-Host "============================================================"
     Write-Host "🆔 ID del deploy: $($deploy.id)"
     Write-Host "📌 Estado inicial: $($deploy.status)"
 }
 catch {
-    Write-Host "❌ ERROR al enviar el deploy del frontend a Render."
+    Write-Host "❌ ERROR al enviar el deploy del backend a Render."
     Write-Host $_
 }
 
 Write-Host "`n============================================================"
-Write-Host "   🎉 DEPLOY DEL FRONTEND COMPLETO"
+Write-Host "   🎉 DEPLOY DEL BACKEND COMPLETO"
 Write-Host "============================================================"
