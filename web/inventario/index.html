@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario - ERP Sucre</title>
+    <link rel="stylesheet" href="inventario.css">
+    <script src="inventario.js" defer></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Inventario</h1>
+        <p>Movimientos, entradas, salidas y control de stock.</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+
+        <div class="filtro-item">
+            <label>Fecha Inicio</label>
+            <input type="date" id="fechaInicio">
+        </div>
+
+        <div class="filtro-item">
+            <label>Fecha Fin</label>
+            <input type="date" id="fechaFin">
+        </div>
+
+        <div class="filtro-item">
+            <label>Tipo de Movimiento</label>
+            <select id="tipoMovimiento">
+                <option value="">Todos</option>
+                <option value="entrada">Entrada</option>
+                <option value="salida">Salida</option>
+                <option value="ajuste">Ajuste</option>
+            </select>
+        </div>
+
+        <button id="btnFiltrar">Filtrar</button>
+        <button id="btnNuevo">➕ Nuevo Movimiento</button>
+
+    </div>
+
+    <!-- Tabla -->
+    <table class="erp-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tablaInventario"></tbody>
+    </table>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitulo">Nuevo Movimiento</h2>
+
+            <label>Producto</label>
+            <input type="text" id="invProducto">
+
+            <label>Tipo de Movimiento</label>
+            <select id="invTipo">
+                <option value="entrada">Entrada</option>
+                <option value="salida">Salida</option>
+                <option value="ajuste">Ajuste</option>
+            </select>
+
+            <label>Cantidad</label>
+            <input type="number" id="invCantidad">
+
+            <label>Usuario</label>
+            <input type="text" id="invUsuario">
+
+            <div class="modal-actions">
+                <button id="btnGuardar">Guardar</button>
+                <button id="btnCerrar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración - ERP Sucre</title>
+    <link rel="stylesheet" href="configuracion.css">
+    <script src="configuracion.js" defer></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Configuración del Sistema</h1>
+        <p>Preferencias generales, empresa, impuestos y seguridad.</p>
+    </div>
+
+    <div class="config-grid">
+
+        <div class="config-card" onclick="openSection('empresa')">
+            <h3>🏢 Empresa</h3>
+            <p>Datos generales, RUC, dirección, contacto.</p>
+        </div>
+
+        <div class="config-card" onclick="openSection('impuestos')">
+            <h3>💰 Impuestos</h3>
+            <p>IVA, retenciones, porcentajes del sistema.</p>
+        </div>
+
+        <div class="config-card" onclick="openSection('usuarios')">
+            <h3>🔐 Seguridad y Usuarios</h3>
+            <p>Roles, permisos y accesos.</p>
+        </div>
+
+        <div class="config-card" onclick="openSection('preferencias')">
+            <h3>⚙️ Preferencias</h3>
+            <p>Opciones generales del ERP.</p>
+        </div>
+
+    </div>
+
+    <!-- Panel dinámico -->
+    <div id="panel" class="panel"></div>
+
+</body>
+</html>

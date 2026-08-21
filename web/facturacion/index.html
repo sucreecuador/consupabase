@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Facturación - ERP Sucre</title>
+    <link rel="stylesheet" href="facturacion.css">
+    <script src="facturacion.js" defer></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Facturación</h1>
+        <p>Emisión de facturas, cálculo automático y exportación.</p>
+    </div>
+
+    <div class="actions">
+        <button id="btnNuevaFactura">➕ Nueva Factura</button>
+        <button id="btnExcel">📊 Exportar Excel</button>
+        <button id="btnPDF">📄 Exportar PDF</button>
+    </div>
+
+    <!-- Tabla de facturas -->
+    <table class="erp-table">
+        <thead>
+            <tr>
+                <th>N° Factura</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Subtotal</th>
+                <th>IVA</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tablaFacturas"></tbody>
+    </table>
+
+    <!-- Modal de factura -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+
+            <h2>Nueva Factura</h2>
+
+            <label>Cliente</label>
+            <input type="text" id="facCliente">
+
+            <label>Fecha</label>
+            <input type="date" id="facFecha">
+
+            <h3>Items</h3>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+            </table>
+
+            <button id="btnAgregarItem">➕ Agregar Item</button>
+
+            <div class="totales">
+                <p>Subtotal: <span id="tSubtotal">0.00</span></p>
+                <p>IVA (15%): <span id="tIVA">0.00</span></p>
+                <p>Total: <span id="tTotal">0.00</span></p>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btnGuardarFactura">Guardar Factura</button>
+                <button id="btnCerrar">Cancelar</button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

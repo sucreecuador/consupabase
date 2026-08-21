@@ -1,5 +1,5 @@
 ﻿# ============================================================
-#  DEPLOY COMPLETO DEL ERP SUCRE (BACKEND + FRONTEND)
+#  🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND + FRONTEND)
 # ============================================================
 
 Write-Host "============================================================"
@@ -30,6 +30,26 @@ if (Test-Path "$projectPath\web") {
     Write-Host "El backend se desplegará igual, pero sin frontend."
 }
 
+# Verificar módulos
+$modules = @(
+    "dashboard",
+    "productos",
+    "contactos",
+    "inventario",
+    "reportes",
+    "facturacion",
+    "configuracion"
+)
+
+Write-Host "`n🔍 Verificando módulos del ERP..."
+foreach ($m in $modules) {
+    if (Test-Path "$projectPath\web\$m") {
+        Write-Host "✔ $m OK"
+    } else {
+        Write-Host "⚠ Módulo faltante: $m"
+    }
+}
+
 # ============================================================
 #  GIT: AGREGAR CAMBIOS Y CREAR COMMIT
 # ============================================================
@@ -39,7 +59,7 @@ git add .
 
 Write-Host "📝 Creando commit..."
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "ERP Deploy - $timestamp"
+git commit -m "ERP Sucre Deploy - $timestamp"
 
 Write-Host "`n⬆ Subiendo cambios a GitHub..."
 git push

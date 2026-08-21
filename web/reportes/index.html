@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes - ERP Sucre</title>
+    <link rel="stylesheet" href="reportes.css">
+    <script src="reportes.js" defer></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Reportes</h1>
+        <p>Informes PDF, Excel y análisis del ERP.</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+
+        <div class="filtro-item">
+            <label>Fecha Inicio</label>
+            <input type="date" id="fechaInicio">
+        </div>
+
+        <div class="filtro-item">
+            <label>Fecha Fin</label>
+            <input type="date" id="fechaFin">
+        </div>
+
+        <div class="filtro-item">
+            <label>Tipo de Reporte</label>
+            <select id="tipoReporte">
+                <option value="productos">Productos</option>
+                <option value="inventario">Inventario</option>
+                <option value="contactos">Contactos</option>
+                <option value="ventas">Ventas</option>
+                <option value="compras">Compras</option>
+            </select>
+        </div>
+
+        <button id="btnGenerar">Generar</button>
+        <button id="btnExcel">📊 Exportar Excel</button>
+        <button id="btnPDF">📄 Exportar PDF</button>
+
+    </div>
+
+    <!-- Tabla de resultados -->
+    <table class="erp-table">
+        <thead id="theadReportes"></thead>
+        <tbody id="tbodyReportes"></tbody>
+    </table>
+
+</body>
+</html>
