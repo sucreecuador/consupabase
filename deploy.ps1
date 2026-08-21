@@ -1,26 +1,23 @@
 ﻿# ============================================================
-#  DEPLOY AUTOMÁTICO A RENDER DESDE WINDOWS POWERSHELL
+#  DEPLOY AUTOMÁTICO DEL FRONTEND ERP-WEB A RENDER
 #  Proyecto: CONSUPABASE ERP
 # ============================================================
 
 Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY DEL ERP CONSUPABASE"
+Write-Host "   🚀 INICIANDO DEPLOY DEL FRONTEND ERP-WEB"
 Write-Host "============================================================"
 
 # Ruta del proyecto
 $projectPath = "C:\Users\Supervisor\consupabase"
 Set-Location $projectPath
 
-Write-Host "`n🔍 Verificando estructura del proyecto..."
+Write-Host "`n🔍 Verificando carpeta web..."
 
-# Carpetas requeridas
-$requiredFolders = @("static", "web")
-foreach ($folder in $requiredFolders) {
-    if (Test-Path "$projectPath\$folder") {
-        Write-Host "✔ OK: $projectPath\$folder"
-    } else {
-        Write-Host "⚠ ADVERTENCIA: Falta $projectPath\$folder"
-    }
+if (Test-Path "$projectPath\web") {
+    Write-Host "✔ OK: carpeta web encontrada"
+} else {
+    Write-Host "❌ ERROR: No existe la carpeta web/"
+    exit
 }
 
 # ============================================================
@@ -32,16 +29,16 @@ git add .
 
 Write-Host "📝 Creando commit..."
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "ERP Deploy - $timestamp"
+git commit -m "Frontend ERP-WEB Deploy - $timestamp"
 
 Write-Host "`n⬆ Subiendo cambios a GitHub..."
 git push
 
 # ============================================================
-#  RENDER: ENVIAR DEPLOY
+#  RENDER: ENVIAR DEPLOY DEL FRONTEND
 # ============================================================
 
-Write-Host "`n🚀 Enviando deploy a Render..."
+Write-Host "`n🚀 Enviando deploy del frontend a Render..."
 
 # Render API Key desde variable de entorno
 $apiKey = $env:RENDER_API_KEY
@@ -51,8 +48,8 @@ if (-not $apiKey) {
     exit
 }
 
-# ID del servicio en Render (debes poner el tuyo)
-$serviceId = "srv-xxxxxxxxxxxxxxxxxxxx"
+# ID del servicio frontend en Render (CAMBIAR ESTE)
+$serviceId = "srv-xxxxxxxxxxxxxxxxxxxx"   # ← PON AQUÍ TU SERVICE ID DEL FRONTEND ERP-WEB
 
 # Endpoint de Render
 $renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
@@ -66,16 +63,16 @@ try {
         -Body "{}"
 
     Write-Host "`n============================================================"
-    Write-Host "   ✔ Render aceptó el deploy"
+    Write-Host "   ✔ Render aceptó el deploy del frontend"
     Write-Host "============================================================"
     Write-Host "🆔 ID del deploy: $($deploy.id)"
     Write-Host "📌 Estado inicial: $($deploy.status)"
 }
 catch {
-    Write-Host "❌ ERROR al enviar el deploy a Render."
+    Write-Host "❌ ERROR al enviar el deploy del frontend a Render."
     Write-Host $_
 }
 
 Write-Host "`n============================================================"
-Write-Host "   🎉 DEPLOY COMPLETO"
+Write-Host "   🎉 DEPLOY DEL FRONTEND COMPLETO"
 Write-Host "============================================================"

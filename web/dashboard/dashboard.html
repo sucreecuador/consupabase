@@ -2,64 +2,49 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CONSUPABASE ERP - Dashboard</title>
-
-    <link rel="stylesheet" href="/web/dashboard/dashboard.css">
-    <script src="/web/dashboard/dashboard.js" defer></script>
+    <title>Dashboard ERP</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 { margin-top: 0; }
+    </style>
 </head>
-
 <body>
 
-    <!-- Sidebar embebido -->
-    <iframe id="sidebar-frame" src="/web/components/sidebar/sidebar.html"></iframe>
+    <h1>Dashboard ERP</h1>
 
-    <!-- Contenedor principal del ERP -->
-    <div id="erp-main">
-
-        <!-- Encabezado superior -->
-        <header id="erp-header">
-            <div class="erp-header-left">
-                <h1>Dashboard ERP</h1>
-                <p>Panel principal de CONSUPABASE ERP</p>
-            </div>
-            <div class="erp-header-right">
-                <span class="erp-user">👤 Ricardo</span>
-            </div>
-        </header>
-
-        <!-- Tarjetas KPI -->
-        <section id="erp-kpi">
-            <div class="kpi-card kpi-ventas">
-                <div class="kpi-title">Ventas del día</div>
-                <div class="kpi-value">$ 0,00</div>
-                <div class="kpi-sub">Sin datos aún</div>
-            </div>
-
-            <div class="kpi-card kpi-inventario">
-                <div class="kpi-title">Productos en inventario</div>
-                <div class="kpi-value">0</div>
-                <div class="kpi-sub">Pendiente de integración</div>
-            </div>
-
-            <div class="kpi-card kpi-clientes">
-                <div class="kpi-title">Clientes activos</div>
-                <div class="kpi-value">0</div>
-                <div class="kpi-sub">Pendiente de integración</div>
-            </div>
-
-            <div class="kpi-card kpi-alertas">
-                <div class="kpi-title">Alertas</div>
-                <div class="kpi-value">0</div>
-                <div class="kpi-sub">Sin alertas por ahora</div>
-            </div>
-        </section>
-
-        <!-- Contenido dinámico (módulos) -->
-        <section id="erp-content">
-            <!-- Aquí se cargan los módulos (dashboard-module, productos, etc.) -->
-        </section>
-
+    <div class="card">
+        <h2>Total de Productos</h2>
+        <p id="total-productos">Cargando...</p>
     </div>
+
+    <script>
+        async function cargarDashboard() {
+            try {
+                const url = "https://consupabase-api.onrender.com/productos";
+                const res = await fetch(url);
+                const json = await res.json();
+
+                document.getElementById("total-productos").innerText =
+                    json.count + " productos registrados";
+            } catch (error) {
+                document.getElementById("total-productos").innerText =
+                    "Error al cargar datos";
+            }
+        }
+
+        cargarDashboard();
+    </script>
 
 </body>
 </html>

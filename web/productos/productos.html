@@ -1,16 +1,39 @@
-<!-- SIDEBAR -->
-<div id="sidebar" class="sidebar">
-    <ul>
-        <li><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></li>
-        <li><span class="menu-icon">📦</span><span class="menu-text">Productos</span></li>
-        <li><span class="menu-icon">📇</span><span class="menu-text">Contactos</span></li>
-        <li><span class="menu-icon">📊</span><span class="menu-text">Inventario</span></li>
-        <li><span class="menu-icon">📑</span><span class="menu-text">Reportes</span></li>
-        <li><span class="menu-icon">👤</span><span class="menu-text">Usuarios</span></li>
-    </ul>
-</div>
+<script>
+let paginaActual = 0;
+let pageSize = 50;
 
-<!-- CONTENIDO -->
-<div id="content" class="content">
-    <!-- Aquí va tu módulo Productos -->
-</div>
+async function cargarProductos() {
+    try {
+        const url = `https://consupabase-api.onrender.com/productos?page=${paginaActual}&page_size=${pageSize}`;
+
+        const res = await fetch(url);
+        const json = await res.json();
+
+        const tabla = document.getElementById("tabla-productos");
+        tabla.innerHTML = "";
+
+        json.data.forEach(prod => {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${prod.codigo ?? "-"}</td>
+                    <td>${prod.descripcion ?? "-"}</td>
+                    <td>${prod.marca ?? "-"}</td>
+                    <td>${prod.proveedor ?? "-"}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("totalInfo").innerText =
+            `Total: ${json.count} productos`;
+
+        document.getElementById("paginaInfo").innerText =
+            `Página ${json.page + 1}`;
+    }
+    catch (error) {
+        console.error("Error cargando productos:", error);
+        alert("❌ Error conectando con el backend Render");
+    }
+}
+
+cargarProductos();
+</script>
