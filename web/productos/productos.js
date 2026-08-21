@@ -19,9 +19,7 @@ let totalPaginas = 1;
 let ordenColumna = "descripcion";
 let ordenDireccion = "asc";
 
-// ===============================
 // Abrir modal
-// ===============================
 btnNuevo.onclick = () => {
     editId = null;
     document.getElementById("modalTitulo").innerText = "Nuevo Producto";
@@ -36,14 +34,10 @@ btnNuevo.onclick = () => {
     modal.style.display = "flex";
 };
 
-// ===============================
 // Cerrar modal
-// ===============================
 btnCerrar.onclick = () => modal.style.display = "none";
 
-// ===============================
 // Guardar producto
-// ===============================
 btnGuardar.onclick = async () => {
     const data = {
         codigo: document.getElementById("prodCodigo").value,
@@ -72,9 +66,7 @@ btnGuardar.onclick = async () => {
     cargarProductos();
 };
 
-// ===============================
-// Cargar productos con orden y paginación
-// ===============================
+// Cargar productos
 async function cargarProductos(filtro = "") {
     const params = new URLSearchParams({
         descripcion: filtro,
@@ -115,9 +107,7 @@ async function cargarProductos(filtro = "") {
     renderPaginacion();
 }
 
-// ===============================
 // Ordenar columnas
-// ===============================
 function ordenar(columna) {
     if (ordenColumna === columna) {
         ordenDireccion = ordenDireccion === "asc" ? "desc" : "asc";
@@ -128,9 +118,7 @@ function ordenar(columna) {
     cargarProductos(buscar.value);
 }
 
-// ===============================
 // Editar producto
-// ===============================
 async function editar(id) {
     editId = id;
 
@@ -149,17 +137,13 @@ async function editar(id) {
     modal.style.display = "flex";
 }
 
-// ===============================
 // Eliminar producto
-// ===============================
 async function eliminar(id) {
     await fetch(`${API}/${id}`, { method: "DELETE" });
     cargarProductos();
 }
 
-// ===============================
 // Paginación
-// ===============================
 function renderPaginacion() {
     const paginacion = document.getElementById("paginacion");
 
@@ -184,9 +168,7 @@ function paginaSiguiente() {
     }
 }
 
-// ===============================
 // Buscar
-// ===============================
 buscar.onkeyup = () => {
     pagina = 1;
     cargarProductos(buscar.value);
