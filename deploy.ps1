@@ -1,22 +1,34 @@
 ﻿# ============================================================
-#  DEPLOY AUTOMÁTICO DEL BACKEND CONSUPABASE-API A RENDER
+#  DEPLOY AUTOMÁTICO COMPLETO: BACKEND + FRONTEND (FastAPI)
+#  Proyecto: CONSUPABASE ERP
 # ============================================================
 
 Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY DEL BACKEND CONSUPABASE-API"
+Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP (BACKEND + FRONTEND)"
 Write-Host "============================================================"
 
 # Ruta del proyecto
 $projectPath = "C:\Users\Supervisor\consupabase"
 Set-Location $projectPath
 
-Write-Host "`n🔍 Verificando main.py..."
+# ============================================================
+#  VERIFICACIONES
+# ============================================================
 
+Write-Host "`n🔍 Verificando main.py..."
 if (Test-Path "$projectPath\main.py") {
     Write-Host "✔ OK: main.py encontrado"
 } else {
-    Write-Host "❌ ERROR: No existe main.py en el proyecto"
+    Write-Host "❌ ERROR: No existe main.py"
     exit
+}
+
+Write-Host "`n🔍 Verificando carpeta web..."
+if (Test-Path "$projectPath\web") {
+    Write-Host "✔ OK: carpeta web encontrada (frontend servido por FastAPI)"
+} else {
+    Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
+    Write-Host "El backend se desplegará igual, pero sin frontend."
 }
 
 # ============================================================
@@ -28,7 +40,7 @@ git add .
 
 Write-Host "📝 Creando commit..."
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Backend Deploy - $timestamp"
+git commit -m "Deploy ALL (Backend + Frontend) - $timestamp"
 
 Write-Host "`n⬆ Subiendo cambios a GitHub..."
 git push
@@ -73,5 +85,5 @@ catch {
 }
 
 Write-Host "`n============================================================"
-Write-Host "   🎉 DEPLOY DEL BACKEND COMPLETO"
+Write-Host "   🎉 DEPLOY COMPLETO FINALIZADO"
 Write-Host "============================================================"
