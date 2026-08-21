@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Módulo Productos</title>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="/web/productos/productos.css">
+    <script src="/web/productos/productos.js" defer></script>
+</head>
+
+<body>
+
+    <h1 class="mod-title">Productos</h1>
+    <p class="mod-subtitle">Gestión de productos del ERP CONSUPABASE</p>
+
+    <div class="mod-actions">
+        <button id="btnNuevoProducto">➕ Nuevo Producto</button>
+    </div>
+
+    <table class="erp-table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Stock</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaProductos">
+            <!-- Se llena dinámicamente -->
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div id="modalProducto" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitulo">Nuevo Producto</h2>
+
+            <input type="hidden" id="prodId">
+
+            <label>Código</label>
+            <input type="text" id="prodCodigo">
+
+            <label>Nombre</label>
+            <input type="text" id="prodNombre">
+
+            <label>Marca</label>
+            <input type="text" id="prodMarca">
+
+            <label>Stock</label>
+            <input type="number" id="prodStock">
+
+            <label>Precio</label>
+            <input type="number" id="prodPrecio" step="0.01">
+
+            <div class="modal-actions">
+                <button id="btnGuardarProducto">Guardar</button>
+                <button id="btnCerrarModal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -19,6 +19,7 @@ $paths = @(
     "$projectPath\web\dashboard",
     "$projectPath\web\components",
     "$projectPath\web\components\sidebar",
+    "$projectPath\web\productos",
     "$projectPath\static"
 )
 
