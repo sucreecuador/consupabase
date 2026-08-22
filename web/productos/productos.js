@@ -26,7 +26,7 @@ function cambiarVista(nombreVista, btnElem) {
     ordenColumna = (vistaActual === 'vista1') ? 'naci' : 'codigo';
 
     renderizarEncabezados();
-    cargarProductos();
+    renderizarTabla(datosActuales);
 }
 
 function renderizarEncabezados() {
@@ -43,7 +43,7 @@ function renderizarEncabezados() {
             <th onclick="ordenar('uni')">UNI ⇕</th>
             <th onclick="ordenar('pvp')">PVP ⇕</th>
             <th onclick="ordenar('saldo_temp')">S.TEM ⇕</th>
-            <th>Acciones</th>
+            <th>ACCIONES</th>
         `;
     } else {
         html += `
@@ -54,7 +54,7 @@ function renderizarEncabezados() {
             <th onclick="ordenar('saldo_gye')">S.GYE ⇕</th>
             <th onclick="ordenar('costo_prom')">COSTO_PROM ⇕</th>
             <th onclick="ordenar('pro1')">PRO1 ⇕</th>
-            <th>Acciones</th>
+            <th>ACCIONES</th>
         `;
     }
 
@@ -67,7 +67,6 @@ async function cargarProductos() {
     const buscar = buscarElem ? buscarElem.value.trim() : '';
     
     let url = `/api/productos?pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
-    
     if (buscar !== '') {
         url += `&descripcion=${encodeURIComponent(buscar)}`;
     }
@@ -77,19 +76,13 @@ async function cargarProductos() {
         if (!respuesta.ok) throw new Error(`Error HTTP: ${respuesta.status}`);
         
         const resultado = await respuesta.json();
-
         datosActuales = resultado.data || [];
-        let totalPaginas = resultado.totalPaginas || 1;
-
+        
         renderizarTabla(datosActuales);
-        renderizarPaginacion(totalPaginas);
+        renderizarPaginacion(resultado.totalPaginas || 1);
 
     } catch (error) {
         console.error('Error al cargar productos:', error);
-        const tbody = document.getElementById('tablaProductos');
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #d9534f; padding: 15px;">Error al conectar con la base de datos. Verifique la clave SUPABASE_KEY en Render.</td></tr>`;
-        }
     }
 }
 
@@ -112,6 +105,7 @@ function renderizarTabla(productos) {
         const id = p.id;
 
         if (vistaActual === 'vista1') {
+            // MAPEO EXACTO PARA VISTA 1 (7 COLUMNAS)
             const nacionalidad = p.naci || p.nacionalidad || '—';
             const marca = p.marca || 'N/A';
             const nombre = p.descripcion || '—';
@@ -120,18 +114,19 @@ function renderizarTabla(productos) {
             const sTem = p.saldo_temp ?? 0;
 
             tr.innerHTML = `
-                <td class="excel-code">${nacionalidad}</td>
+                <td>${nacionalidad}</td>
                 <td><span class="excel-badge">${marca}</span></td>
                 <td>${nombre}</td>
                 <td>${uni}</td>
-                <td class="excel-number">$${pvp}</td>
-                <td class="excel-number">${sTem}</td>
+                <td style="text-align:right;">$${pvp}</td>
+                <td style="text-align:right;">${sTem}</td>
                 <td style="text-align:center;">
-                    <button class="btn-accion" onclick="editarProducto('${id}')">✏️ Editar</button>
-                    <button class="btn-accion" onclick="eliminarProducto('${id}')">❌ Eliminar</button>
+                    <button onclick="editarProducto('${id}')">✏️ Editar</button>
+                    <button onclick="eliminarProducto('${id}')">❌ Eliminar</button>
                 </td>
             `;
         } else {
+            // MAPEO EXACTO PARA VISTA 2 (8 COLUMNAS)
             const codigo = p.codigo || '—';
             const codProv = p.codigo_proveedor || '—';
             const nombre = p.descripcion || '—';
@@ -141,16 +136,16 @@ function renderizarTabla(productos) {
             const pro1 = p.pro1 || '—';
 
             tr.innerHTML = `
-                <td class="excel-code">${codigo}</td>
+                <td>${codigo}</td>
                 <td>${codProv}</td>
                 <td>${nombre}</td>
-                <td class="excel-number">${sUio}</td>
-                <td class="excel-number">${sGye}</td>
-                <td class="excel-number">$${costoProm}</td>
+                <td style="text-align:right;">${sUio}</td>
+                <td style="text-align:right;">${sGye}</td>
+                <td style="text-align:right;">$${costoProm}</td>
                 <td>${pro1}</td>
                 <td style="text-align:center;">
-                    <button class="btn-accion" onclick="editarProducto('${id}')">✏️ Editar</button>
-                    <button class="btn-accion" onclick="eliminarProducto('${id}')">❌ Eliminar</button>
+                    <button onclick="editarProducto('${id}')">✏️ Editar</button>
+                    <button onclick="eliminarProducto('${id}')">❌ Eliminar</button>
                 </td>
             `;
         }

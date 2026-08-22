@@ -4,78 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP Sucre</title>
-    <link rel="stylesheet" href="productos.css?v=2005">
-    <script src="productos.js?v=2005" defer></script>
+    <link rel="stylesheet" href="productos.css?v=3000">
+    <script src="productos.js?v=3000" defer></script>
     <style>
-        /* Estilos del Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+        .views-bar {
+            display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
         }
-        .modal-content {
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .modal-header {
-            font-size: 18px;
+        .views-bar label {
             font-weight: bold;
-            margin-bottom: 15px;
-            color: #2b5797;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 12px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-size: 14px;
             color: #333;
         }
-        .form-group input {
-            width: 100%;
-            padding: 8px 10px;
-            box-sizing: border-box;
+        .btn-view {
+            background-color: #f0f0f0;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .btn-guardar {
-            background-color: #2b5797;
-            color: white;
-            border: none;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 13px;
             font-weight: bold;
+            color: #444;
+            transition: all 0.2s;
         }
-        .btn-cancelar {
-            background-color: #d9534f;
+        .btn-view.active {
+            background-color: #107c41;
             color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
+            border-color: #107c41;
         }
     </style>
 </head>
@@ -91,18 +48,17 @@
         <button id="btnNuevo" class="btn-nuevo" onclick="abrirModalCrear()">➕ Nuevo Producto</button>
     </div>
 
+    <!-- BARRA DE VISTAS -->
+    <div class="views-bar">
+        <label>Vistas:</label>
+        <button class="btn-view active" onclick="cambiarVista('vista1', this)">Vista 1</button>
+        <button class="btn-view" onclick="cambiarVista('vista2', this)">Vista 2</button>
+    </div>
+
     <div class="table-container">
         <table class="erp-table">
-            <thead>
-                <tr>
-                    <th onclick="ordenar('codigo')">Código ⇕</th>
-                    <th onclick="ordenar('descripcion')">Descripción ⇕</th>
-                    <th onclick="ordenar('marca')">Marca ⇕</th>
-                    <th onclick="ordenar('codigo_proveedor')">Proveedor ⇕</th>
-                    <th onclick="ordenar('saldo_temp')">Stock ⇕</th>
-                    <th onclick="ordenar('precio_venta')">Precio ⇕</th>
-                    <th>Acciones</th>
-                </tr>
+            <thead id="tablaHeader">
+                <!-- Encabezados generados dinámicamente desde JS -->
             </thead>
             <tbody id="tablaProductos">
                 <tr><td colspan="7" style="text-align:center; padding: 15px;">Cargando datos...</td></tr>
@@ -111,44 +67,6 @@
     </div>
 
     <div id="paginacion" class="paginacion"></div>
-
-    <!-- Modal Formulario (Crear y Editar) -->
-    <div id="modalProducto" class="modal">
-        <div class="modal-content">
-            <div id="modalTitulo" class="modal-header">➕ Nuevo Producto</div>
-            <form id="formProducto">
-                <input type="hidden" id="prod_id">
-                <div class="form-group">
-                    <label>Código:</label>
-                    <input type="text" id="prod_codigo" required>
-                </div>
-                <div class="form-group">
-                    <label>Descripción:</label>
-                    <input type="text" id="prod_descripcion" required>
-                </div>
-                <div class="form-group">
-                    <label>Marca:</label>
-                    <input type="text" id="prod_marca">
-                </div>
-                <div class="form-group">
-                    <label>Código Proveedor:</label>
-                    <input type="text" id="prod_codigo_proveedor">
-                </div>
-                <div class="form-group">
-                    <label>Stock (Saldo Temp):</label>
-                    <input type="number" step="any" id="prod_saldo_temp" value="0" required>
-                </div>
-                <div class="form-group">
-                    <label>Precio Venta ($):</label>
-                    <input type="number" step="0.01" id="prod_precio_venta" value="0.00" required>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-guardar">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
 </body>
 </html>
