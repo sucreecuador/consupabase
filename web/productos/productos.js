@@ -1,5 +1,5 @@
 let paginaActual = 1;
-let ordenColumna = 'nacionalidad';
+let ordenColumna = 'codigo';
 let ordenDireccion = 'asc';
 let vistaActual = 'vista1';
 let datosActuales = [];
@@ -15,11 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cargarProductos();
         });
     }
-
-    const formProducto = document.getElementById('formProducto');
-    if (formProducto) {
-        formProducto.addEventListener('submit', guardarProducto);
-    }
 });
 
 function cambiarVista(nombreVista, btnElem) {
@@ -28,14 +23,10 @@ function cambiarVista(nombreVista, btnElem) {
     document.querySelectorAll('.btn-view').forEach(btn => btn.classList.remove('active'));
     if (btnElem) btnElem.classList.add('active');
 
-    if (vistaActual === 'vista1') {
-        ordenColumna = 'nacionalidad';
-    } else if (vistaActual === 'vista2') {
-        ordenColumna = 'codigo';
-    }
+    ordenColumna = (vistaActual === 'vista1') ? 'naci' : 'codigo';
 
     renderizarEncabezados();
-    renderizarTabla(datosActuales);
+    cargarProductos();
 }
 
 function renderizarEncabezados() {
@@ -46,7 +37,7 @@ function renderizarEncabezados() {
 
     if (vistaActual === 'vista1') {
         html += `
-            <th onclick="ordenar('nacionalidad')">NACIONALIDAD ⇕</th>
+            <th onclick="ordenar('naci')">NACIONALIDAD ⇕</th>
             <th onclick="ordenar('marca')">MARCA ⇕</th>
             <th onclick="ordenar('descripcion')">NOMBRE ⇕</th>
             <th onclick="ordenar('uni')">UNI ⇕</th>
@@ -54,7 +45,7 @@ function renderizarEncabezados() {
             <th onclick="ordenar('saldo_temp')">S.TEM ⇕</th>
             <th>Acciones</th>
         `;
-    } else if (vistaActual === 'vista2') {
+    } else {
         html += `
             <th onclick="ordenar('codigo')">CODIGO ⇕</th>
             <th onclick="ordenar('codigo_proveedor')">COD.PROV ⇕</th>
@@ -97,7 +88,7 @@ async function cargarProductos() {
         console.error('Error al cargar productos:', error);
         const tbody = document.getElementById('tablaProductos');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error al obtener datos.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #d9534f; padding: 15px;">Error al conectar con la base de datos. Verifique la clave SUPABASE_KEY en Render.</td></tr>`;
         }
     }
 }
@@ -121,8 +112,7 @@ function renderizarTabla(productos) {
         const id = p.id;
 
         if (vistaActual === 'vista1') {
-            // Lee 'nacionalidad' o 'naci' en caso de venir de la BD
-            const nacionalidad = p.nacionalidad || p.naci || '—';
+            const nacionalidad = p.naci || p.nacionalidad || '—';
             const marca = p.marca || 'N/A';
             const nombre = p.descripcion || '—';
             const uni = p.uni || 'UND';
@@ -141,7 +131,7 @@ function renderizarTabla(productos) {
                     <button class="btn-accion" onclick="eliminarProducto('${id}')">❌ Eliminar</button>
                 </td>
             `;
-        } else if (vistaActual === 'vista2') {
+        } else {
             const codigo = p.codigo || '—';
             const codProv = p.codigo_proveedor || '—';
             const nombre = p.descripcion || '—';
@@ -196,101 +186,4 @@ function ordenar(columna) {
     }
     paginaActual = 1;
     cargarProductos();
-}
-
-function abrirModalCrear() {
-    document.getElementById('modalTitulo').textContent = '➕ Nuevo Producto';
-    document.getElementById('prod_id').value = '';
-    document.getElementById('prod_codigo').value = '';
-    document.getElementById('prod_nacionalidad').value = '';
-    document.getElementById('prod_descripcion').value = '';
-    document.getElementById('prod_marca').value = '';
-    document.getElementById('prod_codigo_proveedor').value = '';
-    document.getElementById('prod_uni').value = 'UND';
-    document.getElementById('prod_pvp').value = '0.00';
-    document.getElementById('prod_costo_prom').value = '0.00';
-    document.getElementById('prod_saldo_temp').value = '0';
-    document.getElementById('prod_saldo_uio').value = '0';
-    document.getElementById('prod_saldo_gye').value = '0';
-    document.getElementById('prod_pro1').value = '';
-
-    document.getElementById('modalProducto').style.display = 'flex';
-}
-
-async function editarProducto(id) {
-    try {
-        const res = await fetch(`/api/productos/${id}`);
-        if (!res.ok) throw new Error('No se pudo obtener el producto');
-        const data = await res.json();
-
-        document.getElementById('modalTitulo').textContent = '✏️ Editar Producto';
-        document.getElementById('prod_id').value = data.id;
-        document.getElementById('prod_codigo').value = data.codigo || '';
-        document.getElementById('prod_nacionalidad').value = data.nacionalidad || data.naci || '';
-        document.getElementById('prod_descripcion').value = data.descripcion || '';
-        document.getElementById('prod_marca').value = data.marca || '';
-        document.getElementById('prod_codigo_proveedor').value = data.codigo_proveedor || '';
-        document.getElementById('prod_uni').value = data.uni || '';
-        document.getElementById('prod_pvp').value = data.pvp ?? 0;
-        document.getElementById('prod_costo_prom').value = data.costo_prom ?? 0;
-        document.getElementById('prod_saldo_temp').value = data.saldo_temp ?? 0;
-        document.getElementById('prod_saldo_uio').value = data.saldo_uio ?? 0;
-        document.getElementById('prod_saldo_gye').value = data.saldo_gye ?? 0;
-        document.getElementById('prod_pro1').value = data.pro1 || '';
-
-        document.getElementById('modalProducto').style.display = 'flex';
-    } catch (e) {
-        alert('Error: ' + e.message);
-    }
-}
-
-function cerrarModal() {
-    document.getElementById('modalProducto').style.display = 'none';
-}
-
-async function guardarProducto(e) {
-    e.preventDefault();
-
-    const id = document.getElementById('prod_id').value;
-    const esEdicion = Boolean(id);
-
-    const payload = {
-        codigo: document.getElementById('prod_codigo').value.trim(),
-        nacionalidad: document.getElementById('prod_nacionalidad').value.trim(),
-        descripcion: document.getElementById('prod_descripcion').value.trim(),
-        marca: document.getElementById('prod_marca').value.trim(),
-        codigo_proveedor: document.getElementById('prod_codigo_proveedor').value.trim(),
-        uni: document.getElementById('prod_uni').value.trim(),
-        pvp: parseFloat(document.getElementById('prod_pvp').value) || 0,
-        costo_prom: parseFloat(document.getElementById('prod_costo_prom').value) || 0,
-        saldo_temp: parseFloat(document.getElementById('prod_saldo_temp').value) || 0,
-        saldo_uio: parseFloat(document.getElementById('prod_saldo_uio').value) || 0,
-        saldo_gye: parseFloat(document.getElementById('prod_saldo_gye').value) || 0,
-        pro1: document.getElementById('prod_pro1').value.trim()
-    };
-
-    const url = esEdicion ? `/api/productos/${id}` : '/api/productos';
-    const metodo = esEdicion ? 'PUT' : 'POST';
-
-    try {
-        const res = await fetch(url, {
-            method: metodo,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('Error al guardar el registro');
-
-        cerrarModal();
-        cargarProductos();
-    } catch (err) {
-        alert('Error: ' + err.message);
-    }
-}
-
-function eliminarProducto(id) {
-    if (confirm('¿Desea eliminar este producto?')) {
-        fetch(`/api/productos/${id}`, { method: 'DELETE' })
-            .then(() => cargarProductos());
-    }
 }

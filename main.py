@@ -25,7 +25,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 class ProductoCreate(BaseModel):
     codigo: str
-    nacionalidad: Optional[str] = None  # Reemplaza codigo_ori por nacionalidad / naci
+    naci: Optional[str] = None
     codigo_proveedor: Optional[str] = None
     descripcion: str
     marca: Optional[str] = None
@@ -39,7 +39,7 @@ class ProductoCreate(BaseModel):
 
 class ProductoUpdate(BaseModel):
     codigo: Optional[str] = None
-    nacionalidad: Optional[str] = None
+    naci: Optional[str] = None
     codigo_proveedor: Optional[str] = None
     descripcion: Optional[str] = None
     marca: Optional[str] = None
@@ -56,21 +56,21 @@ async def obtener_productos(
     descripcion: str = Query(None, alias="descripcion"),
     pagina: int = Query(1, alias="pagina"),
     por_pagina: int = Query(20, alias="porPagina"),
-    orden_columna: str = Query("nacionalidad", alias="ordenColumna"),
+    orden_columna: str = Query("codigo", alias="ordenColumna"),
     orden_direccion: str = Query("asc", alias="ordenDireccion")
 ):
     try:
         query = supabase.table("productos").select("*", count="exact")
 
-        query = query.neq("codigo", "CODIGO")
-
         if descripcion and descripcion.strip():
             term = descripcion.strip().replace("%", "")
-            query = query.or_(f"descripcion.ilike.*{term}*,codigo.ilike.*{term}*,codigo_proveedor.ilike.*{term}*,nacionalidad.ilike.*{term}*")
+            query = query.or_(f"descripcion.ilike.*{term}*,codigo.ilike.*{term}*")
 
+        # Mapeo flexible de ordenamiento
         mapa_columnas = {
             "codigo": "codigo",
-            "nacionalidad": "nacionalidad",  # Cambia a "naci" si el nombre exacto de la columna en Supabase es "naci"
+            "nacionalidad": "naci",
+            "naci": "naci",
             "codigo_proveedor": "codigo_proveedor",
             "descripcion": "descripcion",
             "marca": "marca",
@@ -83,7 +83,7 @@ async def obtener_productos(
             "pro1": "pro1"
         }
 
-        columna_real = mapa_columnas.get(orden_columna, "nacionalidad")
+        columna_real = mapa_columnas.get(orden_columna, "codigo")
         es_descendente = (orden_direccion.lower() == "desc")
 
         query = query.order(columna_real, desc=es_descendente, nullsfirst=False)
@@ -104,43 +104,12 @@ async def obtener_productos(
 
     except Exception as e:
         print("Error en endpoint /api/productos:", str(e))
-        return {"data": [], "totalPaginas": 1, "error": str(e)}
-
-@app.get("/api/productos/{producto_id}")
-async def obtener_producto_por_id(producto_id: str):
-    try:
-        res = supabase.table("productos").select("*").eq("id", producto_id).execute()
-        if not res.data:
-            raise HTTPException(status_code=404, detail="Producto no encontrado")
-        return res.data[0]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/productos")
-async def crear_producto(producto: ProductoCreate):
-    try:
-        datos = producto.dict()
-        res = supabase.table("productos").insert(datos).execute()
-        return {"status": "ok", "data": res.data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.put("/api/productos/{producto_id}")
-async def actualizar_producto(producto_id: str, producto: ProductoUpdate):
-    try:
-        datos_actualizar = producto.dict(exclude_unset=True)
-        if not datos_actualizar:
-            raise HTTPException(status_code=400, detail="No se enviaron datos para actualizar")
-
-        res = supabase.table("productos").update(datos_actualizar).eq("id", producto_id).execute()
-        return {"status": "ok", "data": res.data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/api/productos/{producto_id}")
-async def eliminar_producto(producto_id: str):
-    try:
-        res = supabase.table("productos").delete().eq("id", producto_id).execute()
-        return {"status": "ok", "deleted": res.data}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+        # Intento de fallback sin ordenamiento en caso de que la columna falle
+        try:
+            res_fallback = supabase.table("productos").select("*", count="exact").range(0, por_pagina - 1).execute()
+            return {
+                "data": res_fallback.data,
+                "totalPaginas": 1
+            }
+        except Exception as inner_e:
+            return {"data": [], "totalPaginas": 1, "error": str(inner_e)}
