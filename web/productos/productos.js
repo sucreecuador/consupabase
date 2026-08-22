@@ -1,6 +1,7 @@
 let paginaActual = 1;
 let ordenColumna = 'codigo';
 let ordenDireccion = 'asc';
+let columnaBusqueda = 'descripcion'; // Por defecto busca por Nombre / Descripción
 let vistaActual = 'vista1';
 let datosActuales = [];
 
@@ -23,10 +24,38 @@ function cambiarVista(nombreVista, btnElem) {
     document.querySelectorAll('.btn-view').forEach(btn => btn.classList.remove('active'));
     if (btnElem) btnElem.classList.add('active');
 
+    // Resetear orden y columna de búsqueda al valor por defecto
     ordenColumna = 'codigo';
-
+    columnaBusqueda = 'descripcion';
+    
+    actualizarIndicadorBuscador('NOMBRE');
     renderizarEncabezados();
-    renderizarTabla(datosActuales);
+    cargarProductos();
+}
+
+function seleccionarColumnaBusqueda(columna, etiqueta) {
+    columnaBusqueda = columna;
+    paginaActual = 1;
+
+    actualizarIndicadorBuscador(etiqueta);
+    renderizarEncabezados();
+    cargarProductos();
+}
+
+function actualizarIndicadorBuscador(etiqueta) {
+    const inputBuscar = document.getElementById('buscar');
+    if (inputBuscar) {
+        inputBuscar.placeholder = `Buscar por ${etiqueta}...`;
+    }
+    
+    let badge = document.getElementById('search-badge');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.id = 'search-badge';
+        badge.style.cssText = 'background:#10b981; color:white; font-size:12px; font-weight:bold; padding:4px 10px; border-radius:15px; margin-left:10px; display:inline-block;';
+        inputBuscar.parentNode.appendChild(badge);
+    }
+    badge.textContent = `🎯 Buscando en: ${etiqueta}`;
 }
 
 function renderizarEncabezados() {
@@ -37,25 +66,25 @@ function renderizarEncabezados() {
 
     if (vistaActual === 'vista1') {
         html += `
-            <th onclick="ordenar('codigo')">CÓDIGO ⇕</th>
-            <th onclick="ordenar('naci')">NAC ⇕</th>
-            <th onclick="ordenar('marca')">MARCA ⇕</th>
-            <th onclick="ordenar('descripcion')">NOMBRE ⇕</th>
-            <th onclick="ordenar('uni')">UNI ⇕</th>
-            <th onclick="ordenar('pvp')">PVP ⇕</th>
-            <th onclick="ordenar('saldo_temp')">S.TEM ⇕</th>
+            <th class="${columnaBusqueda === 'codigo' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('codigo', 'CÓDIGO')">CÓDIGO ⇕</th>
+            <th class="${columnaBusqueda === 'naci' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('naci', 'NAC')">NAC ⇕</th>
+            <th class="${columnaBusqueda === 'marca' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('marca', 'MARCA')">MARCA ⇕</th>
+            <th class="${columnaBusqueda === 'descripcion' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('descripcion', 'NOMBRE')">NOMBRE ⇕</th>
+            <th class="${columnaBusqueda === 'uni' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('uni', 'UNI')">UNI ⇕</th>
+            <th class="${columnaBusqueda === 'pvp' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('pvp', 'PVP')">PVP ⇕</th>
+            <th class="${columnaBusqueda === 'saldo_temp' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('saldo_temp', 'S.TEM')">S.TEM ⇕</th>
             <th>ACCIONES</th>
         `;
     } else {
         html += `
-            <th onclick="ordenar('codigo')">CÓDIGO ⇕</th>
-            <th onclick="ordenar('codigo_proveedor')">COD.PROV ⇕</th>
-            <th onclick="ordenar('descripcion')">NOMBRE ⇕</th>
-            <th onclick="ordenar('saldo_uio')">S.UIO ⇕</th>
-            <th onclick="ordenar('saldo_gye')">S.GYE ⇕</th>
-            <th onclick="ordenar('costo_prom')">COSTO_PROM ⇕</th>
-            <th onclick="ordenar('pro1')">PRO1 ⇕</th>
-            <th onclick="ordenar('pvp')">PRECIO ⇕</th>
+            <th class="${columnaBusqueda === 'codigo' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('codigo', 'CÓDIGO')">CÓDIGO ⇕</th>
+            <th class="${columnaBusqueda === 'codigo_proveedor' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('codigo_proveedor', 'COD.PROV')">COD.PROV ⇕</th>
+            <th class="${columnaBusqueda === 'descripcion' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('descripcion', 'NOMBRE')">NOMBRE ⇕</th>
+            <th class="${columnaBusqueda === 'saldo_uio' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('saldo_uio', 'S.UIO')">S.UIO ⇕</th>
+            <th class="${columnaBusqueda === 'saldo_gye' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('saldo_gye', 'S.GYE')">S.GYE ⇕</th>
+            <th class="${columnaBusqueda === 'costo_prom' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('costo_prom', 'COSTO_PROM')">COSTO_PROM ⇕</th>
+            <th class="${columnaBusqueda === 'pro1' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('pro1', 'PRO1')">PRO1 ⇕</th>
+            <th class="${columnaBusqueda === 'pvp' ? 'selected-col' : ''}" onclick="seleccionarColumnaBusqueda('pvp', 'PRECIO')">PRECIO ⇕</th>
             <th>ACCIONES</th>
         `;
     }
@@ -69,8 +98,10 @@ async function cargarProductos() {
     const buscar = buscarElem ? buscarElem.value.trim() : '';
     
     let url = `/api/productos?pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
+    
     if (buscar !== '') {
-        url += `&descripcion=${encodeURIComponent(buscar)}`;
+        // Pasa el parámetro dinámico según la columna seleccionada
+        url += `&columnaFiltro=${columnaBusqueda}&valorFiltro=${encodeURIComponent(buscar)}`;
     }
 
     try {
@@ -120,13 +151,13 @@ function renderizarTabla(productos) {
             const sTem = p.saldo_temp ?? 0;
 
             tr.innerHTML = `
-                <td class="excel-code">${codigo}</td>
-                <td>${nac}</td>
-                <td><span class="excel-badge">${marca}</span></td>
-                <td>${nombre}</td>
-                <td>${uni}</td>
-                <td style="text-align:right;">$${pvp}</td>
-                <td style="text-align:right;">${sTem}</td>
+                <td class="${columnaBusqueda === 'codigo' ? 'highlight-cell' : ''}">${codigo}</td>
+                <td class="${columnaBusqueda === 'naci' ? 'highlight-cell' : ''}">${nac}</td>
+                <td class="${columnaBusqueda === 'marca' ? 'highlight-cell' : ''}"><span class="excel-badge">${marca}</span></td>
+                <td class="${columnaBusqueda === 'descripcion' ? 'highlight-cell' : ''}">${nombre}</td>
+                <td class="${columnaBusqueda === 'uni' ? 'highlight-cell' : ''}">${uni}</td>
+                <td class="${columnaBusqueda === 'pvp' ? 'highlight-cell' : ''}" style="text-align:right;">$${pvp}</td>
+                <td class="${columnaBusqueda === 'saldo_temp' ? 'highlight-cell' : ''}" style="text-align:right;">${sTem}</td>
                 <td style="text-align:center;">
                     <button onclick="editarProducto('${id}')">✏️ Editar</button>
                     <button onclick="eliminarProducto('${id}')">❌ Eliminar</button>
@@ -143,14 +174,14 @@ function renderizarTabla(productos) {
             const precioVenta = parseFloat(p.precio_venta || p.pvp || 0).toFixed(2);
 
             tr.innerHTML = `
-                <td class="excel-code">${codigo}</td>
-                <td>${codProv}</td>
-                <td>${nombre}</td>
-                <td style="text-align:right;">${sUio}</td>
-                <td style="text-align:right;">${sGye}</td>
-                <td style="text-align:right;">$${costoProm}</td>
-                <td>${pro1}</td>
-                <td style="text-align:right;">$${precioVenta}</td>
+                <td class="${columnaBusqueda === 'codigo' ? 'highlight-cell' : ''}">${codigo}</td>
+                <td class="${columnaBusqueda === 'codigo_proveedor' ? 'highlight-cell' : ''}">${codProv}</td>
+                <td class="${columnaBusqueda === 'descripcion' ? 'highlight-cell' : ''}">${nombre}</td>
+                <td class="${columnaBusqueda === 'saldo_uio' ? 'highlight-cell' : ''}" style="text-align:right;">${sUio}</td>
+                <td class="${columnaBusqueda === 'saldo_gye' ? 'highlight-cell' : ''}" style="text-align:right;">${sGye}</td>
+                <td class="${columnaBusqueda === 'costo_prom' ? 'highlight-cell' : ''}" style="text-align:right;">$${costoProm}</td>
+                <td class="${columnaBusqueda === 'pro1' ? 'highlight-cell' : ''}" style="text-align:center;">${pro1}</td>
+                <td class="${columnaBusqueda === 'pvp' ? 'highlight-cell' : ''}" style="text-align:right;">$${precioVenta}</td>
                 <td style="text-align:center;">
                     <button onclick="editarProducto('${id}')">✏️ Editar</button>
                     <button onclick="eliminarProducto('${id}')">❌ Eliminar</button>
@@ -178,17 +209,6 @@ function renderizarPaginacion(totalPaginas) {
         };
         div.appendChild(btn);
     }
-}
-
-function ordenar(columna) {
-    if (ordenColumna === columna) {
-        ordenDireccion = ordenDireccion === 'asc' ? 'desc' : 'asc';
-    } else {
-        ordenColumna = columna;
-        ordenDireccion = 'asc';
-    }
-    paginaActual = 1;
-    cargarProductos();
 }
 
 function editarProducto(id) {
