@@ -1,23 +1,30 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
 
 app = FastAPI(title="ERP Sucre API")
 
-# Rutas de tus endpoints backend (ejemplo)
-@app.get("/api/health")
-def health_check():
-    return {"status": "ok"}
+# Endpoint para obtener productos desde la base de datos (Supabase)
+@app.get("/api/productos")
+async def obtener_productos(
+    descripcion: str = Query("", alias="descripcion"),
+    pagina: int = Query(1, alias="pagina"),
+    por_pagina: int = Query(20, alias="porPagina"),
+    orden_columna: str = Query("descripcion", alias="ordenColumna"),
+    orden_direccion: str = Query("asc", alias="ordenDireccion")
+):
+    # AQUÍ MANTIENES TU LÓGICA DE CONSULTA A SUPABASE
+    # Ejemplo de estructura de retorno esperada por la tabla:
+    return {
+        "data": [],
+        "totalPaginas": 1
+    }
 
-# Montar la carpeta web para servir el Frontend
-# Verifica que la carpeta 'web' exista en la raíz del proyecto
+# Montar frontend web
 if os.path.exists("web"):
     app.mount("/web", StaticFiles(directory="web", html=True), name="web")
 
 @app.get("/")
 def read_root():
-    # Redirige la raíz automáticamente a productos
     return RedirectResponse(url="/web/productos/index.html")
-
-# Agrega aquí el resto de tus endpoints de productos, clientes, etc.
