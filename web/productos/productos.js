@@ -13,54 +13,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarProductos() {
     const buscar = document.getElementById('buscar').value;
-    const queryParams = `descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
+    
+    // Ruta directa estandarizada hacia la API
+    const url = `/api/productos?descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
 
-    // Rutas probables según la arquitectura de FastAPI
-    const endpoints = [
-        `/productos?${queryParams}`,
-        `/api/productos?${queryParams}`,
-        `/api/v1/productos?${queryParams}`
-    ];
-
-    let respuesta = null;
-    let errorStatus = 404;
-
-    for (const url of endpoints) {
-        try {
-            const res = await fetch(url);
-            if (res.ok) {
-                respuesta = await res.json();
-                break; // Encontró la ruta correcta
-            } else {
-                errorStatus = res.status;
-            }
-        } catch (e) {
-            console.error(`Error consultando ${url}:`, e);
+    try {
+        const respuesta = await fetch(url);
+        
+        if (!respuesta.ok) {
+            throw new Error(`Código ${respuesta.status}`);
         }
-    }
+        
+        const resultado = await respuesta.json();
+        
+        let lista = [];
+        let totalPaginas = 1;
 
-    if (!respuesta) {
+        if (Array.isArray(resultado)) {
+            lista = resultado;
+        } else if (resultado && Array.isArray(resultado.data)) {
+            lista = resultado.data;
+            totalPaginas = resultado.totalPaginas || 1;
+        }
+
+        renderizarTabla(lista);
+        renderizarPaginacion(totalPaginas);
+
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
         const tbody = document.getElementById('tablaProductos');
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error al obtener datos (Error servidor: ${errorStatus}). Verifique la ruta del backend en main.py.</td></tr>`;
-        return;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error de respuesta backend (${error.message}).</td></tr>`;
     }
-
-    // Extraer array de datos
-    let lista = [];
-    let totalPaginas = 1;
-
-    if (Array.isArray(respuesta)) {
-        lista = respuesta;
-    } else if (respuesta && Array.isArray(respuesta.data)) {
-        lista = respuesta.data;
-        totalPaginas = respuesta.totalPaginas || 1;
-    } else if (respuesta && Array.isArray(respuesta.productos)) {
-        lista = respuesta.productos;
-        totalPaginas = respuesta.totalPaginas || 1;
-    }
-
-    renderizarTabla(lista);
-    renderizarPaginacion(totalPaginas);
 }
 
 function renderizarTabla(productos) {
@@ -128,12 +111,12 @@ function ordenar(columna) {
 }
 
 function editarProducto(id) {
-    alert('Editar producto: ' + id);
+    alert('Editar producto ID: ' + id);
 }
 
 function eliminarProducto(id) {
-    if (confirm('¿Eliminar producto ' + id + '?')) {
-        fetch(`/productos/${id}`, { method: 'DELETE' })
+    if (confirm('¿Eliminar producto ID ' + id + '?')) {
+        fetch(`/api/productos/${id}`, { method: 'DELETE' })
             .then(() => cargarProductos());
     }
 }
