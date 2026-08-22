@@ -2,14 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP Sucre</title>
-
-    <!-- SOLO ESTE CSS -->
-    <link rel="stylesheet" href="productos.css?v=99999">
-
+    <link rel="stylesheet" href="productos.css?v=10">
     <script src="productos.js" defer></script>
 </head>
-
 <body>
 
     <div class="header">
@@ -22,54 +19,24 @@
         <button id="btnNuevo">➕ Nuevo Producto</button>
     </div>
 
-    <table class="erp-table">
-        <thead>
-            <tr>
-                <th onclick="ordenar('codigo')">Código</th>
-                <th onclick="ordenar('descripcion')">Descripción</th>
-                <th onclick="ordenar('marca')">Marca</th>
-                <th onclick="ordenar('proveedor')">Proveedor</th>
-                <th onclick="ordenar('stock')">Stock</th>
-                <th onclick="ordenar('precio')">Precio</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="tablaProductos"></tbody>
-    </table>
-
-    <div id="paginacion"></div>
-
-    <!-- MODAL -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-
-            <h2 id="modalTitulo">Nuevo Producto</h2>
-
-            <label>Código</label>
-            <input type="text" id="prodCodigo">
-
-            <label>Descripción</label>
-            <input type="text" id="prodDescripcion">
-
-            <label>Marca</label>
-            <input type="text" id="prodMarca">
-
-            <label>Proveedor</label>
-            <input type="text" id="prodProveedor">
-
-            <label>Stock</label>
-            <input type="number" id="prodStock">
-
-            <label>Precio</label>
-            <input type="number" id="prodPrecio" step="0.01">
-
-            <div class="modal-actions">
-                <button id="btnGuardar">Guardar</button>
-                <button id="btnCerrar">Cancelar</button>
-            </div>
-
-        </div>
+    <div class="table-container">
+        <table class="erp-table">
+            <thead>
+                <tr>
+                    <th onclick="ordenar('codigo')">Código ⇕</th>
+                    <th onclick="ordenar('descripcion')">Descripción ⇕</th>
+                    <th onclick="ordenar('marca')">Marca ⇕</th>
+                    <th onclick="ordenar('proveedor')">Proveedor ⇕</th>
+                    <th onclick="ordenar('stock')">Stock ⇕</th>
+                    <th onclick="ordenar('precio')">Precio ⇕</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaProductos"></tbody>
+        </table>
     </div>
+
+    <div id="paginacion" class="paginacion"></div>
 
 </body>
 </html>

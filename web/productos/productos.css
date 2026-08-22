@@ -1,35 +1,167 @@
-/* Estilo Base de Tabla Tipo Excel */
-.erp-table {
-    width: 100%;
-    border-collapse: collapse; /* Une los bordes para crear la cuadrícula */
+/* ==========================================
+   ESTILOS GENERALES TIPO EXCEL
+   ========================================== */
+body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 13px;
-    background-color: #ffffff;
-}
-
-/* Encabezado Verde Estilo Excel */
-.erp-table thead th {
-    background-color: #107c41; /* Verde característico de Excel */
-    color: #ffffff;
-    font-weight: 600;
-    text-align: left;
-    padding: 6px 10px;
-    border: 1px solid #0c5e31;
-}
-
-/* Celda / Cuadrícula */
-.erp-table tbody td {
-    padding: 5px 10px;
-    border: 1px solid #d4d4d4; /* Bordes grises para simular celdas */
+    background-color: #f3f3f3;
+    margin: 20px;
     color: #333333;
 }
 
-/* Filas Alternadas (Efecto cebra de tabla formateada) */
+.header h1 {
+    color: #107c41; /* Verde clásico de Excel */
+    margin: 0 0 5px 0;
+    font-size: 24px;
+}
+
+.header p {
+    color: #666666;
+    margin: 0 0 15px 0;
+    font-size: 13px;
+}
+
+/* Panel de Controles superiores */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.actions input[type="text"] {
+    padding: 6px 10px;
+    border: 1px solid #ababab;
+    border-radius: 2px;
+    font-size: 13px;
+    width: 250px;
+    outline: none;
+}
+
+.actions input[type="text"]:focus {
+    border-color: #107c41;
+}
+
+.actions button {
+    background-color: #107c41;
+    color: #ffffff;
+    border: 1px solid #0c5e31;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.actions button:hover {
+    background-color: #0e6b37;
+}
+
+/* Contenedor con scroll para cuadrícula */
+.table-container {
+    overflow-x: auto;
+    border: 1px solid #d4d4d4;
+    background-color: #ffffff;
+}
+
+/* ==========================================
+   TABLA TIPO EXCEL (HOJA DE CÁLCULO)
+   ========================================== */
+.erp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+}
+
+/* Encabezado Verde Excel */
+.erp-table thead tr {
+    background-color: #107c41 !important;
+    color: #ffffff !important;
+}
+
+.erp-table thead th {
+    padding: 6px 10px;
+    font-weight: 600;
+    border: 1px solid #0c5e31;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.erp-table thead th:hover {
+    background-color: #0e6b37;
+}
+
+/* Filas y Celdas */
+.erp-table tbody td {
+    padding: 4px 8px;
+    border: 1px solid #d4d4d4; /* Cuadrícula gris de Excel */
+    color: #222222;
+    white-space: nowrap;
+}
+
+/* Filas cebra alternadas */
 .erp-table tbody tr:nth-child(even) {
     background-color: #f3f9f5;
 }
 
-/* Efecto al pasar el cursor sobre una fila */
+/* Resaltado de fila al pasar el mouse */
 .erp-table tbody tr:hover {
-    background-color: #e2f0d9;
+    background-color: #e2f0d9 !important;
+}
+
+/* Estilos de datos numéricos y etiquetas */
+.excel-code {
+    font-family: Consolas, monospace;
+    font-weight: bold;
+    color: #107c41;
+}
+
+.excel-number {
+    text-align: right;
+    font-weight: 600;
+}
+
+.excel-badge {
+    background-color: #e1dfdd;
+    color: #323130;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-size: 11px;
+}
+
+/* Botones dentro de la celda de acciones */
+.btn-accion {
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 11px;
+    border-radius: 2px;
+    margin-right: 2px;
+}
+
+.btn-accion:hover {
+    background-color: #e0e0e0;
+}
+
+/* Paginación estilo Excel */
+.paginacion {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.paginacion button {
+    border: 1px solid #d4d4d4;
+    background-color: #ffffff;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.paginacion button.activo {
+    background-color: #107c41;
+    color: #ffffff;
+    font-weight: bold;
+    border-color: #0c5e31;
 }
