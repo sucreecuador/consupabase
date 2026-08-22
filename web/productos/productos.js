@@ -1,7 +1,7 @@
 let paginaActual = 1;
 let ordenColumna = 'codigo';
 let ordenDireccion = 'asc';
-let columnaBusqueda = 'descripcion'; // Campo activo por defecto
+let columnaBusqueda = 'descripcion';
 let vistaActual = 'vista1';
 
 const MAPEO_COLUMNAS = {
@@ -28,11 +28,24 @@ document.addEventListener('DOMContentLoaded', () => {
             cargarProductos();
         });
     }
+
+    // listeners para los botones de vistas si existen
+    const btnVista1 = document.getElementById('btnVista1');
+    const btnVista2 = document.getElementById('btnVista2');
+
+    if (btnVista1) btnVista1.addEventListener('click', () => cambiarVista('vista1'));
+    if (btnVista2) btnVista2.addEventListener('click', () => cambiarVista('vista2'));
+
     renderizarEncabezados();
     cargarProductos();
 });
 
-// 1. Lógica para ORDENAR (Ascendente / Descendente)
+function cambiarVista(vista) {
+    vistaActual = vista;
+    renderizarEncabezados();
+    cargarProductos();
+}
+
 function cambiarOrden(columnaBD) {
     if (ordenColumna === columnaBD) {
         ordenDireccion = ordenDireccion === 'asc' ? 'desc' : 'asc';
@@ -44,9 +57,8 @@ function cambiarOrden(columnaBD) {
     cargarProductos();
 }
 
-// 2. Lógica para SELECCIONAR BÚSQUEDA
 function seleccionarBuscador(columnaBD, nombreMostrar, e) {
-    if (e) e.stopPropagation(); // Evita que se active el ordenamiento al hacer clic en la lupa
+    if (e) e.stopPropagation();
     
     columnaBusqueda = columnaBD;
     
@@ -54,7 +66,7 @@ function seleccionarBuscador(columnaBD, nombreMostrar, e) {
     if (badge) badge.textContent = `🎯 Buscando en: ${nombreMostrar}`;
     
     const inputBuscar = document.getElementById('buscar');
-    if (inputBuscar) inputBuscar.placeholder = `Buscar por ${nombreMostrar}...`;
+    if (inputBuscar) inputBuscar.placeholder = `Escribe para buscar en ${nombreMostrar}...`;
 
     renderizarEncabezados();
     paginaActual = 1;
@@ -96,12 +108,11 @@ function renderizarEncabezados() {
     let html = '<tr>';
     columnas.forEach(col => {
         const esBuscado = columnaBusqueda === col.key;
-        const claseTh = esBuscado ? 'style="background-color: #065f46;"' : '';
-        const btnClase = esBuscado ? 'background:#f59e0b; color:#78350f; font-weight:bold;' : 'background:rgba(255,255,255,0.2); color:white;';
+        const btnClase = esBuscado ? 'background:#f59e0b; color:#78350f;' : 'background:rgba(255,255,255,0.25); color:white;';
 
         html += `
-            <th ${claseTh}>
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:5px;">
+            <th>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
                     <span onclick="cambiarOrden('${col.key}')" style="cursor:pointer; flex-grow:1;">
                         ${col.label} ${obtenerFlecha(col.key)}
                     </span>
@@ -119,6 +130,9 @@ function renderizarEncabezados() {
 }
 
 async function cargarProductos() {
+    const tbody = document.getElementById('tablaCuerpo');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Cargando datos...</td></tr>';
+
     const inputBuscar = document.getElementById('buscar');
     const valor = inputBuscar ? inputBuscar.value.trim() : '';
 
@@ -143,5 +157,74 @@ async function cargarProductos() {
         renderizarPaginacion(respuesta.totalPaginas || 1);
     } catch (err) {
         console.error("Error al cargar productos:", err);
+        if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Error al cargar datos de la base de datos</td></tr>';
     }
+}
+
+function renderizarTabla(productos) {
+    const tbody = document.getElementById('tablaCuerpo');
+    if (!tbody) return;
+
+    if (productos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No se encontraron productos</td></tr>';
+        return;
+    }
+
+    let html = '';
+    productos.forEach(p => {
+        html += '<tr>';
+        if (vistaActual === 'vista1') {
+            html += `
+                <td><strong>${p.codigo || ''}</strong></td>
+                <td>${p.naci || ''}</td>
+                <td>${p.marca || ''}</td>
+                <td>${p.descripcion || ''}</td>
+                <td>${p.uni || ''}</td>
+                <td>$${Number(p.pvp || 0).toFixed(2)}</td>
+                <td>${p.saldo_temp || 0}</td>
+            `;
+        } else {
+            html += `
+                <td><strong>${p.codigo || ''}</strong></td>
+                <td>${p.codigo_proveedor || ''}</td>
+                <td>${p.descripcion || ''}</td>
+                <td>${p.saldo_uio || 0}</td>
+                <td>${p.saldo_gye || 0}</td>
+                <td>$${Number(p.costo_prom || 0).toFixed(2)}</td>
+                <td>${p.pro1 || 0}</td>
+                <td>$${Number(p.pvp || 0).toFixed(2)}</td>
+            `;
+        }
+        html += `
+            <td style="text-align:center;">
+                <button onclick="editarProducto('${p.codigo}')">✏️ Editar</button>
+                <button onclick="eliminarProducto('${p.codigo}')">❌ Eliminar</button>
+            </td>
+        </tr>`;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function renderizarPaginacion(totalPaginas) {
+    const divPaginacion = document.getElementById('paginacion');
+    if (!divPaginacion) return;
+
+    let html = '';
+    if (paginaActual > 1) {
+        html += `<button onclick="cambiarPagina(${paginaActual - 1})">Anterior</button> `;
+    }
+    
+    html += `<span>Página ${paginaActual} de ${totalPaginas}</span> `;
+
+    if (paginaActual < totalPaginas) {
+        html += `<button onclick="cambiarPagina(${paginaActual + 1})">Siguiente</button>`;
+    }
+
+    divPaginacion.innerHTML = html;
+}
+
+function cambiarPagina(nuevaPagina) {
+    paginaActual = nuevaPagina;
+    cargarProductos();
 }
