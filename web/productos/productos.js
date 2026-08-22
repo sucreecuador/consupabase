@@ -23,7 +23,7 @@ function cambiarVista(nombreVista, btnElem) {
     document.querySelectorAll('.btn-view').forEach(btn => btn.classList.remove('active'));
     if (btnElem) btnElem.classList.add('active');
 
-    ordenColumna = (vistaActual === 'vista1') ? 'naci' : 'codigo';
+    ordenColumna = 'codigo';
 
     renderizarEncabezados();
     renderizarTabla(datosActuales);
@@ -37,7 +37,8 @@ function renderizarEncabezados() {
 
     if (vistaActual === 'vista1') {
         html += `
-            <th onclick="ordenar('naci')">NACIONALIDAD ⇕</th>
+            <th onclick="ordenar('codigo')">CÓDIGO ⇕</th>
+            <th onclick="ordenar('naci')">NAC ⇕</th>
             <th onclick="ordenar('marca')">MARCA ⇕</th>
             <th onclick="ordenar('descripcion')">NOMBRE ⇕</th>
             <th onclick="ordenar('uni')">UNI ⇕</th>
@@ -47,7 +48,7 @@ function renderizarEncabezados() {
         `;
     } else {
         html += `
-            <th onclick="ordenar('codigo')">CODIGO ⇕</th>
+            <th onclick="ordenar('codigo')">CÓDIGO ⇕</th>
             <th onclick="ordenar('codigo_proveedor')">COD.PROV ⇕</th>
             <th onclick="ordenar('descripcion')">NOMBRE ⇕</th>
             <th onclick="ordenar('saldo_uio')">S.UIO ⇕</th>
@@ -83,6 +84,10 @@ async function cargarProductos() {
 
     } catch (error) {
         console.error('Error al cargar productos:', error);
+        const tbody = document.getElementById('tablaProductos');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #d9534f; padding: 15px;">Error al conectar con la base de datos.</td></tr>`;
+        }
     }
 }
 
@@ -93,8 +98,7 @@ function renderizarTabla(productos) {
     tbody.innerHTML = '';
 
     if (!productos || productos.length === 0) {
-        const colSpan = vistaActual === 'vista2' ? 8 : 7;
-        tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; padding: 15px;">No se encontraron registros.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 15px;">No se encontraron registros.</td></tr>`;
         return;
     }
 
@@ -105,8 +109,8 @@ function renderizarTabla(productos) {
         const id = p.id;
 
         if (vistaActual === 'vista1') {
-            // MAPEO EXACTO PARA VISTA 1 (7 COLUMNAS)
-            const nacionalidad = p.naci || p.nacionalidad || '—';
+            const codigo = p.codigo || '—';
+            const nac = p.naci || p.nacionalidad || '—';
             const marca = p.marca || 'N/A';
             const nombre = p.descripcion || '—';
             const uni = p.uni || 'UND';
@@ -114,7 +118,8 @@ function renderizarTabla(productos) {
             const sTem = p.saldo_temp ?? 0;
 
             tr.innerHTML = `
-                <td>${nacionalidad}</td>
+                <td class="excel-code">${codigo}</td>
+                <td>${nac}</td>
                 <td><span class="excel-badge">${marca}</span></td>
                 <td>${nombre}</td>
                 <td>${uni}</td>
@@ -126,7 +131,6 @@ function renderizarTabla(productos) {
                 </td>
             `;
         } else {
-            // MAPEO EXACTO PARA VISTA 2 (8 COLUMNAS)
             const codigo = p.codigo || '—';
             const codProv = p.codigo_proveedor || '—';
             const nombre = p.descripcion || '—';
@@ -136,7 +140,7 @@ function renderizarTabla(productos) {
             const pro1 = p.pro1 || '—';
 
             tr.innerHTML = `
-                <td>${codigo}</td>
+                <td class="excel-code">${codigo}</td>
                 <td>${codProv}</td>
                 <td>${nombre}</td>
                 <td style="text-align:right;">${sUio}</td>
@@ -181,4 +185,21 @@ function ordenar(columna) {
     }
     paginaActual = 1;
     cargarProductos();
+}
+
+function editarProducto(id) {
+    console.log("Editar producto ID:", id);
+    // Lógica para abrir el modal de edición
+}
+
+function eliminarProducto(id) {
+    if (confirm("¿Está seguro de eliminar este producto?")) {
+        console.log("Eliminar producto ID:", id);
+        // Lógica para eliminar el producto
+    }
+}
+
+function abrirModalCrear() {
+    console.log("Abrir modal nuevo producto");
+    // Lógica para abrir el modal de creación
 }
