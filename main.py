@@ -27,7 +27,17 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-# Modelo Pydantic para actualización de productos
+# Modelo Pydantic para crear producto
+class ProductoCreate(BaseModel):
+    codigo: str
+    descripcion: str
+    marca: Optional[str] = None
+    codigo_proveedor: Optional[str] = None
+    saldo_temp: Optional[float] = 0.0
+    precio_venta: Optional[float] = 0.0
+
+
+# Modelo Pydantic para actualizar producto
 class ProductoUpdate(BaseModel):
     codigo: Optional[str] = None
     descripcion: Optional[str] = None
@@ -53,15 +63,15 @@ async def obtener_productos(
     try:
         query = supabase.table("productos").select("*", count="exact")
 
-        # Excluir la fila del encabezado importado de Excel
+        # Excluir fila de encabezado si existe
         query = query.neq("codigo", "CODIGO")
 
-        # Filtro de búsqueda multi-campo
+        # Filtro de búsqueda
         if descripcion and descripcion.strip():
             term = descripcion.strip().replace("%", "")
             query = query.or_(f"descripcion.ilike.*{term}*,codigo.ilike.*{term}*,codigo_proveedor.ilike.*{term}*")
 
-        # Mapeo a los nombres reales de las columnas en Supabase
+        # Mapeo de columnas
         mapa_columnas = {
             "codigo": "codigo",
             "descripcion": "descripcion",
@@ -77,10 +87,8 @@ async def obtener_productos(
         columna_real = mapa_columnas.get(orden_columna, "codigo")
         es_descendente = (orden_direccion.lower() == "desc")
 
-        # Ordenamiento seguro evitando fallos por NULLs
         query = query.order(columna_real, desc=es_descendente, nullsfirst=False)
 
-        # Paginación
         desde = (pagina - 1) * por_pagina
         hasta = desde + por_pagina - 1
         query = query.range(desde, hasta)
@@ -109,6 +117,17 @@ async def obtener_producto_por_id(producto_id: str):
         return res.data[0]
     except Exception as e:
         print("Error al obtener producto:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/productos")
+async def crear_producto(producto: ProductoCreate):
+    try:
+        datos = producto.dict()
+        res = supabase.table("productos").insert(datos).execute()
+        return {"status": "ok", "data": res.data}
+    except Exception as e:
+        print("Error al crear producto:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     configurarCabeceras();
 
-    const formEditar = document.getElementById('formEditar');
-    if (formEditar) {
-        formEditar.addEventListener('submit', guardarEdicion);
+    const formProducto = document.getElementById('formProducto');
+    if (formProducto) {
+        formProducto.addEventListener('submit', guardarProducto);
     }
 });
 
@@ -150,61 +150,83 @@ function ordenar(columna) {
     cargarProductos();
 }
 
+function abrirModalCrear() {
+    document.getElementById('modalTitulo').textContent = '➕ Nuevo Producto';
+    document.getElementById('prod_id').value = '';
+    document.getElementById('prod_codigo').value = '';
+    document.getElementById('prod_descripcion').value = '';
+    document.getElementById('prod_marca').value = '';
+    document.getElementById('prod_codigo_proveedor').value = '';
+    document.getElementById('prod_saldo_temp').value = '0';
+    document.getElementById('prod_precio_venta').value = '0.00';
+
+    document.getElementById('modalProducto').style.display = 'flex';
+}
+
 async function editarProducto(id) {
     try {
         const res = await fetch(`/api/productos/${id}`);
-        if (!res.ok) throw new Error('No se pudo obtener el producto');
+        if (!res.ok) throw new Error('No se pudo obtener la información del producto');
         const data = await res.json();
 
-        document.getElementById('edit_id').value = data.id;
-        document.getElementById('edit_codigo').value = data.codigo || '';
-        document.getElementById('edit_descripcion').value = data.descripcion || '';
-        document.getElementById('edit_marca').value = data.marca || '';
-        document.getElementById('edit_codigo_proveedor').value = data.codigo_proveedor || '';
-        document.getElementById('edit_saldo_temp').value = data.saldo_temp ?? 0;
-        document.getElementById('edit_precio_venta').value = data.precio_venta ?? 0;
+        document.getElementById('modalTitulo').textContent = '✏️ Editar Producto';
+        document.getElementById('prod_id').value = data.id;
+        document.getElementById('prod_codigo').value = data.codigo || '';
+        document.getElementById('prod_descripcion').value = data.descripcion || '';
+        document.getElementById('prod_marca').value = data.marca || '';
+        document.getElementById('prod_codigo_proveedor').value = data.codigo_proveedor || '';
+        document.getElementById('prod_saldo_temp').value = data.saldo_temp ?? 0;
+        document.getElementById('prod_precio_venta').value = data.precio_venta ?? 0;
 
-        document.getElementById('modalEditar').style.display = 'flex';
+        document.getElementById('modalProducto').style.display = 'flex';
     } catch (e) {
-        alert('Error al abrir modal de edición: ' + e.message);
+        alert('Error: ' + e.message);
     }
 }
 
 function cerrarModal() {
-    document.getElementById('modalEditar').style.display = 'none';
+    document.getElementById('modalProducto').style.display = 'none';
 }
 
-async function guardarEdicion(e) {
+async function guardarProducto(e) {
     e.preventDefault();
 
-    const id = document.getElementById('edit_id').value;
+    const id = document.getElementById('prod_id').value;
+    const esEdicion = Boolean(id);
+
     const payload = {
-        codigo: document.getElementById('edit_codigo').value.trim(),
-        descripcion: document.getElementById('edit_descripcion').value.trim(),
-        marca: document.getElementById('edit_marca').value.trim(),
-        codigo_proveedor: document.getElementById('edit_codigo_proveedor').value.trim(),
-        saldo_temp: parseFloat(document.getElementById('edit_saldo_temp').value) || 0,
-        precio_venta: parseFloat(document.getElementById('edit_precio_venta').value) || 0
+        codigo: document.getElementById('prod_codigo').value.trim(),
+        descripcion: document.getElementById('prod_descripcion').value.trim(),
+        marca: document.getElementById('prod_marca').value.trim(),
+        codigo_proveedor: document.getElementById('prod_codigo_proveedor').value.trim(),
+        saldo_temp: parseFloat(document.getElementById('prod_saldo_temp').value) || 0,
+        precio_venta: parseFloat(document.getElementById('prod_precio_venta').value) || 0
     };
 
+    const url = esEdicion ? `/api/productos/${id}` : '/api/productos';
+    const metodo = esEdicion ? 'PUT' : 'POST';
+
     try {
-        const res = await fetch(`/api/productos/${id}`, {
-            method: 'PUT',
+        const res = await fetch(url, {
+            method: metodo,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error('Error al actualizar producto');
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.detail || 'Error al guardar producto');
+        }
 
         cerrarModal();
         cargarProductos();
     } catch (err) {
-        alert('Error al guardar: ' + err.message);
+        alert('Error: ' + err.message);
     }
 }
 
 function eliminarProducto(id) {
-    if (confirm('¿Desea eliminar el producto ID ' + id + '?')) {
+    if (confirm('¿Desea eliminar este producto?')) {
         fetch(`/api/productos/${id}`, { method: 'DELETE' })
             .then(() => cargarProductos());
     }
