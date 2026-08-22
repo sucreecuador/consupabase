@@ -4,8 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP Sucre</title>
-    <link rel="stylesheet" href="productos.css?v=2002">
-    <script src="productos.js?v=2002" defer></script>
+    <link rel="stylesheet" href="productos.css?v=2004">
+    <script src="productos.js?v=2004" defer></script>
+    <style>
+        /* Modal para Edición de Productos */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2b5797;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-guardar {
+            background-color: #2b5797;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-cancelar {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -15,8 +87,8 @@
     </div>
 
     <div class="actions">
-        <input type="text" id="buscar" placeholder="Buscar producto...">
-        <button id="btnNuevo">➕ Nuevo Producto</button>
+        <input type="text" id="buscar" placeholder="Buscar producto por código, descripción o proveedor...">
+        <button id="btnNuevo" class="btn-nuevo">➕ Nuevo Producto</button>
     </div>
 
     <div class="table-container">
@@ -32,11 +104,51 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="tablaProductos"></tbody>
+            <tbody id="tablaProductos">
+                <tr><td colspan="7" style="text-align:center; padding: 15px;">Cargando datos...</td></tr>
+            </tbody>
         </table>
     </div>
 
     <div id="paginacion" class="paginacion"></div>
+
+    <!-- Modal de Edición -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">✏️ Editar Producto</div>
+            <form id="formEditar">
+                <input type="hidden" id="edit_id">
+                <div class="form-group">
+                    <label>Código:</label>
+                    <input type="text" id="edit_codigo" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <input type="text" id="edit_descripcion" required>
+                </div>
+                <div class="form-group">
+                    <label>Marca:</label>
+                    <input type="text" id="edit_marca">
+                </div>
+                <div class="form-group">
+                    <label>Código Proveedor:</label>
+                    <input type="text" id="edit_codigo_proveedor">
+                </div>
+                <div class="form-group">
+                    <label>Stock (Saldo Temp):</label>
+                    <input type="number" step="any" id="edit_saldo_temp" required>
+                </div>
+                <div class="form-group">
+                    <label>Precio Venta ($):</label>
+                    <input type="number" step="0.01" id="edit_precio_venta" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>

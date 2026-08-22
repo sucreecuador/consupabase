@@ -5,7 +5,6 @@ let ordenDireccion = 'asc';
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
 
-    // Evento de búsqueda en vivo
     const inputBuscar = document.getElementById('buscar');
     if (inputBuscar) {
         inputBuscar.addEventListener('input', () => {
@@ -14,25 +13,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Configurar eventos de clic en las cabeceras de la tabla
     configurarCabeceras();
+
+    const formEditar = document.getElementById('formEditar');
+    if (formEditar) {
+        formEditar.addEventListener('submit', guardarEdicion);
+    }
 });
 
 function configurarCabeceras() {
     const cabeceras = document.querySelectorAll('.erp-table th');
-    // Mapeo del índice de la columna a su campo real en la base de datos
     const mapaColumnas = [
         'codigo',            // Columna 0: Código
         'descripcion',       // Columna 1: Descripción
         'marca',             // Columna 2: Marca
-        'codigo_proveedor',  // Columna 3: Proveedor (código proveedor)
-        'saldo_temp',        // Columna 4: Stock (saldo temporal)
-        'precio_venta'       // Columna 5: Precio (precio venta)
+        'codigo_proveedor',  // Columna 3: Proveedor
+        'saldo_temp',        // Columna 4: Stock
+        'precio_venta'       // Columna 5: Precio
     ];
 
     cabeceras.forEach((th, index) => {
         if (index < mapaColumnas.length) {
             th.style.cursor = 'pointer';
+            th.title = 'Haz clic para ordenar por este campo';
             th.onclick = () => ordenar(mapaColumnas[index]);
         }
     });
@@ -57,15 +60,12 @@ async function cargarProductos() {
         
         const resultado = await respuesta.json();
         
-        let lista = [];
-        let totalPaginas = 1;
-
-        if (Array.isArray(resultado)) {
-            lista = resultado;
-        } else if (resultado && Array.isArray(resultado.data)) {
-            lista = resultado.data;
-            totalPaginas = resultado.totalPaginas || 1;
+        if (resultado.error) {
+            console.error('Error reportado desde el servidor:', resultado.error);
         }
+
+        let lista = resultado.data || [];
+        let totalPaginas = resultado.totalPaginas || 1;
 
         renderizarTabla(lista);
         renderizarPaginacion(totalPaginas);
@@ -91,7 +91,6 @@ function renderizarTabla(productos) {
     }
 
     productos.forEach(p => {
-        // Omite el registro redundante del encabezado importado de Excel
         if (p.codigo === 'CODIGO') return;
 
         const tr = document.createElement('tr');
@@ -147,12 +146,61 @@ function ordenar(columna) {
         ordenColumna = columna;
         ordenDireccion = 'asc';
     }
-    paginaActual = 1; // Reiniciar a la primera página al ordenar
+    paginaActual = 1;
     cargarProductos();
 }
 
-function editarProducto(id) {
-    alert('Editar producto ID: ' + id);
+async function editarProducto(id) {
+    try {
+        const res = await fetch(`/api/productos/${id}`);
+        if (!res.ok) throw new Error('No se pudo obtener el producto');
+        const data = await res.json();
+
+        document.getElementById('edit_id').value = data.id;
+        document.getElementById('edit_codigo').value = data.codigo || '';
+        document.getElementById('edit_descripcion').value = data.descripcion || '';
+        document.getElementById('edit_marca').value = data.marca || '';
+        document.getElementById('edit_codigo_proveedor').value = data.codigo_proveedor || '';
+        document.getElementById('edit_saldo_temp').value = data.saldo_temp ?? 0;
+        document.getElementById('edit_precio_venta').value = data.precio_venta ?? 0;
+
+        document.getElementById('modalEditar').style.display = 'flex';
+    } catch (e) {
+        alert('Error al abrir modal de edición: ' + e.message);
+    }
+}
+
+function cerrarModal() {
+    document.getElementById('modalEditar').style.display = 'none';
+}
+
+async function guardarEdicion(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('edit_id').value;
+    const payload = {
+        codigo: document.getElementById('edit_codigo').value.trim(),
+        descripcion: document.getElementById('edit_descripcion').value.trim(),
+        marca: document.getElementById('edit_marca').value.trim(),
+        codigo_proveedor: document.getElementById('edit_codigo_proveedor').value.trim(),
+        saldo_temp: parseFloat(document.getElementById('edit_saldo_temp').value) || 0,
+        precio_venta: parseFloat(document.getElementById('edit_precio_venta').value) || 0
+    };
+
+    try {
+        const res = await fetch(`/api/productos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Error al actualizar producto');
+
+        cerrarModal();
+        cargarProductos();
+    } catch (err) {
+        alert('Error al guardar: ' + err.message);
+    }
 }
 
 function eliminarProducto(id) {
