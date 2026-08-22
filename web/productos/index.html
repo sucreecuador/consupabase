@@ -4,19 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP Sucre</title>
-    <link rel="stylesheet" href="productos.css?v=3000">
-    <script src="productos.js?v=3000" defer></script>
+    <link rel="stylesheet" href="productos.css?v=5000">
+    <script src="productos.js?v=5000" defer></script>
     <style>
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 300px;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #107c41;
+            box-shadow: 0 0 4px rgba(16, 124, 65, 0.3);
+        }
         .views-bar {
             display: flex;
             align-items: center;
             gap: 10px;
             margin: 15px 0;
-        }
-        .views-bar label {
-            font-weight: bold;
-            font-size: 14px;
-            color: #333;
         }
         .btn-view {
             background-color: #f0f0f0;
@@ -27,12 +41,19 @@
             font-size: 13px;
             font-weight: bold;
             color: #444;
-            transition: all 0.2s;
         }
         .btn-view.active {
             background-color: #107c41;
             color: white;
             border-color: #107c41;
+        }
+        .selected-col {
+            background-color: #f59e0b !important;
+            color: #78350f !important;
+        }
+        .highlight-cell {
+            background-color: #fef3c7 !important;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -43,25 +64,27 @@
         <p>Gestión de catálogo, precios y stock.</p>
     </div>
 
-    <div class="actions">
-        <input type="text" id="buscar" placeholder="Buscar producto por código, descripción o proveedor...">
+    <!-- SECCIÓN DE BÚSQUEDA Y ACCIONES -->
+    <div class="search-container">
+        <input type="text" id="buscar" class="search-input" placeholder="Escribe para buscar en NOMBRE...">
         <button id="btnNuevo" class="btn-nuevo" onclick="abrirModalCrear()">➕ Nuevo Producto</button>
     </div>
 
     <!-- BARRA DE VISTAS -->
     <div class="views-bar">
-        <label>Vistas:</label>
+        <label style="font-weight:bold; font-size:14px;">Vistas:</label>
         <button class="btn-view active" onclick="cambiarVista('vista1', this)">Vista 1</button>
         <button class="btn-view" onclick="cambiarVista('vista2', this)">Vista 2</button>
     </div>
 
+    <!-- TABLA DE PRODUCTOS -->
     <div class="table-container">
         <table class="erp-table">
             <thead id="tablaHeader">
-                <!-- Encabezados generados dinámicamente desde JS -->
+                <!-- Encabezados cargados desde JS -->
             </thead>
             <tbody id="tablaProductos">
-                <tr><td colspan="7" style="text-align:center; padding: 15px;">Cargando datos...</td></tr>
+                <tr><td colspan="9" style="text-align:center; padding: 15px;">Cargando datos...</td></tr>
             </tbody>
         </table>
     </div>
