@@ -14,26 +14,39 @@ document.addEventListener('DOMContentLoaded', () => {
 async function cargarProductos() {
     const buscar = document.getElementById('buscar').value;
     
-    // Nombres de parámetros ajustados a snake_case para FastAPI
-    const url = `/productos?descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&por_pagina=20&orden_columna=${ordenColumna}&orden_direccion=${ordenDireccion}`;
+    // Parámetros exactos que consume el endpoint /productos en main.py
+    const url = `/productos?descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
 
     try {
         const respuesta = await fetch(url);
+        
         if (!respuesta.ok) {
-            throw new Error(`Error HTTP: ${respuesta.status}`);
+            throw new Error(`Error servidor: ${respuesta.status}`);
         }
+        
         const resultado = await respuesta.json();
         
-        // Admite respuesta directa como array o estructura paginada { data, totalPaginas }
-        const lista = Array.isArray(resultado) ? resultado : (resultado.data || []);
-        const totalPaginas = resultado.totalPaginas || 1;
+        // Maneja tanto un array directo como un objeto con propiedad data
+        let lista = [];
+        let totalPaginas = 1;
+
+        if (Array.isArray(resultado)) {
+            lista = resultado;
+        } else if (resultado && Array.isArray(resultado.data)) {
+            lista = resultado.data;
+            totalPaginas = resultado.totalPaginas || 1;
+        } else if (resultado && Array.isArray(resultado.productos)) {
+            lista = resultado.productos;
+            totalPaginas = resultado.totalPaginas || 1;
+        }
 
         renderizarTabla(lista);
         renderizarPaginacion(totalPaginas);
+
     } catch (error) {
         console.error('Error al cargar productos:', error);
         const tbody = document.getElementById('tablaProductos');
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: red; padding: 15px;">Error al conectar con el servidor backend.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error al obtener datos (${error.message}).</td></tr>`;
     }
 }
 
@@ -48,16 +61,26 @@ function renderizarTabla(productos) {
 
     productos.forEach(p => {
         const tr = document.createElement('tr');
+        
+        // Lectura flexible de propiedades según retorne Supabase/FastAPI
+        const codigo = p.codigo || p.code || '—';
+        const descripcion = p.descripcion || p.description || '—';
+        const marca = p.marca || p.brand || 'N/A';
+        const proveedor = p.proveedor || p.provider || '—';
+        const stock = p.stock ?? p.cantidad ?? 0;
+        const precio = parseFloat(p.precio || p.price || 0).toFixed(2);
+        const id = p.id || p.codigo;
+
         tr.innerHTML = `
-            <td class="excel-code">${p.codigo || '—'}</td>
-            <td>${p.descripcion || '—'}</td>
-            <td><span class="excel-badge">${p.marca || 'N/A'}</span></td>
-            <td>${p.proveedor || '—'}</td>
-            <td class="excel-number">${p.stock ?? 0}</td>
-            <td class="excel-number">$${parseFloat(p.precio || 0).toFixed(2)}</td>
+            <td class="excel-code">${codigo}</td>
+            <td>${descripcion}</td>
+            <td><span class="excel-badge">${marca}</span></td>
+            <td>${proveedor}</td>
+            <td class="excel-number">${stock}</td>
+            <td class="excel-number">$${precio}</td>
             <td style="text-align:center;">
-                <button class="btn-accion" onclick="editarProducto(${p.id})">✏️ Editar</button>
-                <button class="btn-accion" onclick="eliminarProducto(${p.id})">❌ Eliminar</button>
+                <button class="btn-accion" onclick="editarProducto('${id}')">✏️ Editar</button>
+                <button class="btn-accion" onclick="eliminarProducto('${id}')">❌ Eliminar</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -93,11 +116,11 @@ function ordenar(columna) {
 }
 
 function editarProducto(id) {
-    alert('Editar producto ID: ' + id);
+    alert('Editar producto: ' + id);
 }
 
 function eliminarProducto(id) {
-    if (confirm('¿Desea eliminar el producto ID ' + id + '?')) {
+    if (confirm('¿Eliminar producto ' + id + '?')) {
         fetch(`/productos/${id}`, { method: 'DELETE' })
             .then(() => cargarProductos());
     }
