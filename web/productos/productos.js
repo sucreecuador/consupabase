@@ -4,22 +4,6 @@ let ordenDireccion = 'asc';
 let columnaBusqueda = 'descripcion';
 let vistaActual = 'vista1';
 
-const MAPEO_COLUMNAS = {
-    'CÓDIGO': 'codigo',
-    'NAC': 'naci',
-    'MARCA': 'marca',
-    'NOMBRE': 'descripcion',
-    'UNI': 'uni',
-    'PVP': 'pvp',
-    'PRECIO': 'pvp',
-    'S.TEM': 'saldo_temp',
-    'COD.PROV': 'codigo_proveedor',
-    'S.UIO': 'saldo_uio',
-    'S.GYE': 'saldo_gye',
-    'COSTO_PROM': 'costo_prom',
-    'PRO1': 'pro1'
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     const inputBuscar = document.getElementById('buscar');
     if (inputBuscar) {
@@ -29,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // listeners para los botones de vistas si existen
     const btnVista1 = document.getElementById('btnVista1');
     const btnVista2 = document.getElementById('btnVista2');
 
@@ -61,9 +44,6 @@ function seleccionarBuscador(columnaBD, nombreMostrar, e) {
     if (e) e.stopPropagation();
     
     columnaBusqueda = columnaBD;
-    
-    const badge = document.getElementById('search-badge');
-    if (badge) badge.textContent = `🎯 Buscando en: ${nombreMostrar}`;
     
     const inputBuscar = document.getElementById('buscar');
     if (inputBuscar) inputBuscar.placeholder = `Escribe para buscar en ${nombreMostrar}...`;
@@ -157,7 +137,7 @@ async function cargarProductos() {
         renderizarPaginacion(respuesta.totalPaginas || 1);
     } catch (err) {
         console.error("Error al cargar productos:", err);
-        if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Error al cargar datos de la base de datos</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Error de conexión con el servidor</td></tr>';
     }
 }
 
@@ -165,45 +145,56 @@ function renderizarTabla(productos) {
     const tbody = document.getElementById('tablaCuerpo');
     if (!tbody) return;
 
-    if (productos.length === 0) {
+    if (!Array.isArray(productos) || productos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No se encontraron productos</td></tr>';
         return;
     }
 
-    let html = '';
-    productos.forEach(p => {
-        html += '<tr>';
-        if (vistaActual === 'vista1') {
-            html += `
-                <td><strong>${p.codigo || ''}</strong></td>
-                <td>${p.naci || ''}</td>
-                <td>${p.marca || ''}</td>
-                <td>${p.descripcion || ''}</td>
-                <td>${p.uni || ''}</td>
-                <td>$${Number(p.pvp || 0).toFixed(2)}</td>
-                <td>${p.saldo_temp || 0}</td>
-            `;
-        } else {
-            html += `
-                <td><strong>${p.codigo || ''}</strong></td>
-                <td>${p.codigo_proveedor || ''}</td>
-                <td>${p.descripcion || ''}</td>
-                <td>${p.saldo_uio || 0}</td>
-                <td>${p.saldo_gye || 0}</td>
-                <td>$${Number(p.costo_prom || 0).toFixed(2)}</td>
-                <td>${p.pro1 || 0}</td>
-                <td>$${Number(p.pvp || 0).toFixed(2)}</td>
-            `;
-        }
-        html += `
-            <td style="text-align:center;">
-                <button onclick="editarProducto('${p.codigo}')">✏️ Editar</button>
-                <button onclick="eliminarProducto('${p.codigo}')">❌ Eliminar</button>
-            </td>
-        </tr>`;
-    });
+    try {
+        let html = '';
+        productos.forEach(p => {
+            // Lectura segura con soporte para variaciones de claves
+            const cod = p.codigo || p.CODIGO || '';
+            const desc = p.descripcion || p.DESCRIPCION || p.NOMBRE || '';
+            const pvpVal = Number(p.pvp || p.PVP || 0).toFixed(2);
+            const costoVal = Number(p.costo_prom || p.COSTO_PROM || 0).toFixed(2);
 
-    tbody.innerHTML = html;
+            html += '<tr>';
+            if (vistaActual === 'vista1') {
+                html += `
+                    <td><strong>${cod}</strong></td>
+                    <td>${p.naci || p.NAC || ''}</td>
+                    <td>${p.marca || p.MARCA || ''}</td>
+                    <td>${desc}</td>
+                    <td>${p.uni || p.UNI || ''}</td>
+                    <td>$${pvpVal}</td>
+                    <td>${p.saldo_temp || p.S_TEM || 0}</td>
+                `;
+            } else {
+                html += `
+                    <td><strong>${cod}</strong></td>
+                    <td>${p.codigo_proveedor || p.COD_PROV || '0'}</td>
+                    <td>${desc}</td>
+                    <td>${p.saldo_uio || p.S_UIO || 0}</td>
+                    <td>${p.saldo_gye || p.S_GYE || 0}</td>
+                    <td>$${costoVal}</td>
+                    <td>${p.pro1 || p.PRO1 || 0}</td>
+                    <td>$${pvpVal}</td>
+                `;
+            }
+            html += `
+                <td style="text-align:center;">
+                    <button onclick="editarProducto('${cod}')" class="btn-editar">✏️ Editar</button>
+                    <button onclick="eliminarProducto('${cod}')" class="btn-eliminar">❌ Eliminar</button>
+                </td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = html;
+    } catch (e) {
+        console.error("Error renderizando filas:", e);
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Error al procesar formato de datos</td></tr>';
+    }
 }
 
 function renderizarPaginacion(totalPaginas) {
