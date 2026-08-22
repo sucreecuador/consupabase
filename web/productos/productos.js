@@ -12,10 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarProductos() {
-    const buscar = document.getElementById('buscar').value;
+    const buscar = document.getElementById('buscar').value.trim();
     
-    // Ruta directa estandarizada hacia la API
-    const url = `/api/productos?descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
+    // Construcción dinámica de la URL para omitir la búsqueda si está vacía
+    let url = `/api/productos?pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
+    
+    if (buscar !== '') {
+        url += `&descripcion=${encodeURIComponent(buscar)}`;
+    }
 
     try {
         const respuesta = await fetch(url);
@@ -42,7 +46,7 @@ async function cargarProductos() {
     } catch (error) {
         console.error('Error al cargar productos:', error);
         const tbody = document.getElementById('tablaProductos');
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error de respuesta backend (${error.message}).</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error al obtener datos (${error.message}).</td></tr>`;
     }
 }
 
