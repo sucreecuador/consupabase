@@ -12,14 +12,21 @@ async def obtener_productos(
         # Excluir fila de encabezados importados
         query = query.neq("codigo", "CODIGO")
 
+        # Filtro de búsqueda multi-columna (Busca en descripción, código de producto y código de proveedor)
         if descripcion and descripcion.strip():
-            query = query.ilike("descripcion", f"%{descripcion.strip()}%")
+            filtro = descripcion.strip()
+            query = query.or_(
+                f"descripcion.ilike.%{filtro}%,codigo.ilike.%{filtro}%,codigo_proveedor.ilike.%{filtro}%"
+            )
 
-        # Traducir alias a nombres reales de columnas de Supabase
+        # Mapeo de seguridad para ordenar por las columnas reales de Supabase
         mapa_columnas = {
             "proveedor": "codigo_proveedor",
+            "codigo_proveedor": "codigo_proveedor",
             "stock": "saldo_temp",
-            "precio": "precio_venta"
+            "saldo_temp": "saldo_temp",
+            "precio": "precio_venta",
+            "precio_venta": "precio_venta"
         }
         columna_real = mapa_columnas.get(orden_columna, orden_columna)
 
