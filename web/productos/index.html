@@ -4,92 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP Sucre</title>
-    <link rel="stylesheet" href="productos.css?v=5000">
-    <script src="productos.js?v=5000" defer></script>
     <style>
-        .search-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .search-input {
-            padding: 8px 12px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 300px;
-            outline: none;
-        }
-        .search-input:focus {
-            border-color: #107c41;
-            box-shadow: 0 0 4px rgba(16, 124, 65, 0.3);
-        }
-        .views-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .btn-view {
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            padding: 6px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            color: #444;
-        }
-        .btn-view.active {
-            background-color: #107c41;
-            color: white;
-            border-color: #107c41;
-        }
-        .selected-col {
-            background-color: #f59e0b !important;
-            color: #78350f !important;
-        }
-        .highlight-cell {
-            background-color: #fef3c7 !important;
-            font-weight: bold;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f8; color: #333; }
+        h1 { margin-bottom: 2px; color: #065f46; }
+        p.sub { margin-top: 0; color: #666; font-size: 14px; }
+        
+        .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .input-buscar { padding: 8px 12px; width: 280px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .btn-nuevo { background-color: #059669; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        .vistas-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .btn-vista { padding: 6px 12px; border: 1px solid #059669; background: white; color: #059669; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-vista.activo { background-color: #059669; color: white; }
+
+        .tabla-container { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background-color: #047857; color: white; padding: 10px; text-align: left; border-bottom: 2px solid #065f46; white-space: nowrap; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        tr:hover { background-color: #f9fafb; }
+
+        .btn-editar { background-color: #ffffff; border: 1px solid #ccc; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+        .btn-eliminar { background-color: #ffffff; border: 1px solid #ccc; padding: 3px 8px; border-radius: 3px; cursor: pointer; color: #dc2626; }
+        
+        .paginacion-bar { margin-top: 15px; display: flex; align-items: center; gap: 10px; }
+        .paginacion-bar button { padding: 5px 10px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 3px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Productos</h1>
-        <p>Gestión de catálogo, precios y stock.</p>
+    <h1>Productos</h1>
+    <p class="sub">Gestión de catálogo, precios y stock.</p>
+
+    <div class="toolbar">
+        <input type="text" id="buscar" class="input-buscar" placeholder="Escribe para buscar en NOMBRE...">
+        <button class="btn-nuevo" onclick="nuevoProducto()">➕ Nuevo Producto</button>
     </div>
 
-    <!-- SECCIÓN DE BÚSQUEDA Y ACCIONES -->
-    <div class="search-container">
-        <input type="text" id="buscar" class="search-input" placeholder="Escribe para buscar en NOMBRE...">
-        <button id="btnNuevo" class="btn-nuevo" onclick="abrirModalCrear()">➕ Nuevo Producto</button>
+    <div class="vistas-bar">
+        <strong>Vistas:</strong>
+        <button id="btnVista1" class="btn-vista activo">Vista 1</button>
+        <button id="btnVista2" class="btn-vista">Vista 2</button>
     </div>
 
-    <!-- BARRA DE VISTAS -->
-    <div class="views-bar">
-        <label style="font-weight:bold; font-size:14px;">Vistas:</label>
-        <button class="btn-view active" onclick="cambiarVista('vista1', this)">Vista 1</button>
-        <button class="btn-view" onclick="cambiarVista('vista2', this)">Vista 2</button>
-    </div>
-
-    <!-- TABLA DE PRODUCTOS -->
-    <div class="table-container">
-        <table class="erp-table">
-            <thead id="tablaHeader">
-                <!-- Encabezados cargados desde JS -->
-            </thead>
-            <tbody id="tablaProductos">
-                <tr><td colspan="9" style="text-align:center; padding: 15px;">Cargando datos...</td></tr>
+    <div class="tabla-container">
+        <table>
+            <thead id="tablaHeader"></thead>
+            <tbody id="tablaCuerpo">
+                <tr><td colspan="10" style="text-align:center;">Cargando datos...</td></tr>
             </tbody>
         </table>
     </div>
 
-    <div id="paginacion" class="paginacion"></div>
+    <div id="paginacion" class="paginacion-bar"></div>
 
+    <script src="productos.js"></script>
 </body>
 </html>
