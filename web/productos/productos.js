@@ -13,41 +13,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarProductos() {
     const buscar = document.getElementById('buscar').value;
-    
-    // Parámetros exactos que consume el endpoint /productos en main.py
-    const url = `/productos?descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
+    const queryParams = `descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
 
-    try {
-        const respuesta = await fetch(url);
-        
-        if (!respuesta.ok) {
-            throw new Error(`Error servidor: ${respuesta.status}`);
+    // Rutas probables según la arquitectura de FastAPI
+    const endpoints = [
+        `/productos?${queryParams}`,
+        `/api/productos?${queryParams}`,
+        `/api/v1/productos?${queryParams}`
+    ];
+
+    let respuesta = null;
+    let errorStatus = 404;
+
+    for (const url of endpoints) {
+        try {
+            const res = await fetch(url);
+            if (res.ok) {
+                respuesta = await res.json();
+                break; // Encontró la ruta correcta
+            } else {
+                errorStatus = res.status;
+            }
+        } catch (e) {
+            console.error(`Error consultando ${url}:`, e);
         }
-        
-        const resultado = await respuesta.json();
-        
-        // Maneja tanto un array directo como un objeto con propiedad data
-        let lista = [];
-        let totalPaginas = 1;
-
-        if (Array.isArray(resultado)) {
-            lista = resultado;
-        } else if (resultado && Array.isArray(resultado.data)) {
-            lista = resultado.data;
-            totalPaginas = resultado.totalPaginas || 1;
-        } else if (resultado && Array.isArray(resultado.productos)) {
-            lista = resultado.productos;
-            totalPaginas = resultado.totalPaginas || 1;
-        }
-
-        renderizarTabla(lista);
-        renderizarPaginacion(totalPaginas);
-
-    } catch (error) {
-        console.error('Error al cargar productos:', error);
-        const tbody = document.getElementById('tablaProductos');
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error al obtener datos (${error.message}).</td></tr>`;
     }
+
+    if (!respuesta) {
+        const tbody = document.getElementById('tablaProductos');
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #d9534f; padding: 15px; font-weight: bold;">Error al obtener datos (Error servidor: ${errorStatus}). Verifique la ruta del backend en main.py.</td></tr>`;
+        return;
+    }
+
+    // Extraer array de datos
+    let lista = [];
+    let totalPaginas = 1;
+
+    if (Array.isArray(respuesta)) {
+        lista = respuesta;
+    } else if (respuesta && Array.isArray(respuesta.data)) {
+        lista = respuesta.data;
+        totalPaginas = respuesta.totalPaginas || 1;
+    } else if (respuesta && Array.isArray(respuesta.productos)) {
+        lista = respuesta.productos;
+        totalPaginas = respuesta.totalPaginas || 1;
+    }
+
+    renderizarTabla(lista);
+    renderizarPaginacion(totalPaginas);
 }
 
 function renderizarTabla(productos) {
@@ -62,7 +75,6 @@ function renderizarTabla(productos) {
     productos.forEach(p => {
         const tr = document.createElement('tr');
         
-        // Lectura flexible de propiedades según retorne Supabase/FastAPI
         const codigo = p.codigo || p.code || '—';
         const descripcion = p.descripcion || p.description || '—';
         const marca = p.marca || p.brand || 'N/A';
