@@ -1,6 +1,8 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional
 from supabase import create_client, Client
 import os
 
@@ -23,6 +25,16 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "https://utcqgkeiyqvfxfhjuptc.supabase.
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+# Modelo Pydantic para actualización de productos
+class ProductoUpdate(BaseModel):
+    codigo: Optional[str] = None
+    descripcion: Optional[str] = None
+    marca: Optional[str] = None
+    codigo_proveedor: Optional[str] = None
+    saldo_temp: Optional[float] = None
+    precio_venta: Optional[float] = None
 
 
 @app.get("/")
@@ -86,6 +98,32 @@ async def obtener_productos(
     except Exception as e:
         print("Error en endpoint /api/productos:", str(e))
         return {"data": [], "totalPaginas": 1, "error": str(e)}
+
+
+@app.get("/api/productos/{producto_id}")
+async def obtener_producto_por_id(producto_id: str):
+    try:
+        res = supabase.table("productos").select("*").eq("id", producto_id).execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Producto no encontrado")
+        return res.data[0]
+    except Exception as e:
+        print("Error al obtener producto:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/productos/{producto_id}")
+async def actualizar_producto(producto_id: str, producto: ProductoUpdate):
+    try:
+        datos_actualizar = producto.dict(exclude_unset=True)
+        if not datos_actualizar:
+            raise HTTPException(status_code=400, detail="No se enviaron datos para actualizar")
+
+        res = supabase.table("productos").update(datos_actualizar).eq("id", producto_id).execute()
+        return {"status": "ok", "data": res.data}
+    except Exception as e:
+        print("Error al actualizar producto:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/api/productos/{producto_id}")
