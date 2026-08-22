@@ -55,6 +55,7 @@ function renderizarEncabezados() {
             <th onclick="ordenar('saldo_gye')">S.GYE ⇕</th>
             <th onclick="ordenar('costo_prom')">COSTO_PROM ⇕</th>
             <th onclick="ordenar('pro1')">PRO1 ⇕</th>
+            <th onclick="ordenar('pvp')">PRECIO ⇕</th>
             <th>ACCIONES</th>
         `;
     }
@@ -86,7 +87,7 @@ async function cargarProductos() {
         console.error('Error al cargar productos:', error);
         const tbody = document.getElementById('tablaProductos');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #d9534f; padding: 15px;">Error al conectar con la base de datos.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color: #d9534f; padding: 15px;">Error al conectar con la base de datos.</td></tr>`;
         }
     }
 }
@@ -98,7 +99,8 @@ function renderizarTabla(productos) {
     tbody.innerHTML = '';
 
     if (!productos || productos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 15px;">No se encontraron registros.</td></tr>`;
+        const colSpan = vistaActual === 'vista2' ? 9 : 8;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; padding: 15px;">No se encontraron registros.</td></tr>`;
         return;
     }
 
@@ -114,7 +116,7 @@ function renderizarTabla(productos) {
             const marca = p.marca || 'N/A';
             const nombre = p.descripcion || '—';
             const uni = p.uni || 'UND';
-            const pvp = parseFloat(p.pvp || 0).toFixed(2);
+            const pvp = parseFloat(p.pvp || p.precio_venta || 0).toFixed(2);
             const sTem = p.saldo_temp ?? 0;
 
             tr.innerHTML = `
@@ -138,6 +140,7 @@ function renderizarTabla(productos) {
             const sGye = p.saldo_gye ?? 0;
             const costoProm = parseFloat(p.costo_prom || 0).toFixed(2);
             const pro1 = p.pro1 || '—';
+            const precioVenta = parseFloat(p.precio_venta || p.pvp || 0).toFixed(2);
 
             tr.innerHTML = `
                 <td class="excel-code">${codigo}</td>
@@ -147,6 +150,7 @@ function renderizarTabla(productos) {
                 <td style="text-align:right;">${sGye}</td>
                 <td style="text-align:right;">$${costoProm}</td>
                 <td>${pro1}</td>
+                <td style="text-align:right;">$${precioVenta}</td>
                 <td style="text-align:center;">
                     <button onclick="editarProducto('${id}')">✏️ Editar</button>
                     <button onclick="eliminarProducto('${id}')">❌ Eliminar</button>
@@ -189,17 +193,14 @@ function ordenar(columna) {
 
 function editarProducto(id) {
     console.log("Editar producto ID:", id);
-    // Lógica para abrir el modal de edición
 }
 
 function eliminarProducto(id) {
     if (confirm("¿Está seguro de eliminar este producto?")) {
         console.log("Eliminar producto ID:", id);
-        // Lógica para eliminar el producto
     }
 }
 
 function abrirModalCrear() {
     console.log("Abrir modal nuevo producto");
-    // Lógica para abrir el modal de creación
 }
