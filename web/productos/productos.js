@@ -16,8 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnVista1 = document.getElementById('btnVista1');
     const btnVista2 = document.getElementById('btnVista2');
 
-    if (btnVista1) btnVista1.addEventListener('click', () => cambiarVista('vista1'));
-    if (btnVista2) btnVista2.addEventListener('click', () => cambiarVista('vista2'));
+    if (btnVista1) {
+        btnVista1.addEventListener('click', () => {
+            btnVista1.classList.add('vista1-activo');
+            if (btnVista2) btnVista2.classList.remove('vista2-activo');
+            cambiarVista('vista1');
+        });
+    }
+
+    if (btnVista2) {
+        btnVista2.addEventListener('click', () => {
+            btnVista2.classList.add('vista2-activo');
+            if (btnVista1) btnVista1.classList.remove('vista1-activo');
+            cambiarVista('vista2');
+        });
+    }
 
     renderizarEncabezados();
     cargarProductos();
@@ -153,7 +166,6 @@ function renderizarTabla(productos) {
     try {
         let html = '';
         productos.forEach(p => {
-            // Lectura segura con soporte para variaciones de claves
             const cod = p.codigo || p.CODIGO || '';
             const desc = p.descripcion || p.DESCRIPCION || p.NOMBRE || '';
             const pvpVal = Number(p.pvp || p.PVP || 0).toFixed(2);
@@ -218,4 +230,18 @@ function renderizarPaginacion(totalPaginas) {
 function cambiarPagina(nuevaPagina) {
     paginaActual = nuevaPagina;
     cargarProductos();
+}
+
+function editarProducto(codigo) {
+    alert(`Editar producto: ${codigo}`);
+}
+
+function eliminarProducto(codigo) {
+    if (confirm(`¿Desea eliminar el producto ${codigo}?`)) {
+        // Implementar acción de eliminación
+    }
+}
+
+function nuevoProducto() {
+    alert("Función nuevo producto");
 }

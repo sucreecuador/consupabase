@@ -14,14 +14,27 @@
         .btn-nuevo { background-color: #059669; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
         .vistas-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .btn-vista { padding: 6px 12px; border: 1px solid #059669; background: white; color: #059669; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-vista.activo { background-color: #059669; color: white; }
+        
+        /* Botones de vistas inactivos */
+        .btn-vista { padding: 6px 14px; border: 1px solid #ccc; background: #ffffff; color: #555; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        
+        /* Botones activos con sus colores correspondientes */
+        .btn-vista.vista1-activo { background-color: #f97316; color: white; border-color: #ea580c; }
+        .btn-vista.vista2-activo { background-color: #059669; color: white; border-color: #047857; }
 
-        .tabla-container { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+        /* Estilos de Tabla Tipo Rejilla con filas alternadas (Cebra) */
+        .tabla-container { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; border: 1px solid #d1d5db; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background-color: #047857; color: white; padding: 10px; text-align: left; border-bottom: 2px solid #065f46; white-space: nowrap; }
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; }
-        tr:hover { background-color: #f9fafb; }
+        
+        th { background-color: #047857; color: white; padding: 10px; text-align: left; border: 1px solid #03543f; white-space: nowrap; }
+        
+        /* Celdas con bordes visibles grises */
+        td { padding: 8px 10px; border: 1px solid #e5e7eb; }
+        
+        /* Filas alternadas: blanca y gris claro */
+        tbody tr:nth-child(even) { background-color: #f8fafc; }
+        tbody tr:nth-child(odd) { background-color: #ffffff; }
+        tbody tr:hover { background-color: #f1f5f9; }
 
         .btn-editar { background-color: #ffffff; border: 1px solid #ccc; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
         .btn-eliminar { background-color: #ffffff; border: 1px solid #ccc; padding: 3px 8px; border-radius: 3px; cursor: pointer; color: #dc2626; }
@@ -42,7 +55,7 @@
 
     <div class="vistas-bar">
         <strong>Vistas:</strong>
-        <button id="btnVista1" class="btn-vista activo">Vista 1</button>
+        <button id="btnVista1" class="btn-vista vista1-activo">Vista 1</button>
         <button id="btnVista2" class="btn-vista">Vista 2</button>
     </div>
 
