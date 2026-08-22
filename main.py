@@ -9,18 +9,19 @@ async def obtener_productos(
     try:
         query = supabase.table("productos").select("*", count="exact")
 
-        # Excluir fila de encabezados importados
+        # Filtro para omitir el encabezado del archivo original
         query = query.neq("codigo", "CODIGO")
 
-        # Filtro de búsqueda multi-columna (Busca en descripción, código de producto y código de proveedor)
+        # Búsqueda en múltiples columnas (descripción, código de producto y código de proveedor)
         if descripcion and descripcion.strip():
-            filtro = descripcion.strip()
-            query = query.or_(
-                f"descripcion.ilike.%{filtro}%,codigo.ilike.%{filtro}%,codigo_proveedor.ilike.%{filtro}%"
-            )
+            term = descripcion.strip()
+            query = query.or_(f"descripcion.ilike.%{term}%,codigo.ilike.%{term}%,codigo_proveedor.ilike.%{term}%")
 
-        # Mapeo de seguridad para ordenar por las columnas reales de Supabase
+        # Diccionario de equivalencias para garantizar el nombre exacto de la columna en Supabase
         mapa_columnas = {
+            "codigo": "codigo",
+            "descripcion": "descripcion",
+            "marca": "marca",
             "proveedor": "codigo_proveedor",
             "codigo_proveedor": "codigo_proveedor",
             "stock": "saldo_temp",
@@ -28,18 +29,19 @@ async def obtener_productos(
             "precio": "precio_venta",
             "precio_venta": "precio_venta"
         }
-        columna_real = mapa_columnas.get(orden_columna, orden_columna)
 
-        desc_bool = (orden_direccion.lower() == "desc")
-        query = query.order(columna_real, desc=desc_bool)
-        
+        columna_real = mapa_columnas.get(orden_columna, "codigo")
+        es_descendente = (orden_direccion.lower() == "desc")
+
+        query = query.order(columna_real, desc=es_descendente)
+
         desde = (pagina - 1) * por_pagina
         hasta = desde + por_pagina - 1
         query = query.range(desde, hasta)
 
         res = query.execute()
 
-        total_registros = res.count or len(res.data)
+        total_registros = res.count if res.count is not None else len(res.data)
         total_paginas = (total_registros + por_pagina - 1) // por_pagina if total_registros > 0 else 1
 
         return {
@@ -48,5 +50,5 @@ async def obtener_productos(
         }
 
     except Exception as e:
-        print("Error en consulta Supabase:", e)
+        print("Error en endpoint /api/productos:", e)
         return {"data": [], "totalPaginas": 1}
