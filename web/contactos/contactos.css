@@ -1,74 +1,132 @@
+/* ============================
+   ESTILO EXCEL — CONTACTOS
+   ============================ */
+
 body {
-    font-family: Arial, sans-serif;
-    background: #eef1f5;
+    font-family: Calibri, Arial, sans-serif;
+    background: #ffffff;
     margin: 0;
     padding: 20px 40px;
+    color: #000;
 }
 
 .header h1 {
     margin: 0;
-    font-size: 28px;
-    color: #333;
+    font-size: 26px;
+    color: #000;
 }
 
 .header p {
-    color: #666;
-    margin-bottom: 25px;
+    color: #444;
+    margin-bottom: 20px;
 }
 
 .actions {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #buscar {
     width: 300px;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    padding: 8px;
+    border: 1px solid #888;
+    background: #fff;
+    color: #000;
+    font-size: 14px;
 }
 
 #btnNuevo {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 8px 14px;
     cursor: pointer;
+    font-size: 14px;
 }
 
 #btnNuevo:hover {
-    background: #2980b9;
+    background: #333;
 }
 
-/* Tabla ERP */
+/* ============================
+   TABLA ESTILO EXCEL
+   ============================ */
+
 .erp-table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    background: #fff;
+    border: 1px solid #000;
 }
 
 .erp-table th {
-    background: #1f2937;
-    color: white;
-    padding: 12px;
-    text-align: left;
+    background: #f2f2f2;   /* Gris claro estilo Excel */
+    color: #000;
+    padding: 6px;
+    border: 1px solid #000;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 .erp-table td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
+    padding: 6px;
+    border: 1px solid #000;
+    font-size: 14px;
 }
 
 .erp-table tr:hover {
-    background: #f5f6fa;
+    background: #e6e6e6;
 }
 
-/* Modal */
+/* ============================
+   BADGES — estilo Excel (gris)
+   ============================ */
+
+.badge {
+    padding: 2px 6px;
+    border-radius: 0;
+    font-size: 12px;
+    background: #d9d9d9;
+    color: #000;
+    border: 1px solid #888;
+}
+
+/* ============================
+   BOTONES EDITAR / ELIMINAR
+   ============================ */
+
+.btn-edit {
+    background: #d9d9d9;
+    color: #000;
+    border: 1px solid #000;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-edit:hover {
+    background: #bfbfbf;
+}
+
+.btn-delete {
+    background: #f2f2f2;
+    color: #000;
+    border: 1px solid #000;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-delete:hover {
+    background: #d9d9d9;
+}
+
+/* ============================
+   MODAL — estilo Excel
+   ============================ */
+
 .modal {
     display: none;
     position: fixed;
@@ -76,30 +134,32 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.35);
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
-    background: white;
-    width: 380px;
+    background: #fff;
+    width: 360px;
     padding: 20px;
-    border-radius: 10px;
+    border: 1px solid #000;
 }
 
 .modal-content label {
     display: block;
     margin-top: 10px;
+    font-size: 14px;
 }
 
-.modal-content input,
-.modal-content select {
+.modal-content input {
     width: 100%;
-    padding: 8px;
+    padding: 6px;
     margin-top: 4px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid #000;
+    background: #fff;
+    color: #000;
+    font-size: 14px;
 }
 
 .modal-actions {
@@ -108,19 +168,55 @@ body {
 }
 
 #btnGuardar {
-    background: #2ecc71;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 6px 12px;
     cursor: pointer;
 }
 
+#btnGuardar:hover {
+    background: #333;
+}
+
 #btnCerrar {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
+    background: #f2f2f2;
+    color: #000;
+    border: 1px solid #000;
+    padding: 6px 12px;
     cursor: pointer;
+}
+
+#btnCerrar:hover {
+    background: #d9d9d9;
+}
+
+/* ============================
+   PAGINACIÓN — estilo Excel
+   ============================ */
+
+#paginacion {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: #000;
+    font-size: 14px;
+}
+
+#paginacion button {
+    padding: 6px 12px;
+    border: 1px solid #000;
+    background: #f2f2f2;
+    color: #000;
+    cursor: pointer;
+}
+
+#paginacion button:hover {
+    background: #d9d9d9;
+}
+
+#paginacion button:disabled {
+    background: #e6e6e6;
+    cursor: not-allowed;
 }

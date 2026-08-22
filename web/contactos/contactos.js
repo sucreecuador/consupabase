@@ -1,17 +1,18 @@
-// API corregida: ahora apunta a /clientes
 const API = "https://consupabase-api.onrender.com/clientes";
 
 const tabla = document.getElementById("tablaContactos");
 const buscar = document.getElementById("buscar");
 
-const modal = document.getElementById("modal");
 const btnNuevo = document.getElementById("btnNuevo");
+const modal = document.getElementById("modal");
 const btnCerrar = document.getElementById("btnCerrar");
 const btnGuardar = document.getElementById("btnGuardar");
 
 let editId = null;
 
-// Abrir modal
+// ===============================
+// ABRIR MODAL
+// ===============================
 btnNuevo.onclick = () => {
     editId = null;
     document.getElementById("modalTitulo").innerText = "Nuevo Contacto";
@@ -20,22 +21,26 @@ btnNuevo.onclick = () => {
     document.getElementById("conEmpresa").value = "";
     document.getElementById("conTelefono").value = "";
     document.getElementById("conEmail").value = "";
-    document.getElementById("conTipo").value = "Cliente";
+    document.getElementById("conTipo").value = "";
 
     modal.style.display = "flex";
 };
 
-// Cerrar modal
+// ===============================
+// CERRAR MODAL
+// ===============================
 btnCerrar.onclick = () => modal.style.display = "none";
 
-// Guardar contacto
+// ===============================
+// GUARDAR CONTACTO
+// ===============================
 btnGuardar.onclick = async () => {
     const data = {
         nombre: document.getElementById("conNombre").value,
-        razon_social: document.getElementById("conEmpresa").value,
-        telefono1: document.getElementById("conTelefono").value,
+        empresa: document.getElementById("conEmpresa").value,
+        telefono: document.getElementById("conTelefono").value,
         email: document.getElementById("conEmail").value,
-        categoria: document.getElementById("conTipo").value
+        tipo: document.getElementById("conTipo").value
     };
 
     if (editId) {
@@ -53,12 +58,18 @@ btnGuardar.onclick = async () => {
     }
 
     modal.style.display = "none";
-    cargarContactos();
+    cargarContactos(buscar.value);
 };
 
-// Cargar contactos
+// ===============================
+// CARGAR CONTACTOS
+// ===============================
 async function cargarContactos(filtro = "") {
-    const res = await fetch(`${API}?nombre=${filtro}`);
+    const params = new URLSearchParams({
+        nombre: filtro
+    });
+
+    const res = await fetch(`${API}?${params.toString()}`);
     const json = await res.json();
 
     tabla.innerHTML = "";
@@ -66,21 +77,23 @@ async function cargarContactos(filtro = "") {
     json.data.forEach(con => {
         tabla.innerHTML += `
             <tr>
-                <td>${con.nombre}</td>
-                <td>${con.empresa}</td>
-                <td>${con.telefono}</td>
-                <td>${con.email}</td>
-                <td>${con.tipo}</td>
+                <td>${con.nombre ?? ""}</td>
+                <td>${con.empresa ?? ""}</td>
+                <td>${con.telefono ?? ""}</td>
+                <td>${con.email ?? ""}</td>
+                <td>${con.tipo ?? ""}</td>
                 <td>
-                    <button onclick="editar('${con.id}')">✏️</button>
-                    <button onclick="eliminar('${con.id}')">🗑️</button>
+                    <button class="btn-edit" onclick="editar('${con.id}')">✏️</button>
+                    <button class="btn-delete" onclick="eliminar('${con.id}')">🗑️</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// Editar contacto
+// ===============================
+// EDITAR CONTACTO
+// ===============================
 async function editar(id) {
     editId = id;
 
@@ -89,23 +102,31 @@ async function editar(id) {
 
     document.getElementById("modalTitulo").innerText = "Editar Contacto";
 
-    document.getElementById("conNombre").value = con.nombre;
-    document.getElementById("conEmpresa").value = con.empresa;
-    document.getElementById("conTelefono").value = con.telefono;
-    document.getElementById("conEmail").value = con.email;
-    document.getElementById("conTipo").value = con.tipo;
+    document.getElementById("conNombre").value = con.nombre ?? "";
+    document.getElementById("conEmpresa").value = con.empresa ?? "";
+    document.getElementById("conTelefono").value = con.telefono ?? "";
+    document.getElementById("conEmail").value = con.email ?? "";
+    document.getElementById("conTipo").value = con.tipo ?? "";
 
     modal.style.display = "flex";
 }
 
-// Eliminar contacto
+// ===============================
+// ELIMINAR CONTACTO
+// ===============================
 async function eliminar(id) {
     await fetch(`${API}/${id}`, { method: "DELETE" });
-    cargarContactos();
+    cargarContactos(buscar.value);
 }
 
-// Buscar
-buscar.onkeyup = () => cargarContactos(buscar.value);
+// ===============================
+// BUSCAR
+// ===============================
+buscar.onkeyup = () => {
+    cargarContactos(buscar.value);
+};
 
-// Inicial
+// ===============================
+// INICIAL
+// ===============================
 cargarContactos();
