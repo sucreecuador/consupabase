@@ -8,7 +8,6 @@ import os
 
 app = FastAPI()
 
-# Configuración CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,74 +16,74 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir archivos estáticos desde el directorio 'web'
 app.mount("/web", StaticFiles(directory="web", html=True), name="web")
 
-# Conexión a Supabase usando variables de entorno
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://utcqgkeiyqvfxfhjuptc.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-
-# Modelo Pydantic para crear producto
 class ProductoCreate(BaseModel):
     codigo: str
+    nacionalidad: Optional[str] = None  # Reemplaza codigo_ori por nacionalidad / naci
+    codigo_proveedor: Optional[str] = None
     descripcion: str
     marca: Optional[str] = None
-    codigo_proveedor: Optional[str] = None
+    uni: Optional[str] = None
+    pvp: Optional[float] = 0.0
     saldo_temp: Optional[float] = 0.0
-    precio_venta: Optional[float] = 0.0
+    saldo_uio: Optional[float] = 0.0
+    saldo_gye: Optional[float] = 0.0
+    costo_prom: Optional[float] = 0.0
+    pro1: Optional[str] = None
 
-
-# Modelo Pydantic para actualizar producto
 class ProductoUpdate(BaseModel):
     codigo: Optional[str] = None
+    nacionalidad: Optional[str] = None
+    codigo_proveedor: Optional[str] = None
     descripcion: Optional[str] = None
     marca: Optional[str] = None
-    codigo_proveedor: Optional[str] = None
+    uni: Optional[str] = None
+    pvp: Optional[float] = None
     saldo_temp: Optional[float] = None
-    precio_venta: Optional[float] = None
-
-
-@app.get("/")
-def read_root():
-    return {"status": "ok", "message": "API Sucre Ecuador corriendo correctamente"}
-
+    saldo_uio: Optional[float] = None
+    saldo_gye: Optional[float] = None
+    costo_prom: Optional[float] = None
+    pro1: Optional[str] = None
 
 @app.get("/api/productos")
 async def obtener_productos(
     descripcion: str = Query(None, alias="descripcion"),
     pagina: int = Query(1, alias="pagina"),
     por_pagina: int = Query(20, alias="porPagina"),
-    orden_columna: str = Query("codigo", alias="ordenColumna"),
+    orden_columna: str = Query("nacionalidad", alias="ordenColumna"),
     orden_direccion: str = Query("asc", alias="ordenDireccion")
 ):
     try:
         query = supabase.table("productos").select("*", count="exact")
 
-        # Excluir fila de encabezado si existe
         query = query.neq("codigo", "CODIGO")
 
-        # Filtro de búsqueda
         if descripcion and descripcion.strip():
             term = descripcion.strip().replace("%", "")
-            query = query.or_(f"descripcion.ilike.*{term}*,codigo.ilike.*{term}*,codigo_proveedor.ilike.*{term}*")
+            query = query.or_(f"descripcion.ilike.*{term}*,codigo.ilike.*{term}*,codigo_proveedor.ilike.*{term}*,nacionalidad.ilike.*{term}*")
 
-        # Mapeo de columnas
         mapa_columnas = {
             "codigo": "codigo",
+            "nacionalidad": "nacionalidad",  # Cambia a "naci" si el nombre exacto de la columna en Supabase es "naci"
+            "codigo_proveedor": "codigo_proveedor",
             "descripcion": "descripcion",
             "marca": "marca",
-            "proveedor": "codigo_proveedor",
-            "codigo_proveedor": "codigo_proveedor",
-            "stock": "saldo_temp",
+            "uni": "uni",
+            "pvp": "pvp",
             "saldo_temp": "saldo_temp",
-            "precio": "precio_venta",
-            "precio_venta": "precio_venta"
+            "saldo_uio": "saldo_uio",
+            "saldo_gye": "saldo_gye",
+            "costo_prom": "costo_prom",
+            "pro1": "pro1"
         }
 
-        columna_real = mapa_columnas.get(orden_columna, "codigo")
+        columna_real = mapa_columnas.get(orden_columna, "nacionalidad")
         es_descendente = (orden_direccion.lower() == "desc")
 
         query = query.order(columna_real, desc=es_descendente, nullsfirst=False)
@@ -107,7 +106,6 @@ async def obtener_productos(
         print("Error en endpoint /api/productos:", str(e))
         return {"data": [], "totalPaginas": 1, "error": str(e)}
 
-
 @app.get("/api/productos/{producto_id}")
 async def obtener_producto_por_id(producto_id: str):
     try:
@@ -116,9 +114,7 @@ async def obtener_producto_por_id(producto_id: str):
             raise HTTPException(status_code=404, detail="Producto no encontrado")
         return res.data[0]
     except Exception as e:
-        print("Error al obtener producto:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/api/productos")
 async def crear_producto(producto: ProductoCreate):
@@ -127,9 +123,7 @@ async def crear_producto(producto: ProductoCreate):
         res = supabase.table("productos").insert(datos).execute()
         return {"status": "ok", "data": res.data}
     except Exception as e:
-        print("Error al crear producto:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.put("/api/productos/{producto_id}")
 async def actualizar_producto(producto_id: str, producto: ProductoUpdate):
@@ -141,9 +135,7 @@ async def actualizar_producto(producto_id: str, producto: ProductoUpdate):
         res = supabase.table("productos").update(datos_actualizar).eq("id", producto_id).execute()
         return {"status": "ok", "data": res.data}
     except Exception as e:
-        print("Error al actualizar producto:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.delete("/api/productos/{producto_id}")
 async def eliminar_producto(producto_id: str):
@@ -151,5 +143,4 @@ async def eliminar_producto(producto_id: str):
         res = supabase.table("productos").delete().eq("id", producto_id).execute()
         return {"status": "ok", "deleted": res.data}
     except Exception as e:
-        print("Error al eliminar producto:", str(e))
         return {"status": "error", "message": str(e)}
