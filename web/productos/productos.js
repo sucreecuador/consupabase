@@ -38,6 +38,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function cambiarVista(vista) {
     vistaActual = vista;
+    
+    // Si la columna elegida para buscar no existe en la vista actual, volver a 'descripcion'
+    const columnasVisibles = vistaActual === 'vista1' 
+        ? ['codigo', 'naci', 'marca', 'descripcion', 'uni', 'pvp', 'saldo_temp']
+        : ['codigo', 'codigo_proveedor', 'descripcion', 'saldo_uio', 'saldo_gye', 'costo_prom', 'pro1', 'pvp'];
+
+    if (!columnasVisibles.includes(columnaBusqueda)) {
+        columnaBusqueda = 'descripcion';
+        const inputBuscar = document.getElementById('buscar');
+        if (inputBuscar) inputBuscar.placeholder = 'Escribe para buscar en NOMBRE...';
+    }
+
     renderizarEncabezados();
     cargarProductos();
 }
@@ -143,14 +155,17 @@ async function cargarProductos() {
 
     try {
         const res = await fetch(`/api/productos?${params.toString()}`);
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) {
+            const errDetail = await res.json().catch(() => ({}));
+            throw new Error(`Error Backend (${res.status}): ${JSON.stringify(errDetail)}`);
+        }
         
         const respuesta = await res.json();
         renderizarTabla(respuesta.data || []);
         renderizarPaginacion(respuesta.totalPaginas || 1);
     } catch (err) {
         console.error("Error al cargar productos:", err);
-        if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Error de conexión con el servidor</td></tr>';
+        if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Error de conexión con el servidor (Revisa si la columna '${columnaBusqueda}' permite búsquedas)</td></tr>`;
     }
 }
 
