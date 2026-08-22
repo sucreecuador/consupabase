@@ -13,15 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarProductos() {
     const buscar = document.getElementById('buscar').value;
+    
+    // Nombres de parámetros ajustados a snake_case para FastAPI
     const url = `/productos?descripcion=${encodeURIComponent(buscar)}&pagina=${paginaActual}&por_pagina=20&orden_columna=${ordenColumna}&orden_direccion=${ordenDireccion}`;
 
     try {
         const respuesta = await fetch(url);
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP: ${respuesta.status}`);
+        }
         const resultado = await respuesta.json();
-        renderizarTabla(resultado.data);
-        renderizarPaginacion(resultado.totalPaginas);
+        
+        // Admite respuesta directa como array o estructura paginada { data, totalPaginas }
+        const lista = Array.isArray(resultado) ? resultado : (resultado.data || []);
+        const totalPaginas = resultado.totalPaginas || 1;
+
+        renderizarTabla(lista);
+        renderizarPaginacion(totalPaginas);
     } catch (error) {
         console.error('Error al cargar productos:', error);
+        const tbody = document.getElementById('tablaProductos');
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: red; padding: 15px;">Error al conectar con el servidor backend.</td></tr>`;
     }
 }
 
@@ -56,6 +68,8 @@ function renderizarPaginacion(totalPaginas) {
     const div = document.getElementById('paginacion');
     div.innerHTML = '';
 
+    if (totalPaginas <= 1) return;
+
     for (let i = 1; i <= totalPaginas; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
@@ -83,7 +97,7 @@ function editarProducto(id) {
 }
 
 function eliminarProducto(id) {
-    if (confirm('¿Eliminar producto ' + id + '?')) {
+    if (confirm('¿Desea eliminar el producto ID ' + id + '?')) {
         fetch(`/productos/${id}`, { method: 'DELETE' })
             .then(() => cargarProductos());
     }
