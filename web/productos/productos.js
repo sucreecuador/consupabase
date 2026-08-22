@@ -1,5 +1,5 @@
 let paginaActual = 1;
-let ordenColumna = 'descripcion';
+let ordenColumna = 'codigo';
 let ordenDireccion = 'asc';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 async function cargarProductos() {
     const buscar = document.getElementById('buscar').value.trim();
     
-    // Construcción dinámica de la URL para omitir la búsqueda si está vacía
     let url = `/api/productos?pagina=${paginaActual}&porPagina=20&ordenColumna=${ordenColumna}&ordenDireccion=${ordenDireccion}`;
     
     if (buscar !== '') {
@@ -60,21 +59,24 @@ function renderizarTabla(productos) {
     }
 
     productos.forEach(p => {
+        // Omite el encabezado redundante de importación
+        if (p.codigo === 'CODIGO') return;
+
         const tr = document.createElement('tr');
         
-        const codigo = p.codigo || p.code || '—';
-        const descripcion = p.descripcion || p.description || '—';
-        const marca = p.marca || p.brand || 'N/A';
-        const proveedor = p.proveedor || p.provider || '—';
-        const stock = p.stock ?? p.cantidad ?? 0;
-        const precio = parseFloat(p.precio || p.price || 0).toFixed(2);
-        const id = p.id || p.codigo;
+        const codigo = p.codigo || '—';
+        const descripcion = p.descripcion || '—';
+        const marca = p.marca || 'N/A';
+        const codProveedor = p.codigo_proveedor || '—';
+        const stock = p.saldo_temp ?? 0;
+        const precio = parseFloat(p.precio_venta || 0).toFixed(2);
+        const id = p.id;
 
         tr.innerHTML = `
             <td class="excel-code">${codigo}</td>
             <td>${descripcion}</td>
             <td><span class="excel-badge">${marca}</span></td>
-            <td>${proveedor}</td>
+            <td>${codProveedor}</td>
             <td class="excel-number">${stock}</td>
             <td class="excel-number">$${precio}</td>
             <td style="text-align:center;">
