@@ -26,7 +26,7 @@ MAPEO_COLUMNAS = {
     'pro1': 'pro1'
 }
 
-# Endpoint principal de consulta de productos (Soporta /api/productos y /api/productos/)
+# API principal de productos
 @app.get("/api/productos")
 @app.get("/api/productos/")
 def listar_productos(
@@ -47,7 +47,7 @@ def listar_productos(
             col_filtro_bd = MAPEO_COLUMNAS.get(columnaFiltro, 'descripcion')
             query = query.ilike(col_filtro_bd, f"%{valorFiltro}%")
 
-        # Ordenar toda la base de datos en Supabase
+        # Ordenar toda la base de datos
         query = query.order(col_orden_bd, desc=not es_ascendente)
 
         # Paginar resultados
@@ -90,17 +90,34 @@ def eliminar_producto(codigo: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# Servir archivos estáticos del Frontend
+# ROUTING PARA ARCHIVOS ESTÁTICOS Y RUTA EXACTA DE NAVEGADOR (/web/productos/index.html)
 if os.path.exists("web"):
     app.mount("/static", StaticFiles(directory="web"), name="static")
 
     @app.get("/")
-    def read_root():
+    def root():
         return FileResponse("web/index.html")
 
-    @app.get("/{file_name}")
-    def read_static_file(file_name: str):
-        file_path = os.path.join("web", file_name)
-        if os.path.exists(file_path):
-            return FileResponse(file_path)
+    # Mapeo directo para la URL observada en Render
+    @app.get("/web/productos/index.html")
+    @app.get("/web/productos/")
+    @app.get("/web/productos")
+    def servir_index_especifico():
+        return FileResponse("web/index.html")
+
+    # Captura general de archivos JS, CSS u otros dentro de la carpeta web
+    @app.get("/{file_name:path}")
+    def servir_archivos_dinamicos(file_name: str):
+        # Si solicitan la carpeta o html directamente
+        if file_name.endswith(".html") or file_name == "":
+            return FileResponse("web/index.html")
+        
+        path_directo = os.path.join("web", os.path.basename(file_name))
+        if os.path.exists(path_directo):
+            return FileResponse(path_directo)
+
+        path_relativo = os.path.join("web", file_name)
+        if os.path.exists(path_relativo):
+            return FileResponse(path_relativo)
+
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
