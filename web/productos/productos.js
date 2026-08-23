@@ -1,7 +1,7 @@
 let paginaActual = 1;
 let ordenColumna = 'codigo';
 let ordenDireccion = 'asc';
-let columnaBusqueda = 'descripcion'; // Nombre de columna exacto en BD
+let columnaBusqueda = 'descripcion';
 let vistaActual = 'vista1';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function cambiarVista(vista) {
     vistaActual = vista;
-    columnaBusqueda = 'descripcion'; // Forzar reseteo a columna segura
+    columnaBusqueda = 'descripcion';
     renderizarEncabezados();
     cargarProductos();
 }
@@ -135,7 +135,6 @@ async function cargarProductos() {
         ordenDireccion: ordenDireccion
     });
 
-    // Filtro únicamente cuando la caja de texto contenga valor
     if (valor !== '') {
         params.append('columnaFiltro', columnaBusqueda);
         params.append('valorFiltro', valor);
@@ -219,7 +218,6 @@ function renderizarPaginacion(totalPaginas) {
 
     let html = '';
 
-    // Botón Inicio
     if (paginaActual > 1) {
         html += `<button onclick="cambiarPagina(1)" title="Primera Página">⏮ Primero</button> `;
         html += `<button onclick="cambiarPagina(${paginaActual - 1})">Anterior</button> `;
@@ -228,7 +226,6 @@ function renderizarPaginacion(totalPaginas) {
         html += `<button disabled style="opacity:0.5; cursor:not-allowed;">Anterior</button> `;
     }
 
-    // Input directo para saltar a una página
     html += ` <span>Página</span> 
               <input type="number" 
                      id="inputPaginaDirecta" 
@@ -240,7 +237,6 @@ function renderizarPaginacion(totalPaginas) {
               <span>de <b>${totalPaginas}</b></span> 
               <button onclick="procesarSaltoPagina(${totalPaginas})" class="btn-ir-pagina">Ir</button> `;
 
-    // Botón Fin
     if (paginaActual < totalPaginas) {
         html += `<button onclick="cambiarPagina(${paginaActual + 1})">Siguiente</button> `;
         html += `<button onclick="cambiarPagina(${totalPaginas})" title="Última Página">Último ⏭</button>`;
@@ -278,7 +274,6 @@ function cambiarPagina(nuevaPagina) {
     cargarProductos();
 }
 
-/* Modal y Control de Edición */
 function editarProducto(codigo, descripcion, marca, precioVenta) {
     document.getElementById('edit_codigo').value = codigo;
     document.getElementById('edit_descripcion').value = descripcion;

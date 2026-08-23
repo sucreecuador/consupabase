@@ -1,6 +1,3 @@
-/* ==========================================
-   ESTILOS GENERALES TIPO EXCEL
-   ========================================== */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f3f3f3;
@@ -9,27 +6,25 @@ body {
 }
 
 .header h1 {
-    color: #107c41; /* Verde clásico de Excel */
+    color: #107c41;
     margin: 0 0 5px 0;
     font-size: 24px;
 }
 
-.header p, p.sub {
+.sub {
     color: #666666;
     margin: 0 0 15px 0;
     font-size: 13px;
 }
 
-/* Panel de Controles superiores */
-.actions, .toolbar {
+.toolbar {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
-    flex-wrap: wrap;
     align-items: center;
 }
 
-.actions input[type="text"], .input-buscar {
+.input-buscar {
     padding: 6px 10px;
     border: 1px solid #ababab;
     border-radius: 2px;
@@ -38,11 +33,7 @@ body {
     outline: none;
 }
 
-.actions input[type="text"]:focus, .input-buscar:focus {
-    border-color: #107c41;
-}
-
-.actions button, .btn-nuevo {
+.btn-nuevo {
     background-color: #107c41;
     color: #ffffff;
     border: 1px solid #0c5e31;
@@ -53,11 +44,6 @@ body {
     border-radius: 2px;
 }
 
-.actions button:hover, .btn-nuevo:hover {
-    background-color: #0e6b37;
-}
-
-/* Barra de vistas */
 .vistas-bar {
     display: flex;
     align-items: center;
@@ -73,40 +59,34 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    transition: all 0.2s;
 }
 
-.btn-vista.vista1-activo {
-    background-color: #f97316;
-    color: white;
-    border-color: #ea580c;
+.vista1-activo {
+    background-color: #f97316 !important;
+    color: white !important;
+    border-color: #ea580c !important;
 }
 
-.btn-vista.vista2-activo {
-    background-color: #059669;
-    color: white;
-    border-color: #047857;
+.vista2-activo {
+    background-color: #059669 !important;
+    color: white !important;
+    border-color: #047857 !important;
 }
 
-/* Contenedor con scroll para cuadrícula */
-.table-container, .tabla-container {
+.tabla-container {
     overflow-x: auto;
     border: 1px solid #d4d4d4;
     background-color: #ffffff;
     border-radius: 4px;
 }
 
-/* ==========================================
-   TABLA TIPO EXCEL (HOJA DE CÁLCULO)
-   ========================================== */
-table, .erp-table {
+table.erp-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
     text-align: left;
 }
 
-/* Encabezado Verde Excel */
 thead tr {
     background-color: #107c41 !important;
     color: #ffffff !important;
@@ -121,26 +101,7 @@ thead th {
     white-space: nowrap;
 }
 
-thead th.col-acciones, th:last-child {
-    width: 70px !important;
-    min-width: 70px !important;
-    max-width: 70px !important;
-    text-align: center;
-}
-
-thead th:hover {
-    background-color: #0e6b37;
-}
-
-/* Filas y Celdas */
-tbody td {
-    padding: 4px 8px;
-    border: 1px solid #d4d4d4; /* Cuadrícula gris de Excel */
-    color: #222222;
-    white-space: nowrap;
-}
-
-tbody td.col-acciones, tbody td:last-child {
+thead th.col-acciones, tbody td.col-acciones {
     width: 70px !important;
     min-width: 70px !important;
     max-width: 70px !important;
@@ -148,17 +109,21 @@ tbody td.col-acciones, tbody td:last-child {
     padding: 2px 4px !important;
 }
 
-/* Filas cebra alternadas */
+tbody td {
+    padding: 4px 8px;
+    border: 1px solid #d4d4d4;
+    color: #222222;
+    white-space: nowrap;
+}
+
 tbody tr:nth-child(even) {
     background-color: #f3f9f5;
 }
 
-/* Resaltado de fila al pasar el mouse */
 tbody tr:hover {
     background-color: #e2f0d9 !important;
 }
 
-/* Estilos de datos numéricos y etiquetas */
 .excel-code {
     font-family: Consolas, monospace;
     font-weight: bold;
@@ -170,17 +135,6 @@ tbody tr:hover {
     font-weight: 600;
 }
 
-.excel-badge {
-    background-color: #e1dfdd;
-    color: #323130;
-    padding: 2px 5px;
-    border-radius: 2px;
-    font-size: 11px;
-}
-
-/* ==========================================
-   BOTONES COMPACTOS DE ACCIONES (E / B)
-   ========================================== */
 .acciones-wrapper {
     display: flex;
     justify-content: center;
@@ -195,49 +149,28 @@ tbody tr:hover {
     justify-content: center !important;
     width: 24px !important;
     height: 24px !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
-    max-width: 24px !important;
-    max-height: 24px !important;
     padding: 0 !important;
     box-sizing: border-box !important;
     border-radius: 3px;
     font-weight: bold;
     font-size: 11px;
     cursor: pointer;
-    margin: 0 !important;
     border: 1px solid transparent;
-    user-select: none;
 }
 
-/* Botón Editar (E) */
 .btn-editar {
     background-color: #eff6ff !important;
     color: #2563eb !important;
     border-color: #bfdbfe !important;
 }
 
-.btn-editar:hover {
-    background-color: #dbeafe !important;
-    color: #1d4ed8 !important;
-}
-
-/* Botón Eliminar / Borrar (B) */
 .btn-eliminar {
     background-color: #fef2f2 !important;
     color: #dc2626 !important;
     border-color: #fecaca !important;
 }
 
-.btn-eliminar:hover {
-    background-color: #fee2e2 !important;
-    color: #b91c1c !important;
-}
-
-/* ==========================================
-   PAGINACIÓN AVANZADA Y SALTO DIRECTO
-   ========================================== */
-.paginacion, .paginacion-bar {
+.paginacion-bar {
     margin-top: 15px;
     display: flex;
     align-items: center;
@@ -246,7 +179,7 @@ tbody tr:hover {
     flex-wrap: wrap;
 }
 
-.paginacion button, .paginacion-bar button {
+.paginacion-bar button {
     border: 1px solid #d4d4d4;
     background-color: #ffffff;
     padding: 4px 10px;
@@ -254,10 +187,6 @@ tbody tr:hover {
     cursor: pointer;
     border-radius: 2px;
     font-weight: 600;
-}
-
-.paginacion button:hover, .paginacion-bar button:hover {
-    background-color: #e2e8f0;
 }
 
 .input-pagina-saltar {
@@ -276,95 +205,4 @@ tbody tr:hover {
     background-color: #107c41 !important;
     color: white !important;
     border-color: #0c5e31 !important;
-}
-
-/* Modal Formulario */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-contenido {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 450px;
-    max-width: 90%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
-.modal-header h2 {
-    margin: 0;
-    color: #107c41;
-    font-size: 18px;
-}
-
-.modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.campo-form {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.campo-form label {
-    font-size: 12px;
-    font-weight: bold;
-    color: #555;
-}
-
-.campo-form input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
-    border-top: 1px solid #eee;
-    padding-top: 10px;
-}
-
-.btn-guardar {
-    background: #107c41;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.btn-cancelar {
-    background: #6b7280;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 4px;
-    cursor: pointer;
 }
