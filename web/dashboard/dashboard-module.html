@@ -1,49 +1,30 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Módulo Dashboard</title>
+<h1 class="dash-title">Panel Principal</h1>
+<p class="dash-subtitle">Accesos rápidos del ERP SUCRE</p>
 
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
+<div class="dash-grid">
 
-        h1 {
-            margin-top: 0;
-            font-size: 28px;
-            color: #0A1A2F;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>Dashboard ERP</h1>
-
-    <div class="card">
-        <h2>Bienvenido Ricardo 👋</h2>
-        <p>Este es tu panel principal del ERP CONSUPABASE.</p>
+    <div class="dash-card" onclick="sendNavigate('/web/productos/productos.html')">
+        🛒
+        <h3>Productos</h3>
+        <p>Catálogo, precios y stock</p>
     </div>
 
-    <div class="card">
-        <h3>Estado del sistema</h3>
-        <ul>
-            <li>Sidebar cargado correctamente</li>
-            <li>Navegación dinámica activa</li>
-            <li>Módulos listos para integrar</li>
-        </ul>
+    <div class="dash-card" onclick="sendNavigate('/web/inventario/inventario.html')">
+        📦
+        <h3>Inventario</h3>
+        <p>Movimientos y existencias</p>
     </div>
 
-</body>
-</html>
+    <div class="dash-card" onclick="sendNavigate('/web/contactos/contactos.html')">
+        👥
+        <h3>Contactos</h3>
+        <p>Clientes y proveedores</p>
+    </div>
+
+    <div class="dash-card" onclick="sendNavigate('/web/reportes/reportes.html')">
+        📈
+        <h3>Reportes</h3>
+        <p>Indicadores y análisis</p>
+    </div>
+
+</div>

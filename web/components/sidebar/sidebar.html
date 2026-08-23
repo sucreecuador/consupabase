@@ -1,72 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Sidebar ERP</title>
-    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
-</head>
+<div id="sidebar" class="sidebar">
 
-<body>
-
-    <div id="erp-sidebar">
-
-        <!-- LOGO -->
-        <div class="erp-logo">
-            <img src="/web/assets/logo.png" alt="ERP Logo">
-            <h2>CONSUPABASE ERP</h2>
-        </div>
-
-        <!-- GENERAL -->
-        <div class="erp-section-title">General</div>
-        <ul class="erp-menu">
-            <li onclick="sendNavigate('/web/dashboard/dashboard-module.html')">
-                <span>🏠</span> Dashboard
-            </li>
-        </ul>
-
-        <!-- GESTIÓN -->
-        <div class="erp-section-title">Gestión</div>
-        <ul class="erp-menu">
-            <li onclick="sendNavigate('/web/productos/productos.html')">
-                <span>📦</span> Productos
-            </li>
-
-            <li onclick="sendNavigate('/web/contactos/contactos.html')">
-                <span>👥</span> Contactos
-            </li>
-
-            <li onclick="sendNavigate('/web/inventario/inventario.html')">
-                <span>📊</span> Inventario
-            </li>
-        </ul>
-
-        <!-- ANÁLISIS -->
-        <div class="erp-section-title">Análisis</div>
-        <ul class="erp-menu">
-            <li onclick="sendNavigate('/web/reportes/reportes.html')">
-                <span>📈</span> Reportes
-            </li>
-        </ul>
-
-        <!-- ADMINISTRACIÓN -->
-        <div class="erp-section-title">Administración</div>
-        <ul class="erp-menu">
-            <li onclick="sendNavigate('/web/usuarios/usuarios.html')">
-                <span>🔐</span> Usuarios
-            </li>
-        </ul>
-
+    <div class="sidebar-header">
+        <h2>ERP SUCRE</h2>
+        <p class="sidebar-user">Panel Principal</p>
     </div>
 
-    <!-- JS DE NAVEGACIÓN -->
-    <script>
-        function sendNavigate(url) {
-            window.parent.postMessage(
-                { action: "navigate", url: url },
-                "*"
-            );
-        }
-    </script>
+    <ul class="sidebar-menu">
 
-</body>
-</html>
+        <li onclick="sendNavigate('/web/dashboard/dashboard.html')">
+            📊 Indicadores
+        </li>
+
+        <li onclick="sendNavigate('/web/productos/productos.html')" class="sidebar-productos">
+            🛒 Productos
+        </li>
+
+        <li onclick="sendNavigate('/web/inventario/inventario.html')">
+            📦 Inventario
+        </li>
+
+        <li onclick="sendNavigate('/web/contactos/contactos.html')">
+            👥 Contactos
+        </li>
+
+        <li onclick="sendNavigate('/web/reportes/reportes.html')">
+            📈 Reportes
+        </li>
+
+        <li onclick="sendNavigate('/web/usuarios/usuarios.html')">
+            👤 Usuarios
+        </li>
+
+        <li onclick="sendNavigate('/web/configuracion/configuracion.html')">
+            ⚙️ Configuración
+        </li>
+
+    </ul>
+
+</div>
