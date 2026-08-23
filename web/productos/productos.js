@@ -1,7 +1,7 @@
 let paginaActual = 1;
 let ordenColumna = 'codigo';
 let ordenDireccion = 'asc';
-let columnaBusqueda = 'descripcion'; // Nombre exacto en la tabla
+let columnaBusqueda = 'descripcion'; // Nombre de columna exacto en BD
 let vistaActual = 'vista1';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,18 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function cambiarVista(vista) {
     vistaActual = vista;
-    
-    // Columnas según tu esquema SQL
-    const columnasVisibles = vistaActual === 'vista1' 
-        ? ['codigo', 'naci', 'marca', 'descripcion', 'unidad', 'precio_venta', 'saldo_temp']
-        : ['codigo', 'codigo_proveedor', 'descripcion', 'saldo', 'costo_prom', 'pro1', 'precio_venta'];
-
-    if (!columnasVisibles.includes(columnaBusqueda)) {
-        columnaBusqueda = 'descripcion';
-        const inputBuscar = document.getElementById('buscar');
-        if (inputBuscar) inputBuscar.placeholder = 'Escribe para buscar en NOMBRE...';
-    }
-
+    columnaBusqueda = 'descripcion'; // Forzar reseteo a columna segura
     renderizarEncabezados();
     cargarProductos();
 }
@@ -146,6 +135,7 @@ async function cargarProductos() {
         ordenDireccion: ordenDireccion
     });
 
+    // Filtro únicamente cuando la caja de texto contenga valor
     if (valor !== '') {
         params.append('columnaFiltro', columnaBusqueda);
         params.append('valorFiltro', valor);
@@ -193,7 +183,7 @@ function renderizarTabla(productos) {
             html += `
                 <td><strong>${cod}</strong></td>
                 <td>${p.naci || ''}</td>
-                <td>${p.marca || ''}</td>
+                <td>${marca}</td>
                 <td>${desc}</td>
                 <td>${p.unidad || ''}</td>
                 <td>$${pvpVal}</td>
@@ -242,4 +232,63 @@ function renderizarPaginacion(totalPaginas) {
 function cambiarPagina(nuevaPagina) {
     paginaActual = nuevaPagina;
     cargarProductos();
+}
+
+/* Modal y Control de Edición */
+function editarProducto(codigo, descripcion, marca, precioVenta) {
+    document.getElementById('edit_codigo').value = codigo;
+    document.getElementById('edit_descripcion').value = descripcion;
+    document.getElementById('edit_marca').value = marca;
+    document.getElementById('edit_precio_venta').value = precioVenta;
+
+    const modal = document.getElementById('modalEditar');
+    if (modal) modal.style.display = 'flex';
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modalEditar');
+    if (modal) modal.style.display = 'none';
+}
+
+async function guardarEdicion(e) {
+    e.preventDefault();
+
+    const codigo = document.getElementById('edit_codigo').value;
+    const datosActualizados = {
+        descripcion: document.getElementById('edit_descripcion').value,
+        marca: document.getElementById('edit_marca').value,
+        precio_venta: parseFloat(document.getElementById('edit_precio_venta').value)
+    };
+
+    try {
+        const res = await fetch(`/api/productos/${codigo}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosActualizados)
+        });
+
+        if (res.ok) {
+            cerrarModal();
+            cargarProductos();
+        } else {
+            alert('Error al intentar guardar cambios en la base de datos');
+        }
+    } catch (err) {
+        console.error('Error al actualizar:', err);
+        alert('Error de comunicación con el servidor');
+    }
+}
+
+function eliminarProducto(codigo) {
+    if (confirm(`¿Desea eliminar el producto con código ${codigo}?`)) {
+        fetch(`/api/productos/${codigo}`, { method: 'DELETE' })
+            .then(res => {
+                if (res.ok) cargarProductos();
+                else alert('Error al eliminar producto');
+            });
+    }
+}
+
+function nuevoProducto() {
+    editarProducto('', '', '', 0.00);
 }
