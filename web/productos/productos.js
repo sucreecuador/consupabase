@@ -218,17 +218,59 @@ function renderizarPaginacion(totalPaginas) {
     if (!divPaginacion) return;
 
     let html = '';
-    if (paginaActual > 1) {
-        html += `<button onclick="cambiarPagina(${paginaActual - 1})">Anterior</button> `;
-    }
-    
-    html += `<span>Página ${paginaActual} de ${totalPaginas}</span> `;
 
+    // Botón Inicio
+    if (paginaActual > 1) {
+        html += `<button onclick="cambiarPagina(1)" title="Primera Página">⏮ Primero</button> `;
+        html += `<button onclick="cambiarPagina(${paginaActual - 1})">Anterior</button> `;
+    } else {
+        html += `<button disabled style="opacity:0.5; cursor:not-allowed;">⏮ Primero</button> `;
+        html += `<button disabled style="opacity:0.5; cursor:not-allowed;">Anterior</button> `;
+    }
+
+    // Input directo para saltar a una página
+    html += ` <span>Página</span> 
+              <input type="number" 
+                     id="inputPaginaDirecta" 
+                     class="input-pagina-saltar" 
+                     value="${paginaActual}" 
+                     min="1" 
+                     max="${totalPaginas}" 
+                     onkeydown="evaluarTeclaPagina(event, ${totalPaginas})"> 
+              <span>de <b>${totalPaginas}</b></span> 
+              <button onclick="procesarSaltoPagina(${totalPaginas})" class="btn-ir-pagina">Ir</button> `;
+
+    // Botón Fin
     if (paginaActual < totalPaginas) {
-        html += `<button onclick="cambiarPagina(${paginaActual + 1})">Siguiente</button>`;
+        html += `<button onclick="cambiarPagina(${paginaActual + 1})">Siguiente</button> `;
+        html += `<button onclick="cambiarPagina(${totalPaginas})" title="Última Página">Último ⏭</button>`;
+    } else {
+        html += `<button disabled style="opacity:0.5; cursor:not-allowed;">Siguiente</button> `;
+        html += `<button disabled style="opacity:0.5; cursor:not-allowed;">Último ⏭</button>`;
     }
 
     divPaginacion.innerHTML = html;
+}
+
+function evaluarTeclaPagina(event, totalPaginas) {
+    if (event.key === 'Enter') {
+        procesarSaltoPagina(totalPaginas);
+    }
+}
+
+function procesarSaltoPagina(totalPaginas) {
+    const input = document.getElementById('inputPaginaDirecta');
+    if (!input) return;
+
+    let destino = parseInt(input.value, 10);
+
+    if (isNaN(destino) || destino < 1) {
+        destino = 1;
+    } else if (destino > totalPaginas) {
+        destino = totalPaginas;
+    }
+
+    cambiarPagina(destino);
 }
 
 function cambiarPagina(nuevaPagina) {

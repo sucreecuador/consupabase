@@ -234,28 +234,48 @@ tbody tr:hover {
     color: #b91c1c !important;
 }
 
-/* Paginación estilo Excel */
+/* ==========================================
+   PAGINACIÓN AVANZADA Y SALTO DIRECTO
+   ========================================== */
 .paginacion, .paginacion-bar {
     margin-top: 15px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    font-size: 13px;
+    flex-wrap: wrap;
 }
 
 .paginacion button, .paginacion-bar button {
     border: 1px solid #d4d4d4;
     background-color: #ffffff;
-    padding: 4px 8px;
+    padding: 4px 10px;
     font-size: 12px;
     cursor: pointer;
     border-radius: 2px;
+    font-weight: 600;
 }
 
-.paginacion button.activo {
-    background-color: #107c41;
-    color: #ffffff;
+.paginacion button:hover, .paginacion-bar button:hover {
+    background-color: #e2e8f0;
+}
+
+.input-pagina-saltar {
+    width: 55px;
+    padding: 3px 5px;
+    text-align: center;
+    border: 1px solid #107c41;
+    border-radius: 3px;
+    font-size: 13px;
     font-weight: bold;
-    border-color: #0c5e31;
+    color: #107c41;
+    outline: none;
+}
+
+.btn-ir-pagina {
+    background-color: #107c41 !important;
+    color: white !important;
+    border-color: #0c5e31 !important;
 }
 
 /* Modal Formulario */
