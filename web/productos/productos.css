@@ -121,6 +121,13 @@ thead th {
     white-space: nowrap;
 }
 
+thead th.col-acciones, th:last-child {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    text-align: center;
+}
+
 thead th:hover {
     background-color: #0e6b37;
 }
@@ -131,6 +138,14 @@ tbody td {
     border: 1px solid #d4d4d4; /* Cuadrícula gris de Excel */
     color: #222222;
     white-space: nowrap;
+}
+
+tbody td.col-acciones, tbody td:last-child {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    text-align: center;
+    padding: 2px 4px !important;
 }
 
 /* Filas cebra alternadas */
@@ -166,43 +181,57 @@ tbody tr:hover {
 /* ==========================================
    BOTONES COMPACTOS DE ACCIONES (E / B)
    ========================================== */
+.acciones-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
 .btn-editar, .btn-eliminar {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    line-height: 22px;
-    text-align: center;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
     border-radius: 3px;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
-    margin: 0 2px;
+    margin: 0 !important;
     border: 1px solid transparent;
     user-select: none;
 }
 
 /* Botón Editar (E) */
 .btn-editar {
-    background-color: #eff6ff;
-    color: #2563eb;
-    border-color: #bfdbfe;
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+    border-color: #bfdbfe !important;
 }
 
 .btn-editar:hover {
-    background-color: #dbeafe;
-    color: #1d4ed8;
+    background-color: #dbeafe !important;
+    color: #1d4ed8 !important;
 }
 
 /* Botón Eliminar / Borrar (B) */
 .btn-eliminar {
-    background-color: #fef2f2;
-    color: #dc2626;
-    border-color: #fecaca;
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+    border-color: #fecaca !important;
 }
 
 .btn-eliminar:hover {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
 }
 
 /* Paginación estilo Excel */

@@ -117,7 +117,7 @@ function renderizarEncabezados() {
         `;
     });
 
-    html += '<th style="text-align:center;">ACCIONES</th></tr>';
+    html += '<th class="col-acciones">ACCIONES</th></tr>';
     thead.innerHTML = html;
 }
 
@@ -201,9 +201,11 @@ function renderizarTabla(productos) {
             `;
         }
         html += `
-            <td style="text-align:center;">
-                <button onclick="editarProducto('${cod}', '${descEscaped}', '${marcaEscaped}', ${pvpVal})" class="btn-editar" title="Editar">E</button>
-                <button onclick="eliminarProducto('${cod}')" class="btn-eliminar" title="Borrar">B</button>
+            <td class="col-acciones">
+                <div class="acciones-wrapper">
+                    <button onclick="editarProducto('${cod}', '${descEscaped}', '${marcaEscaped}', ${pvpVal})" class="btn-editar" title="Editar">E</button>
+                    <button onclick="eliminarProducto('${cod}')" class="btn-eliminar" title="Borrar">B</button>
+                </div>
             </td>
         </tr>`;
     });
