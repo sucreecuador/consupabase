@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderizarEncabezados();
-    cargarProductos();
 });
 
 function cambiarVista(vista) {
@@ -153,7 +152,7 @@ async function cargarProductos() {
         console.error("Error al cargar productos:", err);
         if (tbody) {
             tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">
-                Error de conexión con el servidor
+                Error de conexión con el servidor (/api/productos)
             </td></tr>`;
         }
     }

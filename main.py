@@ -47,10 +47,8 @@ def listar_productos(
             col_filtro_bd = MAPEO_COLUMNAS.get(columnaFiltro, 'descripcion')
             query = query.ilike(col_filtro_bd, f"%{valorFiltro}%")
 
-        # Ordenar toda la base de datos
         query = query.order(col_orden_bd, desc=not es_ascendente)
 
-        # Paginar resultados
         inicio = (pagina - 1) * porPagina
         fin = inicio + porPagina - 1
         query = query.range(inicio, fin)
@@ -90,7 +88,7 @@ def eliminar_producto(codigo: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# ROUTING PARA ARCHIVOS ESTÁTICOS Y RUTA EXACTA DE NAVEGADOR (/web/productos/index.html)
+# Servir archivos estáticos del Frontend
 if os.path.exists("web"):
     app.mount("/static", StaticFiles(directory="web"), name="static")
 
@@ -98,26 +96,15 @@ if os.path.exists("web"):
     def root():
         return FileResponse("web/index.html")
 
-    # Mapeo directo para la URL observada en Render
-    @app.get("/web/productos/index.html")
-    @app.get("/web/productos/")
-    @app.get("/web/productos")
-    def servir_index_especifico():
-        return FileResponse("web/index.html")
-
-    # Captura general de archivos JS, CSS u otros dentro de la carpeta web
+    # Mapea cualquier variante de URL para responder siempre con web/index.html
     @app.get("/{file_name:path}")
-    def servir_archivos_dinamicos(file_name: str):
-        # Si solicitan la carpeta o html directamente
-        if file_name.endswith(".html") or file_name == "":
-            return FileResponse("web/index.html")
-        
+    def servir_archivos_estaticos(file_name: str):
         path_directo = os.path.join("web", os.path.basename(file_name))
-        if os.path.exists(path_directo):
+        if os.path.exists(path_directo) and not file_name.endswith(".html"):
             return FileResponse(path_directo)
 
         path_relativo = os.path.join("web", file_name)
-        if os.path.exists(path_relativo):
+        if os.path.exists(path_relativo) and not file_name.endswith(".html"):
             return FileResponse(path_relativo)
 
-        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+        return FileResponse("web/index.html")
