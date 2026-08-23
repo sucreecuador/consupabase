@@ -39,10 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function cambiarVista(vista) {
     vistaActual = vista;
     columnaBusqueda = 'descripcion';
+    paginaActual = 1;
     renderizarEncabezados();
     cargarProductos();
 }
 
+// CORREGIDO: Resetea a la Página 1 para ver el resultado de toda la BD ordenada
 function cambiarOrden(columnaBD) {
     if (ordenColumna === columnaBD) {
         ordenDireccion = ordenDireccion === 'asc' ? 'desc' : 'asc';
@@ -50,6 +52,7 @@ function cambiarOrden(columnaBD) {
         ordenColumna = columnaBD;
         ordenDireccion = 'asc';
     }
+    paginaActual = 1; // Resetea a página 1
     renderizarEncabezados();
     cargarProductos();
 }
