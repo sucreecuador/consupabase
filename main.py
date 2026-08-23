@@ -1,15 +1,17 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from supabase import create_client, Client
 import os
 
-app = FastAPI()
+app = FastAPI(title="ERP Sucre API")
 
 # Configuración de cliente Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://tu-proyecto.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "tu-anon-key")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Mapeo de columnas permitidas en el Frontend hacia la BD en Supabase
+# Mapeo de columnas del Frontend a campos en la base de datos Supabase
 MAPEO_COLUMNAS = {
     'codigo': 'codigo',
     'naci': 'naci',
@@ -24,7 +26,9 @@ MAPEO_COLUMNAS = {
     'pro1': 'pro1'
 }
 
+# Endpoint principal de consulta de productos (Soporta /api/productos y /api/productos/)
 @app.get("/api/productos")
+@app.get("/api/productos/")
 def listar_productos(
     pagina: int = Query(1, ge=1),
     porPagina: int = Query(20, ge=1, le=100),
@@ -34,27 +38,23 @@ def listar_productos(
     valorFiltro: str = Query(None)
 ):
     try:
-        # Validar y resolver columna de ordenación
         col_orden_bd = MAPEO_COLUMNAS.get(ordenColumna, 'codigo')
         es_ascendente = (ordenDireccion.lower() == 'asc')
 
-        # Iniciar consulta base a la tabla productos
         query = supabase.table('productos').select('*', count='exact')
 
-        # Aplicar filtro de búsqueda si existe
         if columnaFiltro and valorFiltro:
             col_filtro_bd = MAPEO_COLUMNAS.get(columnaFiltro, 'descripcion')
             query = query.ilike(col_filtro_bd, f"%{valorFiltro}%")
 
-        # 1. ORDENAR TODA LA BASE DE DATOS
+        # Ordenar toda la base de datos en Supabase
         query = query.order(col_orden_bd, desc=not es_ascendente)
 
-        # 2. APLICAR PAGINACIÓN DE LOS RESULTADOS YA ORDENADOS
+        # Paginar resultados
         inicio = (pagina - 1) * porPagina
         fin = inicio + porPagina - 1
         query = query.range(inicio, fin)
 
-        # Ejecutar consulta
         respuesta = query.execute()
 
         total_registros = respuesta.count if respuesta.count is not None else 0
@@ -69,3 +69,38 @@ def listar_productos(
 
     except Exception as e:
         return {"data": [], "totalRegistros": 0, "totalPaginas": 1, "error": str(e)}
+
+# Endpoint de actualización
+@app.put("/api/productos/{codigo}")
+@app.put("/api/productos/{codigo}/")
+def actualizar_producto(codigo: str, datos: dict):
+    try:
+        respuesta = supabase.table('productos').update(datos).eq('codigo', codigo).execute()
+        return {"status": "ok", "data": respuesta.data}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Endpoint de eliminación
+@app.delete("/api/productos/{codigo}")
+@app.delete("/api/productos/{codigo}/")
+def eliminar_producto(codigo: str):
+    try:
+        respuesta = supabase.table('productos').delete().eq('codigo', codigo).execute()
+        return {"status": "ok", "data": respuesta.data}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Servir archivos estáticos del Frontend
+if os.path.exists("web"):
+    app.mount("/static", StaticFiles(directory="web"), name="static")
+
+    @app.get("/")
+    def read_root():
+        return FileResponse("web/index.html")
+
+    @app.get("/{file_name}")
+    def read_static_file(file_name: str):
+        file_path = os.path.join("web", file_name)
+        if os.path.exists(file_path):
+            return FileResponse(file_path)
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")

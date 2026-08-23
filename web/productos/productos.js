@@ -44,7 +44,6 @@ function cambiarVista(vista) {
     cargarProductos();
 }
 
-// CORREGIDO: Resetea a la Página 1 para ver el resultado de toda la BD ordenada
 function cambiarOrden(columnaBD) {
     if (ordenColumna === columnaBD) {
         ordenDireccion = ordenDireccion === 'asc' ? 'desc' : 'asc';
@@ -52,7 +51,7 @@ function cambiarOrden(columnaBD) {
         ordenColumna = columnaBD;
         ordenDireccion = 'asc';
     }
-    paginaActual = 1; // Resetea a página 1
+    paginaActual = 1;
     renderizarEncabezados();
     cargarProductos();
 }
@@ -154,7 +153,7 @@ async function cargarProductos() {
         console.error("Error al cargar productos:", err);
         if (tbody) {
             tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">
-                Error de conexión con el servidor
+                Error de conexión con el servidor (/api/productos)
             </td></tr>`;
         }
     }
