@@ -1,41 +1,96 @@
-﻿# Script de Despliegue con Sincronización Forzada para Respaldo Consupabase
-Param(
-    [string]$MensajeCommit = "Respaldo y despliegue completo de consupabase a Render"
-)
+﻿# ============================================================
+#  🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND)
+# ============================================================
 
-$ErrorActionPreference = "Stop"
+Write-Host "============================================================"
+Write-Host "   🚀 INICIANDO DEPLOY DEL ERP SUCRE"
+Write-Host "============================================================"
 
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  RESPALDO CONSUPABASE - DEPLIEGUE TOTAL  " -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Cyan
+# Ruta del proyecto
+$projectPath = "C:\Users\Supervisor\consupabase"
+Set-Location $projectPath
 
-# 1. Agregar todos los archivos del respaldo
-Write-Host "[+] Agregando todos los archivos y programas del respaldo..." -ForegroundColor Green
-git add -A
+# ============================================================
+#  VERIFICACIONES
+# ============================================================
 
-# 2. Crear commit si existen cambios locales
-$status = git status --porcelain
-If ($status) {
-    Write-Host "[+] Creando commit local..." -ForegroundColor Green
-    git commit -m "$MensajeCommit"
+Write-Host "`n🔍 Verificando main.py..."
+if (!(Test-Path "$projectPath\main.py")) {
+    Write-Host "❌ ERROR: No existe main.py"
+    exit
+}
+Write-Host "✔ OK: main.py encontrado"
+
+Write-Host "`n🔍 Verificando carpeta web..."
+if (!(Test-Path "$projectPath\web")) {
+    Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
 } else {
-    Write-Host "[i] No hay cambios locales pendientes de commit." -ForegroundColor Yellow
+    Write-Host "✔ OK: carpeta web encontrada"
 }
 
-# 3. Intentar integrar cambios remotos o forzar push del respaldo
-Write-Host "[+] Sincronizando respaldo local con GitHub (main)..." -ForegroundColor Green
+# ============================================================
+#  GIT: AGREGAR CAMBIOS SOLO SI EXISTEN
+# ============================================================
+
+Write-Host "`n📦 Verificando cambios pendientes..."
+
+$changes = git status --porcelain
+
+if ($changes) {
+    Write-Host "✔ Cambios detectados, creando commit..."
+
+    git add .
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    git commit -m "Deploy ERP Sucre - $timestamp"
+
+    Write-Host "⬆ Subiendo cambios a GitHub..."
+    git push
+} else {
+    Write-Host "⚠ No hay cambios en Git."
+    Write-Host "   → Render NO reconstruirá automáticamente."
+    Write-Host "   → Se enviará un deploy manual igualmente."
+}
+
+# ============================================================
+#  RENDER: ENVIAR DEPLOY
+# ============================================================
+
+Write-Host "`n🚀 Enviando deploy a Render..."
+
+$apiKey = $env:RENDER_API_KEY
+
+if (-not $apiKey) {
+    Write-Host "❌ ERROR: No existe RENDER_API_KEY en variables de entorno."
+    exit
+}
+
+# ID del servicio backend en Render
+$serviceId = "srv-d9l24qdaeets73ad9fvg"
+
+# Endpoint de Render
+$renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
 
 try {
-    # Intenta hacer rebase primero
-    git pull --rebase origin main 2>$null
-    git push origin main
-} catch {
-    Write-Host "[!] El historial remoto difiere. Forzando actualización con el respaldo local..." -ForegroundColor Yellow
-    # Si falla por conflicto de historial, fuerza la subida del respaldo local
-    git push --force origin main
+    $deploy = Invoke-RestMethod `
+        -Method POST `
+        -Uri $renderUrl `
+        -Headers @{ "Authorization" = "Bearer $apiKey" } `
+        -ContentType "application/json" `
+        -Body "{}"
+
+    Write-Host "`n============================================================"
+    Write-Host "   ✔ Render aceptó el deploy"
+    Write-Host "============================================================"
+    Write-Host "🆔 ID del deploy: $($deploy.id)"
+    Write-Host "📌 Estado inicial: $($deploy.status)"
+    Write-Host "🔗 Logs: https://dashboard.render.com/services/$serviceId/deploys/$($deploy.id)"
+}
+catch {
+    Write-Host "❌ ERROR al enviar el deploy a Render."
+    Write-Host $_
 }
 
-Write-Host "`n==========================================" -ForegroundColor Cyan
-Write-Host "✔ DESPLIEGUE A GITHUB COMPLETADO EXITOSAMENTE" -ForegroundColor Green
-Write-Host "Render detectará los cambios en main e iniciará el build." -ForegroundColor Gray
-Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host "`n============================================================"
+Write-Host "   🎉 DEPLOY COMPLETO FINALIZADO"
+Write-Host "============================================================"
