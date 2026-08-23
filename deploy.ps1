@@ -1,96 +1,38 @@
-﻿# ============================================================
-#  🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND)
-# ============================================================
+﻿# Script de Despliegue para Render (ERP Sucre)
+Param(
+    [string]$MensajeCommit = "Actualizacion y despliegue continuo a Render"
+)
 
-Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY DEL ERP SUCRE"
-Write-Host "============================================================"
+$ErrorActionPreference = "Stop"
 
-# Ruta del proyecto
-$projectPath = "C:\Users\Supervisor\consupabase"
-Set-Location $projectPath
+Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host "     INICIANDO DESPLIEGUE A RENDER        " -ForegroundColor Cyan
+Write-Host "==========================================" -ForegroundColor Cyan
 
-# ============================================================
-#  VERIFICACIONES
-# ============================================================
-
-Write-Host "`n🔍 Verificando main.py..."
-if (!(Test-Path "$projectPath\main.py")) {
-    Write-Host "❌ ERROR: No existe main.py"
-    exit
-}
-Write-Host "✔ OK: main.py encontrado"
-
-Write-Host "`n🔍 Verificando carpeta web..."
-if (!(Test-Path "$projectPath\web")) {
-    Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
-} else {
-    Write-Host "✔ OK: carpeta web encontrada"
+# 1. Verificar estado del repositorio Git
+If (-not (Test-Path ".git")) {
+    Write-Host "[-] Inicializando repositorio Git..." -ForegroundColor Yellow
+    git init
+    git branch -M main
 }
 
-# ============================================================
-#  GIT: AGREGAR CAMBIOS SOLO SI EXISTEN
-# ============================================================
+# 2. Agregar cambios
+Write-Host "[+] Agregando archivos al control de versiones..." -ForegroundColor Green
+git add .
 
-Write-Host "`n📦 Verificando cambios pendientes..."
-
-$changes = git status --porcelain
-
-if ($changes) {
-    Write-Host "✔ Cambios detectados, creando commit..."
-
-    git add .
-
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    git commit -m "Deploy ERP Sucre - $timestamp"
-
-    Write-Host "⬆ Subiendo cambios a GitHub..."
-    git push
-} else {
-    Write-Host "⚠ No hay cambios en Git."
-    Write-Host "   → Render NO reconstruirá automáticamente."
-    Write-Host "   → Se enviará un deploy manual igualmente."
-}
-
-# ============================================================
-#  RENDER: ENVIAR DEPLOY
-# ============================================================
-
-Write-Host "`n🚀 Enviando deploy a Render..."
-
-$apiKey = $env:RENDER_API_KEY
-
-if (-not $apiKey) {
-    Write-Host "❌ ERROR: No existe RENDER_API_KEY en variables de entorno."
-    exit
-}
-
-# ID del servicio backend en Render
-$serviceId = "srv-d9l24qdaeets73ad9fvg"
-
-# Endpoint de Render
-$renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
-
+# 3. Crear Commit
+Write-Host "[+] Creando commit: '$MensajeCommit'..." -ForegroundColor Green
 try {
-    $deploy = Invoke-RestMethod `
-        -Method POST `
-        -Uri $renderUrl `
-        -Headers @{ "Authorization" = "Bearer $apiKey" } `
-        -ContentType "application/json" `
-        -Body "{}"
-
-    Write-Host "`n============================================================"
-    Write-Host "   ✔ Render aceptó el deploy"
-    Write-Host "============================================================"
-    Write-Host "🆔 ID del deploy: $($deploy.id)"
-    Write-Host "📌 Estado inicial: $($deploy.status)"
-    Write-Host "🔗 Logs: https://dashboard.render.com/services/$serviceId/deploys/$($deploy.id)"
-}
-catch {
-    Write-Host "❌ ERROR al enviar el deploy a Render."
-    Write-Host $_
+    git commit -m "$MensajeCommit"
+} catch {
+    Write-Host "[!] No hay cambios nuevos para confirmar." -ForegroundColor Yellow
 }
 
-Write-Host "`n============================================================"
-Write-Host "   🎉 DEPLOY COMPLETO FINALIZADO"
-Write-Host "============================================================"
+# 4. Enviar a GitHub
+Write-Host "[+] Subiendo cambios a GitHub (main)..." -ForegroundColor Green
+git push origin main
+
+Write-Host "`n==========================================" -ForegroundColor Cyan
+Write-Host "✔ PUSH COMPLETADO EXITOSAMENTE" -ForegroundColor Green
+Write-Host "Render detectará los cambios en main e iniciará el Build automáticamente." -ForegroundColor Gray
+Write-Host "==========================================" -ForegroundColor Cyan
