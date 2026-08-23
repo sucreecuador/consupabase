@@ -90,23 +90,21 @@ def eliminar_producto(codigo: str):
 
 # Servir archivos estáticos del Frontend
 if os.path.exists("web"):
-    # Monta la carpeta web para servir JS, CSS, imagenes y archivos HTML reales
-    app.mount("/web", StaticFiles(directory="web", html=True), name="web")
+    app.mount("/static", StaticFiles(directory="web"), name="static")
 
-    # Página raíz (Soporta GET y HEAD para Render Health Check)
-    @app.get("/", methods=["GET", "HEAD"])
+    @app.get("/")
     def root():
         return FileResponse("web/index.html")
 
-    # Manejo dinámico de rutas para servir archivos existentes sin bloquear HTMLs
+    # Mapea cualquier variante de URL para responder siempre con web/index.html
     @app.get("/{file_name:path}")
     def servir_archivos_estaticos(file_name: str):
-        path_relativo = os.path.join("web", file_name)
-        if os.path.isfile(path_relativo):
-            return FileResponse(path_relativo)
-
         path_directo = os.path.join("web", os.path.basename(file_name))
-        if os.path.isfile(path_directo):
+        if os.path.exists(path_directo) and not file_name.endswith(".html"):
             return FileResponse(path_directo)
+
+        path_relativo = os.path.join("web", file_name)
+        if os.path.exists(path_relativo) and not file_name.endswith(".html"):
+            return FileResponse(path_relativo)
 
         return FileResponse("web/index.html")
