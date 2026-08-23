@@ -181,29 +181,29 @@ function renderizarTabla(productos) {
         html += '<tr>';
         if (vistaActual === 'vista1') {
             html += `
-                <td><strong>${cod}</strong></td>
+                <td class="excel-code">${cod}</td>
                 <td>${p.naci || ''}</td>
                 <td>${marca}</td>
                 <td>${desc}</td>
                 <td>${p.unidad || ''}</td>
-                <td>$${pvpVal}</td>
-                <td>${p.saldo_temp || 0}</td>
+                <td class="excel-number">$${pvpVal}</td>
+                <td class="excel-number">${p.saldo_temp || 0}</td>
             `;
         } else {
             html += `
-                <td><strong>${cod}</strong></td>
+                <td class="excel-code">${cod}</td>
                 <td>${p.codigo_proveedor || '0'}</td>
                 <td>${desc}</td>
-                <td>${p.saldo || 0}</td>
-                <td>$${costoVal}</td>
-                <td>${p.pro1 || 0}</td>
-                <td>$${pvpVal}</td>
+                <td class="excel-number">${p.saldo || 0}</td>
+                <td class="excel-number">$${costoVal}</td>
+                <td><span class="excel-badge">${p.pro1 || 0}</span></td>
+                <td class="excel-number"><b>$${pvpVal}</b></td>
             `;
         }
         html += `
             <td style="text-align:center;">
-                <button onclick="editarProducto('${cod}', '${descEscaped}', '${marcaEscaped}', ${pvpVal})" class="btn-editar">✏️ Editar</button>
-                <button onclick="eliminarProducto('${cod}')" class="btn-eliminar">❌ Eliminar</button>
+                <button onclick="editarProducto('${cod}', '${descEscaped}', '${marcaEscaped}', ${pvpVal})" class="btn-editar" title="Editar">E</button>
+                <button onclick="eliminarProducto('${cod}')" class="btn-eliminar" title="Borrar">B</button>
             </td>
         </tr>`;
     });
