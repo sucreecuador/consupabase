@@ -1,3 +1,5 @@
+COLUMNAS_TEXTO = ["codigo", "codigo_proveedor", "naci", "marca", "descripcion", "unidad", "pro1", "pro2", "pro3"]
+
 @app.get("/api/productos")
 def listar_productos(
     pagina: int = 1,
@@ -9,11 +11,10 @@ def listar_productos(
 ):
     query = supabase.table("productos").select("*", count="exact")
     
-    # Aplicar filtro solo si hay un valor ingresado
-    if columnaFiltro and valorFiltro:
-        query = query.ilike(columnaFiltro, f"%{valorFiltro}%")
+    # Solo filtrar por columnas tipo texto para evitar errores de tipo de dato
+    if columnaFiltro and valorFiltro and columnaFiltro.lower() in COLUMNAS_TEXTO:
+        query = query.ilike(columnaFiltro.lower(), f"%{valorFiltro}%")
         
-    # Paginación y orden
     inicio = (pagina - 1) * porPagina
     fin = inicio + porPagina - 1
     
