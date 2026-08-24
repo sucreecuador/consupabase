@@ -51,7 +51,7 @@ if (btnVista1) {
     btnVista1.onclick = () => {
         vistaActual = 1;
         btnVista1.classList.add("activa");
-        btnVista2.classList.remove("activa");
+        if (btnVista2) btnVista2.classList.remove("activa");
         actualizarEncabezados();
         mostrarPagina(1);
     };
@@ -61,7 +61,7 @@ if (btnVista2) {
     btnVista2.onclick = () => {
         vistaActual = 2;
         btnVista2.classList.add("activa");
-        btnVista1.classList.remove("activa");
+        if (btnVista1) btnVista1.classList.remove("activa");
         actualizarEncabezados();
         mostrarPagina(1);
     };
@@ -180,7 +180,6 @@ function mostrarPagina(numPagina) {
                 </tr>
             `;
         } else {
-            // Se asegura de extraer codigo_proveedor o cod_proveedor según devuelva la API
             const codProv = prod.codigo_proveedor ?? prod.cod_proveedor ?? "—";
             
             tablaBody.innerHTML += `
@@ -357,6 +356,9 @@ if (toggleSidebar) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    vistaActual = 2;
+    if (btnVista2) btnVista2.classList.add("activa");
+    if (btnVista1) btnVista1.classList.remove("activa");
     actualizarEncabezados();
     cargarProductos();
 });
