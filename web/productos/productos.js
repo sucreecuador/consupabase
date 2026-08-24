@@ -30,6 +30,7 @@ function actualizarEncabezados() {
     if (vista === 1) {
         thead.innerHTML = `
             <tr>
+                <th data-col="id">ID</th>
                 <th data-col="codigo">CÓDIGO</th>
                 <th data-col="naci">NAC</th>
                 <th data-col="marca">MARCA</th>
@@ -43,13 +44,14 @@ function actualizarEncabezados() {
     } else {
         thead.innerHTML = `
             <tr>
+                <th data-col="id">ID</th>
                 <th data-col="codigo">CÓDIGO</th>
                 <th data-col="codigo_proveedor">COD.PROV</th>
+                <th data-col="marca">MARCA</th>
+                <th data-col="descripcion">NOMBRE</th>
+                <th data-col="saldo_temp">S.TEM</th>
                 <th data-col="costo_prom">COSTO</th>
-                <th data-col="precio_fob">FOB</th>
-                <th data-col="precio_anterior">P.ANT</th>
-                <th data-col="viene">VIENE</th>
-                <th data-col="fecha_ultima_ingreso">F.ING</th>
+                <th data-col="precio_venta">P.VENTA</th>
                 <th>ACCIONES</th>
             </tr>
         `;
@@ -97,7 +99,7 @@ function mostrarPagina(numPagina) {
     tbody.innerHTML = "";
 
     if (pagina.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8">No se encontraron productos</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9">No se encontraron productos</td></tr>`;
         return;
     }
 
@@ -105,6 +107,7 @@ function mostrarPagina(numPagina) {
         if (vista === 1) {
             tbody.innerHTML += `
                 <tr>
+                    <td>${prod.id}</td>
                     <td>${prod.codigo}</td>
                     <td>${prod.naci}</td>
                     <td>${prod.marca}</td>
@@ -121,13 +124,14 @@ function mostrarPagina(numPagina) {
         } else {
             tbody.innerHTML += `
                 <tr>
+                    <td>${prod.id}</td>
                     <td>${prod.codigo}</td>
                     <td>${prod.codigo_proveedor}</td>
+                    <td>${prod.marca}</td>
+                    <td>${prod.descripcion}</td>
+                    <td>${prod.saldo_temp}</td>
                     <td>${prod.costo_prom}</td>
-                    <td>${prod.precio_fob}</td>
-                    <td>${prod.precio_anterior}</td>
-                    <td>${prod.viene}</td>
-                    <td>${prod.fecha_ultima_ingreso}</td>
+                    <td>${prod.precio_venta}</td>
                     <td>
                         <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
                         <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
@@ -167,7 +171,7 @@ btnIr.onclick = () => {
 };
 
 // ===============================
-//  FILTROS AVANZADOS (Vista 1 y Vista 2)
+//  FILTROS AVANZADOS
 // ===============================
 
 function aplicarFiltros() {
