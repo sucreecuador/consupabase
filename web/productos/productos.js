@@ -7,7 +7,7 @@ let productosFiltrados = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let mostrarTodos = false;
-let vista = 2; // tu ERP usa vista 2 por defecto
+let vista = 2;
 let ordenActual = {};
 let productoEditando = null;
 
@@ -79,11 +79,14 @@ async function cargarProductos() {
 function actualizarEncabezados() {
     theadProductos.innerHTML = `
         <tr>
+            <th data-col="pro1">PRO1</th>
+            <th data-col="pro2">PRO2</th>
+            <th data-col="pro3">PRO3</th>
             <th data-col="codigo_proveedor">PROV</th>
-            <th data-col="codigo">PROD</th>
+            <th data-col="codigo">CÓDIGO</th>
             <th data-col="marca">MARCA</th>
             <th data-col="descripcion">DESCRIPCIÓN</th>
-            <th data-col="saldo_temp">CTR</th>
+            <th data-col="saldo_temp">S.TEM</th>
             <th data-col="costo_prom">COSTO</th>
             <th data-col="precio_venta">P.VENTA</th>
             <th>ACCIONES</th>
@@ -144,6 +147,9 @@ function mostrarPagina(numPagina) {
     lista.forEach(prod => {
         tablaBody.innerHTML += `
             <tr>
+                <td>${prod.pro1 ?? "—"}</td>
+                <td>${prod.pro2 ?? "—"}</td>
+                <td>${prod.pro3 ?? "—"}</td>
                 <td>${prod.codigo_proveedor ?? ""}</td>
                 <td>${prod.codigo}</td>
                 <td>${prod.marca}</td>
