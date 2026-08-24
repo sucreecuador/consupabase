@@ -2,7 +2,7 @@ let productos = [];
 let productosFiltrados = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
-let mostrarTodos = false;
+let mostrarTodos = true;
 let ordenActual = {};
 let productoEditando = null;
 let vistaActual = 2;
@@ -69,16 +69,15 @@ if (btnVista2) {
 
 async function cargarProductos() {
     try {
-        const contacto = (buscarPro1 && buscarPro1.value.trim()) ? buscarPro1.value.trim() : "319";
-        const respuesta = await fetch(`/api/productos?contacto=${contacto}`);
+        const respuesta = await fetch('/api/productos?contacto=319');
         productos = await respuesta.json();
         productosFiltrados = [...productos];
+        actualizarEncabezados();
         mostrarPagina(1);
     } catch (error) {
         if (tablaBody) {
-            const cols = vistaActual === 1 ? 8 : 11;
             tablaBody.innerHTML =
-                `<tr><td colspan="${cols}" style="text-align:center; color:red;">Error al conectar con el servidor</td></tr>`;
+                `<tr><td colspan="11" style="text-align:center; color:red;">Error al conectar con la API para el proveedor 319</td></tr>`;
         }
     }
 }
@@ -157,7 +156,7 @@ function mostrarPagina(numPagina) {
     const totalCols = vistaActual === 1 ? 8 : 11;
 
     if (lista.length === 0) {
-        tablaBody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;">No se encontraron productos</td></tr>`;
+        tablaBody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;">No hay productos para el proveedor 319</td></tr>`;
         actualizarPaginacion();
         return;
     }
@@ -210,7 +209,7 @@ function actualizarPaginacion() {
     if (!paginaActualSpan) return;
 
     if (mostrarTodos) {
-        paginaActualSpan.innerText = `Mostrando ${productosFiltrados.length} productos`;
+        paginaActualSpan.innerText = `Mostrando ${productosFiltrados.length} productos del proveedor 319`;
         return;
     }
 
@@ -244,17 +243,11 @@ function aplicarFiltros() {
     const nombre = buscarNombre ? buscarNombre.value.toLowerCase() : "";
     const marca  = buscarMarca ? buscarMarca.value.toLowerCase() : "";
     const codigo = buscarCodigo ? buscarCodigo.value.toLowerCase() : "";
-    const pro1   = buscarPro1 ? buscarPro1.value.toLowerCase() : "";
 
     productosFiltrados = productos.filter(p =>
         (p.descripcion ?? "").toLowerCase().includes(nombre) &&
         (p.marca ?? "").toLowerCase().includes(marca) &&
-        (p.codigo ?? "").toLowerCase().includes(codigo) &&
-        (
-            (p.pro1 ?? "").toString().toLowerCase().includes(pro1) ||
-            (p.pro2 ?? "").toString().toLowerCase().includes(pro1) ||
-            (p.pro3 ?? "").toString().toLowerCase().includes(pro1)
-        )
+        (p.codigo ?? "").toLowerCase().includes(codigo)
     );
 
     mostrarPagina(1);
@@ -263,10 +256,6 @@ function aplicarFiltros() {
 if (buscarNombre) buscarNombre.oninput = aplicarFiltros;
 if (buscarMarca) buscarMarca.oninput  = aplicarFiltros;
 if (buscarCodigo) buscarCodigo.oninput = aplicarFiltros;
-if (buscarPro1) {
-    buscarPro1.onchange = () => cargarProductos();
-    buscarPro1.oninput = aplicarFiltros;
-}
 
 if (btnMostrarTodos) {
     btnMostrarTodos.onclick = () => {
@@ -359,6 +348,5 @@ document.addEventListener("DOMContentLoaded", () => {
     vistaActual = 2;
     if (btnVista2) btnVista2.classList.add("activa");
     if (btnVista1) btnVista1.classList.remove("activa");
-    actualizarEncabezados();
     cargarProductos();
 });
