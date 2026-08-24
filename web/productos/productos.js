@@ -4,6 +4,7 @@ let itemsPorPagina = 20;
 let ordenActual = {};
 let vista = 1;
 let productoEditando = null;
+let mostrarTodos = false;
 
 // ===============================
 //  CARGAR PRODUCTOS
@@ -21,7 +22,7 @@ async function cargarProductos() {
 }
 
 // ===============================
-//  CAMBIAR ENCABEZADOS SEGÚN VISTA
+//  ENCABEZADOS DINÁMICOS
 // ===============================
 
 function actualizarEncabezados() {
@@ -89,20 +90,23 @@ function ordenarPor(columna) {
 function mostrarPagina(numPagina) {
     paginaActual = numPagina;
 
-    const inicio = (paginaActual - 1) * itemsPorPagina;
-    const fin = inicio + itemsPorPagina;
+    let lista = productos;
 
-    const pagina = productos.slice(inicio, fin);
+    if (!mostrarTodos) {
+        const inicio = (paginaActual - 1) * itemsPorPagina;
+        const fin = inicio + itemsPorPagina;
+        lista = productos.slice(inicio, fin);
+    }
 
     const tbody = document.getElementById("tablaBody");
     tbody.innerHTML = "";
 
-    if (pagina.length === 0) {
+    if (lista.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9">No se encontraron productos</td></tr>`;
         return;
     }
 
-    pagina.forEach(prod => {
+    lista.forEach(prod => {
         if (vista === 1) {
             tbody.innerHTML += `
                 <tr>
@@ -111,7 +115,7 @@ function mostrarPagina(numPagina) {
                     <td>${prod.marca}</td>
                     <td>${prod.descripcion}</td>
                     <td>${prod.unidad}</td>
-                    <td>${prod.precio_venta}</td>
+                    <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
                     <td>${prod.saldo_temp}</td>
                     <td>
                         <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
@@ -128,8 +132,8 @@ function mostrarPagina(numPagina) {
                     <td>${prod.marca}</td>
                     <td>${prod.descripcion}</td>
                     <td>${prod.saldo_temp}</td>
-                    <td>${prod.costo_prom}</td>
-                    <td>${prod.precio_venta}</td>
+                    <td>${(prod.costo_prom ?? 0).toFixed(2)}</td>
+                    <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
                     <td>
                         <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
                         <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
@@ -147,6 +151,12 @@ function mostrarPagina(numPagina) {
 // ===============================
 
 function actualizarPaginacion() {
+    if (mostrarTodos) {
+        paginaActual = 1;
+        document.getElementById("paginaActual").innerText = `Mostrando todo`;
+        return;
+    }
+
     const totalPaginas = Math.ceil(productos.length / itemsPorPagina);
     document.getElementById("paginaActual").innerText =
         `Página ${paginaActual} de ${totalPaginas}`;
@@ -176,20 +186,32 @@ function aplicarFiltros() {
     const nombre = buscarNombre.value.toLowerCase();
     const marca = buscarMarca.value.toLowerCase();
     const codigo = buscarCodigo.value.toLowerCase();
+    const pro1 = buscarPro1.value.toLowerCase();
 
-    const filtrados = productos.filter(p =>
+    productos = productos.filter(p =>
         (p.descripcion || "").toLowerCase().includes(nombre) &&
         (p.marca || "").toLowerCase().includes(marca) &&
-        (p.codigo || "").toLowerCase().includes(codigo)
+        (p.codigo || "").toLowerCase().includes(codigo) &&
+        (p.pro1 || "").toString().toLowerCase().includes(pro1)
     );
 
-    productos = filtrados;
     mostrarPagina(1);
 }
 
 buscarNombre.oninput = aplicarFiltros;
 buscarMarca.oninput = aplicarFiltros;
 buscarCodigo.oninput = aplicarFiltros;
+buscarPro1.oninput = aplicarFiltros;
+
+// ===============================
+//  MOSTRAR TODOS
+// ===============================
+
+btnMostrarTodos.onclick = () => {
+    mostrarTodos = !mostrarTodos;
+    btnMostrarTodos.innerText = mostrarTodos ? "Modo paginado" : "Mostrar todos";
+    mostrarPagina(1);
+};
 
 // ===============================
 //  VISTAS
@@ -300,17 +322,4 @@ toggleSidebar.onclick = () => {
     if (sidebar.style.display === "none") {
         sidebar.style.display = "block";
         main.style.marginLeft = "240px";
-        toggleSidebar.innerText = "Ocultar menú";
-    } else {
-        sidebar.style.display = "none";
-        main.style.marginLeft = "20px";
-        toggleSidebar.innerText = "Mostrar menú";
-    }
-};
-
-// ===============================
-//  INICIO
-// ===============================
-
-actualizarEncabezados();
-cargarProductos();
+        toggleSidebar.innerText
