@@ -89,8 +89,8 @@ catch {
 
 Write-Host "`n🚀 Enviando deploy del FRONTEND (carpeta /web)..."
 
-# ID del servicio STATIC en Render (CREARLO UNA VEZ EN RENDER)
-$frontendId = "srv-frontend-sucre-123456"   # ← CAMBIA ESTE ID
+# ID del servicio STATIC en Render (TU ID REAL)
+$frontendId = "srv-da67qsafngtc738llj6g"
 
 $frontendUrl = "https://api.render.com/v1/services/$frontendId/deploys"
 
