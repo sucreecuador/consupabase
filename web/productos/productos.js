@@ -1,7 +1,3 @@
-// ===============================
-// VARIABLES GLOBALES DE ESTADO
-// ===============================
-
 let productos = [];
 let productosFiltrados = [];
 let paginaActual = 1;
@@ -9,10 +5,7 @@ let itemsPorPagina = 20;
 let mostrarTodos = false;
 let ordenActual = {};
 let productoEditando = null;
-
-// ===============================
-// ELEMENTOS DEL DOM
-// ===============================
+let vistaActual = 2;
 
 const tablaBody       = document.getElementById("tablaBody");
 const theadProductos  = document.getElementById("theadProductos");
@@ -24,6 +17,9 @@ const buscarPro1      = document.getElementById("buscarPro1");
 
 const btnMostrarTodos = document.getElementById("btnMostrarTodos");
 const btnNuevoProducto= document.getElementById("btnNuevoProducto");
+
+const btnVista1       = document.getElementById("vista1");
+const btnVista2       = document.getElementById("vista2");
 
 const btnPrimero      = document.getElementById("btnPrimero");
 const btnAnterior     = document.getElementById("btnAnterior");
@@ -51,9 +47,25 @@ const cerrarCrear     = document.getElementById("cerrarCrear");
 
 const toggleSidebar   = document.getElementById("toggleSidebar");
 
-// ===============================
-// CONSULTA Y CARGA DE DATOS
-// ===============================
+if (btnVista1) {
+    btnVista1.onclick = () => {
+        vistaActual = 1;
+        btnVista1.classList.add("activa");
+        btnVista2.classList.remove("activa");
+        actualizarEncabezados();
+        mostrarPagina(1);
+    };
+}
+
+if (btnVista2) {
+    btnVista2.onclick = () => {
+        vistaActual = 2;
+        btnVista2.classList.add("activa");
+        btnVista1.classList.remove("activa");
+        actualizarEncabezados();
+        mostrarPagina(1);
+    };
+}
 
 async function cargarProductos() {
     try {
@@ -64,33 +76,46 @@ async function cargarProductos() {
         mostrarPagina(1);
     } catch (error) {
         if (tablaBody) {
+            const cols = vistaActual === 1 ? 8 : 11;
             tablaBody.innerHTML =
-                `<tr><td colspan="11" style="text-align:center; color:red;">Error al conectar con el servidor</td></tr>`;
+                `<tr><td colspan="${cols}" style="text-align:center; color:red;">Error al conectar con el servidor</td></tr>`;
         }
     }
 }
 
-// ===============================
-// DIBUJAR ENCABEZADOS Y ORDENACIÓN
-// ===============================
-
 function actualizarEncabezados() {
     if (!theadProductos) return;
-    theadProductos.innerHTML = `
-        <tr>
-            <th data-col="pro1">PRO1</th>
-            <th data-col="pro2">PRO2</th>
-            <th data-col="pro3">PRO3</th>
-            <th data-col="codigo_proveedor">CÓD. PROV.</th>
-            <th data-col="codigo">CÓDIGO</th>
-            <th data-col="marca">MARCA</th>
-            <th data-col="descripcion">DESCRIPCIÓN</th>
-            <th data-col="saldo_temp">S.TEM</th>
-            <th data-col="costo_prom">COSTO</th>
-            <th data-col="precio_venta">P.VENTA</th>
-            <th>ACCIONES</th>
-        </tr>
-    `;
+
+    if (vistaActual === 1) {
+        theadProductos.innerHTML = `
+            <tr>
+                <th data-col="codigo">CÓDIGO</th>
+                <th data-col="naci">NAC</th>
+                <th data-col="marca">MARCA</th>
+                <th data-col="descripcion">NOMBRE</th>
+                <th data-col="unidad">UNI</th>
+                <th data-col="precio_venta">PVP</th>
+                <th data-col="saldo_temp">S.TEM</th>
+                <th>ACCIONES</th>
+            </tr>
+        `;
+    } else {
+        theadProductos.innerHTML = `
+            <tr>
+                <th data-col="pro1">PRO1</th>
+                <th data-col="pro2">PRO2</th>
+                <th data-col="pro3">PRO3</th>
+                <th data-col="codigo_proveedor">CÓD. PROV.</th>
+                <th data-col="codigo">CÓDIGO</th>
+                <th data-col="marca">MARCA</th>
+                <th data-col="descripcion">DESCRIPCIÓN</th>
+                <th data-col="saldo_temp">S.TEM</th>
+                <th data-col="costo_prom">COSTO</th>
+                <th data-col="precio_venta">P.VENTA</th>
+                <th>ACCIONES</th>
+            </tr>
+        `;
+    }
 
     activarOrdenamiento();
 }
@@ -114,10 +139,6 @@ function ordenarPor(columna) {
     mostrarPagina(1);
 }
 
-// ===============================
-// RENDERIZADO DE TABLA Y PAGINACIÓN
-// ===============================
-
 function mostrarPagina(numPagina) {
     paginaActual = numPagina;
     let lista = [];
@@ -133,31 +154,51 @@ function mostrarPagina(numPagina) {
     if (!tablaBody) return;
     tablaBody.innerHTML = "";
 
+    const totalCols = vistaActual === 1 ? 8 : 11;
+
     if (lista.length === 0) {
-        tablaBody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No se encontraron productos</td></tr>`;
+        tablaBody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;">No se encontraron productos</td></tr>`;
         actualizarPaginacion();
         return;
     }
 
     lista.forEach(prod => {
-        tablaBody.innerHTML += `
-            <tr>
-                <td>${prod.pro1 ?? "—"}</td>
-                <td>${prod.pro2 ?? "—"}</td>
-                <td>${prod.pro3 ?? "—"}</td>
-                <td>${prod.codigo_proveedor ?? "—"}</td>
-                <td>${prod.codigo ?? ""}</td>
-                <td>${prod.marca ?? ""}</td>
-                <td>${prod.descripcion ?? ""}</td>
-                <td>${prod.saldo_temp ?? 0}</td>
-                <td>${(prod.costo_prom ?? 0).toFixed(2)}</td>
-                <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
-                <td style="text-align:center;">
-                    <button onclick='abrirModal(${JSON.stringify(prod)})' title="Editar">✏️</button>
-                    <button onclick='eliminarProducto(${prod.id})' title="Eliminar">🗑️</button>
-                </td>
-            </tr>
-        `;
+        if (vistaActual === 1) {
+            tablaBody.innerHTML += `
+                <tr>
+                    <td>${prod.codigo ?? ""}</td>
+                    <td>${prod.naci ?? ""}</td>
+                    <td>${prod.marca ?? ""}</td>
+                    <td>${prod.descripcion ?? ""}</td>
+                    <td>${prod.unidad ?? ""}</td>
+                    <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
+                    <td>${prod.saldo_temp ?? 0}</td>
+                    <td style="text-align:center;">
+                        <button onclick='abrirModal(${JSON.stringify(prod)})' title="Editar">✏️</button>
+                        <button onclick='eliminarProducto(${prod.id})' title="Eliminar">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        } else {
+            tablaBody.innerHTML += `
+                <tr>
+                    <td>${prod.pro1 ?? "—"}</td>
+                    <td>${prod.pro2 ?? "—"}</td>
+                    <td>${prod.pro3 ?? "—"}</td>
+                    <td>${prod.codigo_proveedor ?? "—"}</td>
+                    <td>${prod.codigo ?? ""}</td>
+                    <td>${prod.marca ?? ""}</td>
+                    <td>${prod.descripcion ?? ""}</td>
+                    <td>${prod.saldo_temp ?? 0}</td>
+                    <td>${(prod.costo_prom ?? 0).toFixed(2)}</td>
+                    <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
+                    <td style="text-align:center;">
+                        <button onclick='abrirModal(${JSON.stringify(prod)})' title="Editar">✏️</button>
+                        <button onclick='eliminarProducto(${prod.id})' title="Eliminar">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        }
     });
 
     actualizarPaginacion();
@@ -175,7 +216,6 @@ function actualizarPaginacion() {
     paginaActualSpan.innerText = `Página ${paginaActual} de ${totalPaginas}`;
 }
 
-// Eventos Paginador
 if (btnPrimero) btnPrimero.onclick = () => { if (!mostrarTodos) mostrarPagina(1); };
 if (btnAnterior) btnAnterior.onclick = () => { if (!mostrarTodos && paginaActual > 1) mostrarPagina(paginaActual - 1); };
 if (btnSiguiente) btnSiguiente.onclick = () => {
@@ -197,10 +237,6 @@ if (btnIr) btnIr.onclick = () => {
         if (num >= 1 && num <= total) mostrarPagina(num);
     }
 };
-
-// ===============================
-// BÚSQUEDA Y FILTROS
-// ===============================
 
 function aplicarFiltros() {
     const nombre = buscarNombre ? buscarNombre.value.toLowerCase() : "";
@@ -237,10 +273,6 @@ if (btnMostrarTodos) {
         mostrarPagina(1);
     };
 }
-
-// ===============================
-// OPERACIONES CRUD & MODALES
-// ===============================
 
 function abrirModal(prod) {
     productoEditando = prod;
@@ -304,10 +336,6 @@ async function eliminarProducto(id) {
     cargarProductos();
 }
 
-// ===============================
-// CONTROLES DE INTERFAZ
-// ===============================
-
 if (toggleSidebar) {
     toggleSidebar.onclick = () => {
         const sidebar = document.getElementById("sidebar");
@@ -324,10 +352,6 @@ if (toggleSidebar) {
         }
     };
 }
-
-// ===============================
-// INICIALIZACIÓN
-// ===============================
 
 document.addEventListener("DOMContentLoaded", () => {
     actualizarEncabezados();
