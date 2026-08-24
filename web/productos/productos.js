@@ -69,15 +69,30 @@ if (btnVista2) {
 
 async function cargarProductos() {
     try {
+        // Intenta obtener los datos filtrados directamente o la lista completa
         const respuesta = await fetch('/api/productos?contacto=319');
-        productos = await respuesta.json();
+        let data = await respuesta.json();
+        
+        // Si el endpoint no filtró automáticamente, forzamos el filtro local por 319
+        productos = data.filter(p => 
+            String(p.pro1) === "319" || 
+            String(p.pro2) === "319" || 
+            String(p.pro3) === "319" ||
+            String(p.contacto) === "319"
+        );
+
+        // Si la respuesta venía filtrada de origen pero el array quedó vacío con el filtro extra, usamos la data limpia
+        if (productos.length === 0 && data.length > 0) {
+            productos = data;
+        }
+
         productosFiltrados = [...productos];
         actualizarEncabezados();
         mostrarPagina(1);
     } catch (error) {
         if (tablaBody) {
             tablaBody.innerHTML =
-                `<tr><td colspan="11" style="text-align:center; color:red;">Error al conectar con la API para el proveedor 319</td></tr>`;
+                `<tr><td colspan="11" style="text-align:center; color:red;">Error al cargar datos del proveedor 319</td></tr>`;
         }
     }
 }
@@ -156,7 +171,7 @@ function mostrarPagina(numPagina) {
     const totalCols = vistaActual === 1 ? 8 : 11;
 
     if (lista.length === 0) {
-        tablaBody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;">No hay productos para el proveedor 319</td></tr>`;
+        tablaBody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;">No hay registros asociados al proveedor 319</td></tr>`;
         actualizarPaginacion();
         return;
     }
@@ -209,35 +224,13 @@ function actualizarPaginacion() {
     if (!paginaActualSpan) return;
 
     if (mostrarTodos) {
-        paginaActualSpan.innerText = `Mostrando ${productosFiltrados.length} productos del proveedor 319`;
+        paginaActualSpan.innerText = `Mostrando ${productosFiltrados.length} productos (Proveedor 319)`;
         return;
     }
 
     const totalPaginas = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
     paginaActualSpan.innerText = `Página ${paginaActual} de ${totalPaginas}`;
 }
-
-if (btnPrimero) btnPrimero.onclick = () => { if (!mostrarTodos) mostrarPagina(1); };
-if (btnAnterior) btnAnterior.onclick = () => { if (!mostrarTodos && paginaActual > 1) mostrarPagina(paginaActual - 1); };
-if (btnSiguiente) btnSiguiente.onclick = () => {
-    if (!mostrarTodos) {
-        const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
-        if (paginaActual < total) mostrarPagina(paginaActual + 1);
-    }
-};
-if (btnUltimo) btnUltimo.onclick = () => {
-    if (!mostrarTodos) {
-        const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
-        mostrarPagina(total);
-    }
-};
-if (btnIr) btnIr.onclick = () => {
-    if (!mostrarTodos && irPagina) {
-        const num   = parseInt(irPagina.value);
-        const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
-        if (num >= 1 && num <= total) mostrarPagina(num);
-    }
-};
 
 function aplicarFiltros() {
     const nombre = buscarNombre ? buscarNombre.value.toLowerCase() : "";
@@ -262,85 +255,6 @@ if (btnMostrarTodos) {
         mostrarTodos = !mostrarTodos;
         btnMostrarTodos.innerText = mostrarTodos ? "Modo paginado" : "Mostrar todos";
         mostrarPagina(1);
-    };
-}
-
-function abrirModal(prod) {
-    productoEditando = prod;
-    if (editCodigo) editCodigo.value      = prod.codigo ?? "";
-    if (editDescripcion) editDescripcion.value = prod.descripcion ?? "";
-    if (editPrecio) editPrecio.value      = prod.precio_venta ?? "";
-    if (modalEditar) modalEditar.style.display = "block";
-}
-
-if (cerrarModal) cerrarModal.onclick = () => { if (modalEditar) modalEditar.style.display = "none"; };
-
-if (guardarEdicion) {
-    guardarEdicion.onclick = async () => {
-        if (!productoEditando) return;
-
-        const nuevo = {
-            codigo:       editCodigo.value,
-            descripcion:  editDescripcion.value,
-            precio_venta: parseFloat(editPrecio.value || "0")
-        };
-
-        await fetch(`/api/productos/${productoEditando.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(nuevo)
-        });
-
-        if (modalEditar) modalEditar.style.display = "none";
-        cargarProductos();
-    };
-}
-
-if (btnNuevoProducto) btnNuevoProducto.onclick = () => { if (modalCrear) modalCrear.style.display = "block"; };
-if (cerrarCrear) cerrarCrear.onclick = () => { if (modalCrear) modalCrear.style.display = "none"; };
-
-if (guardarNuevo) {
-    guardarNuevo.onclick = async () => {
-        const nuevo = {
-            codigo:       newCodigo.value,
-            descripcion:  newDescripcion.value,
-            marca:        newMarca.value,
-            unidad:       newUnidad.value,
-            precio_venta: parseFloat(newPrecio.value || "0")
-        };
-
-        await fetch("/api/productos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(nuevo)
-        });
-
-        if (modalCrear) modalCrear.style.display = "none";
-        cargarProductos();
-    };
-}
-
-async function eliminarProducto(id) {
-    if (!confirm("¿Eliminar producto?")) return;
-
-    await fetch(`/api/productos/${id}`, { method: "DELETE" });
-    cargarProductos();
-}
-
-if (toggleSidebar) {
-    toggleSidebar.onclick = () => {
-        const sidebar = document.getElementById("sidebar");
-        const main    = document.querySelector(".main-content");
-
-        if (sidebar && sidebar.style.display === "none") {
-            sidebar.style.display = "block";
-            if (main) main.style.marginLeft = "240px";
-            toggleSidebar.innerText = "Ocultar menú";
-        } else if (sidebar) {
-            sidebar.style.display = "none";
-            if (main) main.style.marginLeft = "20px";
-            toggleSidebar.innerText = "Mostrar menú";
-        }
     };
 }
 

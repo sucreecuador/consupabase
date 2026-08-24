@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
     <link rel="stylesheet" href="/web/productos/productos.css">
     <script src="/web/components/sidebar/sidebar.js"></script>
-    <script src="/web/productos/productos.js" defer></script>
+    <!-- Se agrega ?v=319 para forzar la actualización del caché -->
+    <script src="/web/productos/productos.js?v=319" defer></script>
 </head>
 <body>
     <div id="sidebar"></div>
@@ -20,7 +21,7 @@
             <input type="text" id="buscarNombre" placeholder="Buscar por NOMBRE..." />
             <input type="text" id="buscarMarca" placeholder="Buscar por MARCA..." />
             <input type="text" id="buscarCodigo" placeholder="Buscar por CÓDIGO..." />
-            <input type="text" id="buscarPro1" placeholder="Buscar por PRO1..." />
+            <input type="text" id="buscarPro1" placeholder="Buscar por PRO1..." value="319" />
             <button id="btnMostrarTodos" class="btn-nuevo">Mostrar todos</button>
             <button id="btnNuevoProducto" class="btn-nuevo">+ Nuevo Producto</button>
         </div>
@@ -35,7 +36,7 @@
             </thead>
             <tbody id="tablaBody">
                 <tr>
-                    <td colspan="11" class="sin-productos">Cargando...</td>
+                    <td colspan="11" class="sin-productos">Cargando productos del proveedor 319...</td>
                 </tr>
             </tbody>
         </table>
