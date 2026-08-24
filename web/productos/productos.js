@@ -1,5 +1,3 @@
-// build 24-08-2026
-
 // ===============================
 // VARIABLES
 // ===============================
@@ -7,55 +5,10 @@
 let productos = [];
 let productosFiltrados = [];
 let paginaActual = 1;
-let itemsPorPagina = 20;
+let itemsPorPagina = 50;
 let mostrarTodos = false;
-let vista = 2;
 let ordenActual = {};
 let productoEditando = null;
-
-// ===============================
-// REFERENCIAS DOM
-// ===============================
-
-const tablaBody       = document.getElementById("tablaBody");
-const theadProductos  = document.getElementById("theadProductos");
-
-const buscarNombre    = document.getElementById("buscarNombre");
-const buscarMarca     = document.getElementById("buscarMarca");
-const buscarCodigo    = document.getElementById("buscarCodigo");
-const buscarPro1      = document.getElementById("buscarPro1");
-
-const btnMostrarTodos = document.getElementById("btnMostrarTodos");
-const btnNuevoProducto= document.getElementById("btnNuevoProducto");
-
-const vista1          = document.getElementById("vista1");
-const vista2          = document.getElementById("vista2");
-
-const btnPrimero      = document.getElementById("btnPrimero");
-const btnAnterior     = document.getElementById("btnAnterior");
-const btnSiguiente    = document.getElementById("btnSiguiente");
-const btnUltimo       = document.getElementById("btnUltimo");
-const paginaActualSpan= document.getElementById("paginaActual");
-const irPagina        = document.getElementById("irPagina");
-const btnIr           = document.getElementById("btnIr");
-
-const modalEditar     = document.getElementById("modalEditar");
-const editCodigo      = document.getElementById("editCodigo");
-const editDescripcion = document.getElementById("editDescripcion");
-const editPrecio      = document.getElementById("editPrecio");
-const guardarEdicion  = document.getElementById("guardarEdicion");
-const cerrarModal     = document.getElementById("cerrarModal");
-
-const modalCrear      = document.getElementById("modalCrear");
-const newCodigo       = document.getElementById("newCodigo");
-const newDescripcion  = document.getElementById("newDescripcion");
-const newMarca        = document.getElementById("newMarca");
-const newUnidad       = document.getElementById("newUnidad");
-const newPrecio       = document.getElementById("newPrecio");
-const guardarNuevo    = document.getElementById("guardarNuevo");
-const cerrarCrear     = document.getElementById("cerrarCrear");
-
-const toggleSidebar   = document.getElementById("toggleSidebar");
 
 // ===============================
 // CARGAR PRODUCTOS
@@ -64,9 +17,11 @@ const toggleSidebar   = document.getElementById("toggleSidebar");
 async function cargarProductos() {
     try {
         const contacto = buscarPro1.value || 319;
+
         const respuesta = await fetch(`https://consupabase-api.onrender.com/api/productos?contacto=${contacto}`);
         productos = await respuesta.json();
         productosFiltrados = [...productos];
+
         mostrarPagina(1);
     } catch (error) {
         tablaBody.innerHTML =
@@ -280,7 +235,7 @@ guardarEdicion.onclick = async () => {
         precio_venta: parseFloat(editPrecio.value || "0")
     };
 
-    await fetch(`/api/productos/${productoEditando.id}`, {
+    await fetch(`https://consupabase-api.onrender.com/api/productos/${productoEditando.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevo)
@@ -311,7 +266,7 @@ guardarNuevo.onclick = async () => {
         precio_venta: parseFloat(newPrecio.value || "0")
     };
 
-    await fetch("/api/productos", {
+    await fetch("https://consupabase-api.onrender.com/api/productos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevo)
@@ -328,7 +283,7 @@ guardarNuevo.onclick = async () => {
 async function eliminarProducto(id) {
     if (!confirm("¿Eliminar producto?")) return;
 
-    await fetch(`/api/productos/${id}`, {
+    await fetch(`https://consupabase-api.onrender.com/api/productos/${id}`, {
         method: "DELETE"
     });
 
