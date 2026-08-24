@@ -5,7 +5,6 @@ import os
 
 app = FastAPI()
 
-# Ruta base del proyecto
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(BASE_DIR, "web")
 
