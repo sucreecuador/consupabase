@@ -56,12 +56,13 @@ const cerrarCrear     = document.getElementById("cerrarCrear");
 const toggleSidebar   = document.getElementById("toggleSidebar");
 
 // ===============================
-// CARGAR PRODUCTOS
+// CARGAR PRODUCTOS (CORREGIDO)
 // ===============================
 
 async function cargarProductos() {
     try {
-        const respuesta = await fetch("/api/productos");
+        const contacto = buscarPro1.value || 319;
+        const respuesta = await fetch(`/api/productos?contacto=${contacto}`);
         productos = await respuesta.json();
         productosFiltrados = [...productos];
         mostrarPagina(1);

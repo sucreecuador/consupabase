@@ -31,15 +31,16 @@ app.add_middleware(
 async def get_productos(request: Request):
     contacto = request.query_params.get("contacto")
 
+    # Si no envías contacto, usa 319 por defecto
     if not contacto:
-        return {"error": "Falta el parámetro contacto"}
+        contacto = "319"
 
-    # Consulta Supabase
     query = (
         supabase
         .from("productos")
-        .select("*")
-        .limit(5000)  # ← SIN ESTO SUPABASE DEVUELVE SOLO 100
+        .select("id, codigo, codigo_proveedor, marca, descripcion, unidad, "
+                "naci, saldo_temp, costo_prom, precio_venta, pro1, pro2, pro3")
+        .limit(5000)
         .or(f"pro1.eq.{contacto},pro2.eq.{contacto},pro3.eq.{contacto}")
     )
 
