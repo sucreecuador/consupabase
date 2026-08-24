@@ -1,100 +1,43 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #eef1f5;
+    background: #f5f6f8;
 }
 
-/* Sidebar */
-.sidebar {
-    width: 260px;
-    height: 100vh;
-    background: #1f2937;
-    color: white;
-    position: fixed;
-    left: 0;
-    top: 0;
-    padding: 25px;
+.main-content {
+    margin-left: 240px;
+    padding: 30px;
 }
 
-.sidebar h2 {
-    margin: 0;
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 40px;
+.home-title {
+    font-size: 32px;
     font-weight: bold;
+    margin-bottom: 25px;
 }
 
-.sidebar a {
-    display: block;
-    padding: 14px;
-    margin: 10px 0;
-    color: #d1d5db;
-    text-decoration: none;
-    font-size: 18px;
-    border-radius: 6px;
-    transition: 0.2s;
-}
-
-.sidebar a:hover {
-    background: #374151;
-    color: white;
-}
-
-/* Main content */
-.main {
-    margin-left: 280px;
-    padding: 40px;
-}
-
-.header {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
-}
-
-.header h1 {
-    margin: 0;
-    font-size: 30px;
-    color: #333;
-}
-
-/* Cards */
-.cards {
+.home-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 25px;
 }
 
-.card {
-    background: white;
+.home-card {
+    background: #ffffff;
+    border-radius: 14px;
     padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: 0.25s ease;
+    border: 1px solid #eaeaea;
+    text-align: center;
 }
 
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.home-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
-.card h3 {
-    margin: 0 0 10px 0;
-    font-size: 22px;
-    color: #333;
-}
-
-.card p {
-    margin: 0;
-    font-size: 15px;
-    color: #555;
-}
-
-.icon {
-    font-size: 32px;
+.home-icon {
+    font-size: 42px;
     margin-bottom: 10px;
-    color: #4b5563;
 }
