@@ -1,5 +1,5 @@
 // ===============================
-// VARIABLES
+// VARIABLES GLOBALES DE ESTADO
 // ===============================
 
 let productos = [];
@@ -7,12 +7,11 @@ let productosFiltrados = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let mostrarTodos = false;
-let vista = 2;
 let ordenActual = {};
 let productoEditando = null;
 
 // ===============================
-// REFERENCIAS DOM
+// ELEMENTOS DEL DOM
 // ===============================
 
 const tablaBody       = document.getElementById("tablaBody");
@@ -53,7 +52,7 @@ const cerrarCrear     = document.getElementById("cerrarCrear");
 const toggleSidebar   = document.getElementById("toggleSidebar");
 
 // ===============================
-// CARGAR PRODUCTOS
+// CONSULTA Y CARGA DE DATOS
 // ===============================
 
 async function cargarProductos() {
@@ -72,7 +71,7 @@ async function cargarProductos() {
 }
 
 // ===============================
-// ENCABEZADOS DINÁMICOS
+// DIBUJAR ENCABEZADOS Y ORDENACIÓN
 // ===============================
 
 function actualizarEncabezados() {
@@ -96,10 +95,6 @@ function actualizarEncabezados() {
     activarOrdenamiento();
 }
 
-// ===============================
-// ORDENAR COLUMNAS
-// ===============================
-
 function activarOrdenamiento() {
     document.querySelectorAll("th[data-col]").forEach(th => {
         th.onclick = () => ordenarPor(th.dataset.col);
@@ -120,12 +115,11 @@ function ordenarPor(columna) {
 }
 
 // ===============================
-// MOSTRAR PAGINA
+// RENDERIZADO DE TABLA Y PAGINACIÓN
 // ===============================
 
 function mostrarPagina(numPagina) {
     paginaActual = numPagina;
-
     let lista = [];
 
     if (mostrarTodos) {
@@ -169,10 +163,6 @@ function mostrarPagina(numPagina) {
     actualizarPaginacion();
 }
 
-// ===============================
-// PAGINACIÓN
-// ===============================
-
 function actualizarPaginacion() {
     if (!paginaActualSpan) return;
 
@@ -185,6 +175,7 @@ function actualizarPaginacion() {
     paginaActualSpan.innerText = `Página ${paginaActual} de ${totalPaginas}`;
 }
 
+// Eventos Paginador
 if (btnPrimero) btnPrimero.onclick = () => { if (!mostrarTodos) mostrarPagina(1); };
 if (btnAnterior) btnAnterior.onclick = () => { if (!mostrarTodos && paginaActual > 1) mostrarPagina(paginaActual - 1); };
 if (btnSiguiente) btnSiguiente.onclick = () => {
@@ -208,7 +199,7 @@ if (btnIr) btnIr.onclick = () => {
 };
 
 // ===============================
-// FILTROS
+// BÚSQUEDA Y FILTROS
 // ===============================
 
 function aplicarFiltros() {
@@ -239,10 +230,6 @@ if (buscarPro1) {
     buscarPro1.oninput = aplicarFiltros;
 }
 
-// ===============================
-// MOSTRAR TODOS
-// ===============================
-
 if (btnMostrarTodos) {
     btnMostrarTodos.onclick = () => {
         mostrarTodos = !mostrarTodos;
@@ -252,24 +239,18 @@ if (btnMostrarTodos) {
 }
 
 // ===============================
-// EDITAR PRODUCTO
+// OPERACIONES CRUD & MODALES
 // ===============================
 
 function abrirModal(prod) {
     productoEditando = prod;
-
     if (editCodigo) editCodigo.value      = prod.codigo ?? "";
     if (editDescripcion) editDescripcion.value = prod.descripcion ?? "";
     if (editPrecio) editPrecio.value      = prod.precio_venta ?? "";
-
     if (modalEditar) modalEditar.style.display = "block";
 }
 
-if (cerrarModal) {
-    cerrarModal.onclick = () => {
-        if (modalEditar) modalEditar.style.display = "none";
-    };
-}
+if (cerrarModal) cerrarModal.onclick = () => { if (modalEditar) modalEditar.style.display = "none"; };
 
 if (guardarEdicion) {
     guardarEdicion.onclick = async () => {
@@ -292,21 +273,8 @@ if (guardarEdicion) {
     };
 }
 
-// ===============================
-// CREAR PRODUCTO
-// ===============================
-
-if (btnNuevoProducto) {
-    btnNuevoProducto.onclick = () => {
-        if (modalCrear) modalCrear.style.display = "block";
-    };
-}
-
-if (cerrarCrear) {
-    cerrarCrear.onclick = () => {
-        if (modalCrear) modalCrear.style.display = "none";
-    };
-}
+if (btnNuevoProducto) btnNuevoProducto.onclick = () => { if (modalCrear) modalCrear.style.display = "block"; };
+if (cerrarCrear) cerrarCrear.onclick = () => { if (modalCrear) modalCrear.style.display = "none"; };
 
 if (guardarNuevo) {
     guardarNuevo.onclick = async () => {
@@ -329,22 +297,15 @@ if (guardarNuevo) {
     };
 }
 
-// ===============================
-// ELIMINAR PRODUCTO
-// ===============================
-
 async function eliminarProducto(id) {
     if (!confirm("¿Eliminar producto?")) return;
 
-    await fetch(`/api/productos/${id}`, {
-        method: "DELETE"
-    });
-
+    await fetch(`/api/productos/${id}`, { method: "DELETE" });
     cargarProductos();
 }
 
 // ===============================
-// SIDEBAR
+// CONTROLES DE INTERFAZ
 // ===============================
 
 if (toggleSidebar) {
@@ -365,7 +326,7 @@ if (toggleSidebar) {
 }
 
 // ===============================
-// INICIO
+// INICIALIZACIÓN
 // ===============================
 
 document.addEventListener("DOMContentLoaded", () => {
