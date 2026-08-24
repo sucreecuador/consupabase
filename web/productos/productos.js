@@ -7,7 +7,7 @@ let productosFiltrados = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let mostrarTodos = false;
-let vista = 2; // tu ERP usa vista 2 por defecto
+let vista = 2;
 let ordenActual = {};
 let productoEditando = null;
 
@@ -61,14 +61,16 @@ const toggleSidebar   = document.getElementById("toggleSidebar");
 
 async function cargarProductos() {
     try {
-        const contacto = buscarPro1.value || 319;
+        const contacto = (buscarPro1 && buscarPro1.value.trim()) ? buscarPro1.value.trim() : "319";
         const respuesta = await fetch(`/api/productos?contacto=${contacto}`);
         productos = await respuesta.json();
         productosFiltrados = [...productos];
         mostrarPagina(1);
     } catch (error) {
-        tablaBody.innerHTML =
-            `<tr><td colspan="12">Error al conectar con el servidor</td></tr>`;
+        if (tablaBody) {
+            tablaBody.innerHTML =
+                `<tr><td colspan="11" style="text-align:center; color:red;">Error al conectar con el servidor</td></tr>`;
+        }
     }
 }
 
@@ -77,13 +79,17 @@ async function cargarProductos() {
 // ===============================
 
 function actualizarEncabezados() {
+    if (!theadProductos) return;
     theadProductos.innerHTML = `
         <tr>
-            <th data-col="codigo_proveedor">PROV</th>
-            <th data-col="codigo">PROD</th>
+            <th data-col="pro1">PRO1</th>
+            <th data-col="pro2">PRO2</th>
+            <th data-col="pro3">PRO3</th>
+            <th data-col="codigo_proveedor">CÓD. PROV.</th>
+            <th data-col="codigo">CÓDIGO</th>
             <th data-col="marca">MARCA</th>
             <th data-col="descripcion">DESCRIPCIÓN</th>
-            <th data-col="saldo_temp">CTR</th>
+            <th data-col="saldo_temp">S.TEM</th>
             <th data-col="costo_prom">COSTO</th>
             <th data-col="precio_venta">P.VENTA</th>
             <th>ACCIONES</th>
@@ -133,10 +139,11 @@ function mostrarPagina(numPagina) {
         lista = productosFiltrados.slice(inicio, fin);
     }
 
+    if (!tablaBody) return;
     tablaBody.innerHTML = "";
 
     if (lista.length === 0) {
-        tablaBody.innerHTML = `<tr><td colspan="12">No se encontraron productos</td></tr>`;
+        tablaBody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No se encontraron productos</td></tr>`;
         actualizarPaginacion();
         return;
     }
@@ -144,16 +151,19 @@ function mostrarPagina(numPagina) {
     lista.forEach(prod => {
         tablaBody.innerHTML += `
             <tr>
+                <td>${prod.pro1 ?? ""}</td>
+                <td>${prod.pro2 ?? ""}</td>
+                <td>${prod.pro3 ?? ""}</td>
                 <td>${prod.codigo_proveedor ?? ""}</td>
-                <td>${prod.codigo}</td>
-                <td>${prod.marca}</td>
-                <td>${prod.descripcion}</td>
-                <td>${prod.saldo_temp}</td>
-                <td>${(prod.costo_prom ?? 0).toFixed(2)}</td>
-                <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
-                <td>
-                    <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
-                    <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
+                <td class="excel-code">${prod.codigo ?? ""}</td>
+                <td>${prod.marca ?? ""}</td>
+                <td>${prod.descripcion ?? ""}</td>
+                <td class="excel-number">${prod.saldo_temp ?? 0}</td>
+                <td class="excel-number">$${(prod.costo_prom ?? 0).toFixed(2)}</td>
+                <td class="excel-number">$${(prod.precio_venta ?? 0).toFixed(2)}</td>
+                <td style="text-align:center;">
+                    <button onclick='abrirModal(${JSON.stringify(prod)})' title="Editar">✏️</button>
+                    <button onclick='eliminarProducto(${prod.id})' title="Eliminar">🗑️</button>
                 </td>
             </tr>
         `;
@@ -167,6 +177,8 @@ function mostrarPagina(numPagina) {
 // ===============================
 
 function actualizarPaginacion() {
+    if (!paginaActualSpan) return;
+
     if (mostrarTodos) {
         paginaActualSpan.innerText = `Mostrando ${productosFiltrados.length} productos`;
         return;
@@ -176,30 +188,22 @@ function actualizarPaginacion() {
     paginaActualSpan.innerText = `Página ${paginaActual} de ${totalPaginas}`;
 }
 
-btnPrimero.onclick = () => {
-    if (!mostrarTodos) mostrarPagina(1);
-};
-
-btnAnterior.onclick = () => {
-    if (!mostrarTodos && paginaActual > 1) mostrarPagina(paginaActual - 1);
-};
-
-btnSiguiente.onclick = () => {
+if (btnPrimero) btnPrimero.onclick = () => { if (!mostrarTodos) mostrarPagina(1); };
+if (btnAnterior) btnAnterior.onclick = () => { if (!mostrarTodos && paginaActual > 1) mostrarPagina(paginaActual - 1); };
+if (btnSiguiente) btnSiguiente.onclick = () => {
     if (!mostrarTodos) {
         const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
         if (paginaActual < total) mostrarPagina(paginaActual + 1);
     }
 };
-
-btnUltimo.onclick = () => {
+if (btnUltimo) btnUltimo.onclick = () => {
     if (!mostrarTodos) {
         const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
         mostrarPagina(total);
     }
 };
-
-btnIr.onclick = () => {
-    if (!mostrarTodos) {
+if (btnIr) btnIr.onclick = () => {
+    if (!mostrarTodos && irPagina) {
         const num   = parseInt(irPagina.value);
         const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
         if (num >= 1 && num <= total) mostrarPagina(num);
@@ -211,10 +215,10 @@ btnIr.onclick = () => {
 // ===============================
 
 function aplicarFiltros() {
-    const nombre = buscarNombre.value.toLowerCase();
-    const marca  = buscarMarca.value.toLowerCase();
-    const codigo = buscarCodigo.value.toLowerCase();
-    const pro1   = buscarPro1.value.toLowerCase();
+    const nombre = buscarNombre ? buscarNombre.value.toLowerCase() : "";
+    const marca  = buscarMarca ? buscarMarca.value.toLowerCase() : "";
+    const codigo = buscarCodigo ? buscarCodigo.value.toLowerCase() : "";
+    const pro1   = buscarPro1 ? buscarPro1.value.toLowerCase() : "";
 
     productosFiltrados = productos.filter(p =>
         (p.descripcion ?? "").toLowerCase().includes(nombre) &&
@@ -230,20 +234,25 @@ function aplicarFiltros() {
     mostrarPagina(1);
 }
 
-buscarNombre.oninput = aplicarFiltros;
-buscarMarca.oninput  = aplicarFiltros;
-buscarCodigo.oninput = aplicarFiltros;
-buscarPro1.oninput   = aplicarFiltros;
+if (buscarNombre) buscarNombre.oninput = aplicarFiltros;
+if (buscarMarca) buscarMarca.oninput  = aplicarFiltros;
+if (buscarCodigo) buscarCodigo.oninput = aplicarFiltros;
+if (buscarPro1) {
+    buscarPro1.onchange = () => cargarProductos();
+    buscarPro1.oninput = aplicarFiltros;
+}
 
 // ===============================
 // MOSTRAR TODOS
 // ===============================
 
-btnMostrarTodos.onclick = () => {
-    mostrarTodos = !mostrarTodos;
-    btnMostrarTodos.innerText = mostrarTodos ? "Modo paginado" : "Mostrar todos";
-    mostrarPagina(1);
-};
+if (btnMostrarTodos) {
+    btnMostrarTodos.onclick = () => {
+        mostrarTodos = !mostrarTodos;
+        btnMostrarTodos.innerText = mostrarTodos ? "Modo paginado" : "Mostrar todos";
+        mostrarPagina(1);
+    };
+}
 
 // ===============================
 // EDITAR PRODUCTO
@@ -252,66 +261,76 @@ btnMostrarTodos.onclick = () => {
 function abrirModal(prod) {
     productoEditando = prod;
 
-    editCodigo.value      = prod.codigo ?? "";
-    editDescripcion.value = prod.descripcion ?? "";
-    editPrecio.value      = prod.precio_venta ?? "";
+    if (editCodigo) editCodigo.value      = prod.codigo ?? "";
+    if (editDescripcion) editDescripcion.value = prod.descripcion ?? "";
+    if (editPrecio) editPrecio.value      = prod.precio_venta ?? "";
 
-    modalEditar.style.display = "block";
+    if (modalEditar) modalEditar.style.display = "block";
 }
 
-cerrarModal.onclick = () => {
-    modalEditar.style.display = "none";
-};
-
-guardarEdicion.onclick = async () => {
-    if (!productoEditando) return;
-
-    const nuevo = {
-        codigo:       editCodigo.value,
-        descripcion:  editDescripcion.value,
-        precio_venta: parseFloat(editPrecio.value || "0")
+if (cerrarModal) {
+    cerrarModal.onclick = () => {
+        if (modalEditar) modalEditar.style.display = "none";
     };
+}
 
-    await fetch(`/api/productos/${productoEditando.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevo)
-    });
+if (guardarEdicion) {
+    guardarEdicion.onclick = async () => {
+        if (!productoEditando) return;
 
-    modalEditar.style.display = "none";
-    cargarProductos();
-};
+        const nuevo = {
+            codigo:       editCodigo.value,
+            descripcion:  editDescripcion.value,
+            precio_venta: parseFloat(editPrecio.value || "0")
+        };
+
+        await fetch(`/api/productos/${productoEditando.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevo)
+        });
+
+        if (modalEditar) modalEditar.style.display = "none";
+        cargarProductos();
+    };
+}
 
 // ===============================
 // CREAR PRODUCTO
 // ===============================
 
-btnNuevoProducto.onclick = () => {
-    modalCrear.style.display = "block";
-};
-
-cerrarCrear.onclick = () => {
-    modalCrear.style.display = "none";
-};
-
-guardarNuevo.onclick = async () => {
-    const nuevo = {
-        codigo:       newCodigo.value,
-        descripcion:  newDescripcion.value,
-        marca:        newMarca.value,
-        unidad:       newUnidad.value,
-        precio_venta: parseFloat(newPrecio.value || "0")
+if (btnNuevoProducto) {
+    btnNuevoProducto.onclick = () => {
+        if (modalCrear) modalCrear.style.display = "block";
     };
+}
 
-    await fetch("/api/productos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevo)
-    });
+if (cerrarCrear) {
+    cerrarCrear.onclick = () => {
+        if (modalCrear) modalCrear.style.display = "none";
+    };
+}
 
-    modalCrear.style.display = "none";
-    cargarProductos();
-};
+if (guardarNuevo) {
+    guardarNuevo.onclick = async () => {
+        const nuevo = {
+            codigo:       newCodigo.value,
+            descripcion:  newDescripcion.value,
+            marca:        newMarca.value,
+            unidad:       newUnidad.value,
+            precio_venta: parseFloat(newPrecio.value || "0")
+        };
+
+        await fetch("/api/productos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevo)
+        });
+
+        if (modalCrear) modalCrear.style.display = "none";
+        cargarProductos();
+    };
+}
 
 // ===============================
 // ELIMINAR PRODUCTO
@@ -331,24 +350,28 @@ async function eliminarProducto(id) {
 // SIDEBAR
 // ===============================
 
-toggleSidebar.onclick = () => {
-    const sidebar = document.getElementById("sidebar");
-    const main    = document.querySelector(".main-content");
+if (toggleSidebar) {
+    toggleSidebar.onclick = () => {
+        const sidebar = document.getElementById("sidebar");
+        const main    = document.querySelector(".main-content");
 
-    if (sidebar.style.display === "none") {
-        sidebar.style.display = "block";
-        main.style.marginLeft = "240px";
-        toggleSidebar.innerText = "Ocultar menú";
-    } else {
-        sidebar.style.display = "none";
-        main.style.marginLeft = "20px";
-        toggleSidebar.innerText = "Mostrar menú";
-    }
-};
+        if (sidebar && sidebar.style.display === "none") {
+            sidebar.style.display = "block";
+            if (main) main.style.marginLeft = "240px";
+            toggleSidebar.innerText = "Ocultar menú";
+        } else if (sidebar) {
+            sidebar.style.display = "none";
+            if (main) main.style.marginLeft = "20px";
+            toggleSidebar.innerText = "Mostrar menú";
+        }
+    };
+}
 
 // ===============================
 // INICIO
 // ===============================
 
-actualizarEncabezados();
-cargarProductos();
+document.addEventListener("DOMContentLoaded", () => {
+    actualizarEncabezados();
+    cargarProductos();
+});
