@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="/web/inventario/index.html" class="sidebar-item">Inventario</a>
             <a href="/web/contactos/index.html" class="sidebar-item">Contactos</a>
             <a href="/web/reportes/index.html" class="sidebar-item">Reportes</a>
-            <a href="/web/usuarios/index.html" class="sidebar-item">Usuarios</a>
+            <a href="/web/facturacion/index.html" class="sidebar-item">Facturación</a>
             <a href="/web/configuracion/index.html" class="sidebar-item">Configuración</a>
         </div>
     `;
