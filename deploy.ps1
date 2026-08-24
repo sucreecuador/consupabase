@@ -1,9 +1,9 @@
 ﻿# ============================================================
-#  🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND)
+# 🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND + FRONTEND)
 # ============================================================
 
 Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY DEL ERP SUCRE"
+Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE"
 Write-Host "============================================================"
 
 # Ruta del proyecto
@@ -11,7 +11,7 @@ $projectPath = "C:\Users\Supervisor\consupabase"
 Set-Location $projectPath
 
 # ============================================================
-#  VERIFICACIONES
+# VERIFICACIONES
 # ============================================================
 
 Write-Host "`n🔍 Verificando main.py..."
@@ -23,13 +23,13 @@ Write-Host "✔ OK: main.py encontrado"
 
 Write-Host "`n🔍 Verificando carpeta web..."
 if (!(Test-Path "$projectPath\web")) {
-    Write-Host "⚠ ADVERTENCIA: No existe carpeta web/"
-} else {
-    Write-Host "✔ OK: carpeta web encontrada"
+    Write-Host "❌ ERROR: No existe carpeta web/"
+    exit
 }
+Write-Host "✔ OK: carpeta web encontrada"
 
 # ============================================================
-#  GIT: AGREGAR CAMBIOS SOLO SI EXISTEN
+# GIT: AGREGAR CAMBIOS
 # ============================================================
 
 Write-Host "`n📦 Verificando cambios pendientes..."
@@ -48,15 +48,14 @@ if ($changes) {
     git push
 } else {
     Write-Host "⚠ No hay cambios en Git."
-    Write-Host "   → Render NO reconstruirá automáticamente."
-    Write-Host "   → Se enviará un deploy manual igualmente."
+    Write-Host "   → Se enviará deploy manual igualmente."
 }
 
 # ============================================================
-#  RENDER: ENVIAR DEPLOY
+# DEPLOY BACKEND (Render)
 # ============================================================
 
-Write-Host "`n🚀 Enviando deploy a Render..."
+Write-Host "`n🚀 Enviando deploy del BACKEND a Render..."
 
 $apiKey = $env:RENDER_API_KEY
 
@@ -66,28 +65,47 @@ if (-not $apiKey) {
 }
 
 # ID del servicio backend en Render
-$serviceId = "srv-d9l24qdaeets73ad9fvg"
-
-# Endpoint de Render
-$renderUrl = "https://api.render.com/v1/services/$serviceId/deploys"
+$backendId = "srv-d9l24qdaeets73ad9fvg"
+$backendUrl = "https://api.render.com/v1/services/$backendId/deploys"
 
 try {
-    $deploy = Invoke-RestMethod `
+    $deployBackend = Invoke-RestMethod `
         -Method POST `
-        -Uri $renderUrl `
+        -Uri $backendUrl `
         -Headers @{ "Authorization" = "Bearer $apiKey" } `
         -ContentType "application/json" `
         -Body "{}"
 
-    Write-Host "`n============================================================"
-    Write-Host "   ✔ Render aceptó el deploy"
-    Write-Host "============================================================"
-    Write-Host "🆔 ID del deploy: $($deploy.id)"
-    Write-Host "📌 Estado inicial: $($deploy.status)"
-    Write-Host "🔗 Logs: https://dashboard.render.com/services/$serviceId/deploys/$($deploy.id)"
+    Write-Host "`n✔ Backend desplegado correctamente"
 }
 catch {
-    Write-Host "❌ ERROR al enviar el deploy a Render."
+    Write-Host "❌ ERROR al desplegar backend."
+    Write-Host $_
+}
+
+# ============================================================
+# DEPLOY FRONTEND (Render STATIC)
+# ============================================================
+
+Write-Host "`n🚀 Enviando deploy del FRONTEND (carpeta /web)..."
+
+# ID del servicio STATIC en Render (CREARLO UNA VEZ EN RENDER)
+$frontendId = "srv-frontend-sucre-123456"   # ← CAMBIA ESTE ID
+
+$frontendUrl = "https://api.render.com/v1/services/$frontendId/deploys"
+
+try {
+    $deployFrontend = Invoke-RestMethod `
+        -Method POST `
+        -Uri $frontendUrl `
+        -Headers @{ "Authorization" = "Bearer $apiKey" } `
+        -ContentType "application/json" `
+        -Body "{}"
+
+    Write-Host "`n✔ Frontend desplegado correctamente"
+}
+catch {
+    Write-Host "❌ ERROR al desplegar frontend."
     Write-Host $_
 }
 
