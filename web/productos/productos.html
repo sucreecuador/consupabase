@@ -2,201 +2,77 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP Sucre</title>
-    <link rel="stylesheet" href="productos.css">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; display: flex; height: 100vh; overflow: hidden; color: #333; }
-        
-        /* Layout con Sidebar */
-        .sidebar { width: 220px; background-color: #1e293b; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-brand { padding: 20px 15px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #334155; text-align: center; letter-spacing: 1px; }
-        .sidebar-menu { list-style: none; padding: 15px 0; flex-grow: 1; }
-        .sidebar-menu li a { display: block; padding: 12px 20px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-        .sidebar-menu li a:hover, .sidebar-menu li a.active { background-color: #334155; color: white; border-left: 4px solid #107c41; }
-        
-        /* Área principal de trabajo */
-        .main-workspace { flex-grow: 1; padding: 20px; overflow-y: auto; }
-        
-        /* Módulos (Vistas) */
-        .vista-seccion { display: none; }
-        .vista-activa { display: block; }
-        
-        /* Dashboard Cards */
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card-module { background: white; border-radius: 8px; padding: 20px; text-decoration: none; color: inherit; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s; }
-        .card-module:hover { transform: translateY(-3px); }
-        .card-module h3 { font-size: 16px; color: #0f172a; margin-top: 10px; margin-bottom: 5px; }
-        .card-module p { font-size: 13px; color: #64748b; }
-        
-        /* Tabla ERP Styles */
-        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
-        .input-buscar { padding: 6px 10px; border: 1px solid #ababab; font-size: 13px; width: 280px; }
-        .btn-nuevo { background: #107c41; color: white; border: 1px solid #0c5e31; padding: 6px 12px; font-weight: bold; cursor: pointer; }
-        .vistas-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .btn-vista { padding: 5px 14px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-weight: bold; }
-        .vista1-activo { background-color: #f97316 !important; color: white !important; border-color: #ea580c !important; }
-        .vista2-activo { background-color: #059669 !important; color: white !important; border-color: #047857 !important; }
-        .tabla-container { overflow-x: auto; border: 1px solid #d4d4d4; background: white; }
-        table.erp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        table.erp-table thead tr { background-color: #107c41; color: white; }
-        table.erp-table th, table.erp-table td { padding: 6px 8px; border: 1px solid #d4d4d4; text-align: left; }
-        table.erp-table th.col-acciones, table.erp-table td.col-acciones { width: 70px !important; text-align: center; padding: 2px 4px !important; }
-        table.erp-table tbody tr:nth-child(even) { background-color: #f3f9f5; }
-        table.erp-table tbody tr:hover { background-color: #e2f0d9; }
-        .excel-code { font-family: Consolas, monospace; font-weight: bold; color: #107c41; }
-        .excel-number { text-align: right; font-weight: 600; }
-        .acciones-wrapper { display: flex; justify-content: center; gap: 4px; }
-        .btn-editar, .btn-eliminar { width: 24px; height: 24px; padding: 0; font-weight: bold; font-size: 11px; cursor: pointer; border-radius: 3px; border: 1px solid transparent; }
-        .btn-editar { background-color: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
-        .btn-eliminar { background-color: #fef2f2; color: #dc2626; border-color: #fecaca; }
-        .paginacion-bar { margin-top: 15px; display: flex; align-items: center; gap: 6px; font-size: 13px; flex-wrap: wrap; }
-        .paginacion-bar button { border: 1px solid #d4d4d4; background: white; padding: 4px 10px; cursor: pointer; font-weight: 600; }
-        .input-pagina-saltar { width: 55px; padding: 3px 5px; text-align: center; border: 1px solid #107c41; font-weight: bold; color: #107c41; }
-        .btn-ir-pagina { background-color: #107c41 !important; color: white !important; border-color: #0c5e31 !important; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-contenido { background: white; padding: 20px; border-radius: 8px; width: 450px; max-width: 90%; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .modal-header h2 { margin: 0; color: #107c41; font-size: 18px; }
-        .modal-body { display: flex; flex-direction: column; gap: 12px; }
-        .campo-form { display: flex; flex-direction: column; gap: 4px; }
-        .campo-form label { font-size: 12px; font-weight: bold; color: #555; }
-        .campo-form input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        .btn-guardar { background: #107c41; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-cancelar { background: #6b7280; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
-    </style>
+    <title>ERP SUCRE - Productos</title>
+
+    <link rel="stylesheet" href="/web/components/layout.css">
+    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
+    <link rel="stylesheet" href="/web/productos/productos.css">
+
+    <script src="/web/components/sidebar/sidebar.js"></script>
+    <script src="/web/productos/productos.js" defer></script>
 </head>
+
 <body>
 
-    <aside class="sidebar">
-        <div class="sidebar-brand">ERP SUCRE</div>
-        <ul class="sidebar-menu">
-            <li><a href="#" id="menuIndicadores" class="active" onclick="mostrarSeccion('seccionIndicadores', this, event)">Indicadores</a></li>
-            <li><a href="#" id="menuProductos" onclick="mostrarSeccion('seccionProductos', this, event)">Productos</a></li>
-            <li><a href="#">Inventario</a></li>
-            <li><a href="#">Contactos</a></li>
-            <li><a href="#">Reportes</a></li>
-            <li><a href="#">Usuarios</a></li>
-            <li><a href="#">Configuración</a></li>
-        </ul>
-    </aside>
+    <div id="sidebar"></div>
 
-    <main class="main-workspace">
-        
-        <!-- SECCIÓN 1: INDICADORES / DASHBOARD -->
-        <section id="seccionIndicadores" class="vista-seccion vista-activa">
-            <div style="background:white; padding:20px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                <h1 style="color:#1e293b; font-size:22px; margin-bottom:5px;">Bienvenido al ERP SUCRE</h1>
-            </div>
+    <div class="main-content">
 
-            <div class="grid-container">
-                <div class="card-module" onclick="mostrarSeccion('seccionIndicadores', document.getElementById('menuIndicadores'))">
-                    <div style="font-size:28px;">📊</div>
-                    <h3>Dashboard</h3>
-                    <p>Indicadores, métricas y resumen general.</p>
-                </div>
-                <div class="card-module" onclick="mostrarSeccion('seccionProductos', document.getElementById('menuProductos'))">
-                    <div style="font-size:28px;">📦</div>
-                    <h3>Productos</h3>
-                    <p>Gestión de catálogo, precios y stock.</p>
-                </div>
-                <div class="card-module">
-                    <div style="font-size:28px;">📁</div>
-                    <h3>Inventario</h3>
-                    <p>Movimientos, entradas y salidas.</p>
-                </div>
-            </div>
-        </section>
+        <h1 class="productos-title">Productos</h1>
+        <p class="productos-subtitle">Gestión de catálogo, precios y stock</p>
 
-        <!-- SECCIÓN 2: PRODUCTOS -->
-        <section id="seccionProductos" class="vista-seccion">
-            <div style="margin-bottom:15px;">
-                <h1 style="color: #107c41; margin: 0 0 5px 0; font-size: 24px;">Productos</h1>
-                <p style="color: #666; margin: 0; font-size: 13px;">Gestión de catálogo, precios y stock.</p>
-            </div>
+        <div class="productos-header">
 
-            <div class="toolbar">
-                <input type="text" id="buscar" class="input-buscar" placeholder="Escribe para buscar en NOMBRE...">
-                <button class="btn-nuevo" onclick="nuevoProducto()">➕ Nuevo Producto</button>
-            </div>
+            <input type="text" id="buscarNombre" placeholder="Escribe para buscar en NOMBRE..." />
 
-            <div class="vistas-bar">
-                <strong>Vistas:</strong>
-                <button id="btnVista1" class="btn-vista vista1-activo">Vista 1</button>
-                <button id="btnVista2" class="btn-vista">Vista 2</button>
-            </div>
+            <button id="btnNuevoProducto" class="btn-nuevo">
+                + Nuevo Producto
+            </button>
 
-            <div class="tabla-container">
-                <table class="erp-table">
-                    <thead id="tablaHeader"></thead>
-                    <tbody id="tablaCuerpo">
-                        <tr><td colspan="10" style="text-align:center;">Cargando datos...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="paginacion" class="paginacion-bar"></div>
-        </section>
-
-    </main>
-
-    <!-- Modal Formulario de Edición -->
-    <div id="modalEditar" class="modal">
-        <div class="modal-contenido">
-            <div class="modal-header">
-                <h2>Editar Producto</h2>
-                <span onclick="cerrarModal()" style="cursor:pointer; font-size:20px; font-weight:bold;">&times;</span>
-            </div>
-            <form id="formEditar" onsubmit="guardarEdicion(event)">
-                <div class="modal-body">
-                    <div class="campo-form">
-                        <label>Código:</label>
-                        <input type="text" id="edit_codigo" readonly style="background:#eee;">
-                    </div>
-                    <div class="campo-form">
-                        <label>Descripción / Nombre:</label>
-                        <input type="text" id="edit_descripcion" required>
-                    </div>
-                    <div class="campo-form">
-                        <label>Marca:</label>
-                        <input type="text" id="edit_marca">
-                    </div>
-                    <div class="campo-form">
-                        <label>Precio de Venta ($):</label>
-                        <input type="number" step="0.01" id="edit_precio_venta" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-guardar">Guardar Cambios</button>
-                </div>
-            </form>
         </div>
+
+        <div class="vista-selector">
+            <button class="vista-btn activa" id="vista1">Vista 1</button>
+            <button class="vista-btn" id="vista2">Vista 2</button>
+        </div>
+
+        <table class="tabla-productos">
+            <thead>
+                <tr>
+                    <th>CÓDIGO</th>
+                    <th>NAC</th>
+                    <th>MARCA</th>
+                    <th>NOMBRE</th>
+                    <th>UNI</th>
+                    <th>PVP</th>
+                    <th>S.TEM</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaBody">
+                <tr>
+                    <td colspan="8" class="sin-productos">
+                        No se encontraron productos
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="paginacion">
+            <button id="btnPrimero">Primero</button>
+            <button id="btnAnterior">Anterior</button>
+
+            <span id="paginaActual">Página 1 de 1</span>
+
+            <button id="btnSiguiente">Siguiente</button>
+            <button id="btnUltimo">Último</button>
+
+            <input type="number" id="irPagina" min="1" value="1" />
+            <button id="btnIr">Ir</button>
+        </div>
+
     </div>
 
-    <script src="productos.js"></script>
-    <script>
-        function mostrarSeccion(idSeccion, enlaceMenu, event) {
-            if (event) event.preventDefault();
-
-            // Ocultar todas las secciones
-            document.querySelectorAll('.vista-seccion').forEach(sec => sec.classList.remove('vista-activa'));
-            
-            // Mostrar la seleccionada
-            const seccionDestino = document.getElementById(idSeccion);
-            if (seccionDestino) seccionDestino.classList.add('vista-activa');
-
-            // Actualizar menú activo
-            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-            if (enlaceMenu) enlaceMenu.classList.add('active');
-
-            // Si entra a productos, cargar la tabla
-            if (idSeccion === 'seccionProductos' && typeof cargarProductos === 'function') {
-                cargarProductos();
-            }
-        }
-    </script>
 </body>
 </html>
