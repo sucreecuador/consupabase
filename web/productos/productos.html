@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
     <link rel="stylesheet" href="/web/productos/productos.css">
     <script src="/web/components/sidebar/sidebar.js"></script>
-    <!-- Se agrega ?v=319 para forzar la actualización del caché -->
-    <script src="/web/productos/productos.js?v=319" defer></script>
+    <script src="/web/productos/productos.js?v=319_force" defer></script>
 </head>
 <body>
     <div id="sidebar"></div>
@@ -33,10 +32,23 @@
 
         <table class="tabla-productos">
             <thead id="theadProductos">
+                <tr>
+                    <th data-col="pro1">PRO1</th>
+                    <th data-col="pro2">PRO2</th>
+                    <th data-col="pro3">PRO3</th>
+                    <th data-col="codigo_proveedor">CÓD. PROV.</th>
+                    <th data-col="codigo">CÓDIGO</th>
+                    <th data-col="marca">MARCA</th>
+                    <th data-col="descripcion">DESCRIPCIÓN</th>
+                    <th data-col="saldo_temp">S.TEM</th>
+                    <th data-col="costo_prom">COSTO</th>
+                    <th data-col="precio_venta">P.VENTA</th>
+                    <th>ACCIONES</th>
+                </tr>
             </thead>
             <tbody id="tablaBody">
                 <tr>
-                    <td colspan="11" class="sin-productos">Cargando productos del proveedor 319...</td>
+                    <td colspan="11" class="sin-productos" style="text-align:center;">Cargando productos del proveedor 319...</td>
                 </tr>
             </tbody>
         </table>
@@ -85,5 +97,51 @@
             <button id="cerrarCrear">Cerrar</button>
         </div>
     </div>
+
+    <!-- SCRIPT DE ANULACIÓN DIRECTA PARA FORZAR PROVEEDOR 319 EN PANTALLA -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const res = await fetch('/api/productos?contacto=319');
+          const data = await res.json();
+          const tbody = document.getElementById("tablaBody");
+          if (!tbody) return;
+          
+          tbody.innerHTML = "";
+          
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No se encontraron registros para el proveedor 319</td></tr>';
+            return;
+          }
+          
+          data.forEach(prod => {
+            const codProv = prod.codigo_proveedor ?? prod.cod_proveedor ?? "—";
+            tbody.innerHTML += `
+              <tr>
+                <td>${prod.pro1 ?? "—"}</td>
+                <td>${prod.pro2 ?? "—"}</td>
+                <td>${prod.pro3 ?? "—"}</td>
+                <td>${codProv}</td>
+                <td>${prod.codigo ?? ""}</td>
+                <td>${prod.marca ?? ""}</td>
+                <td>${prod.descripcion ?? ""}</td>
+                <td>${prod.saldo_temp ?? 0}</td>
+                <td>${Number(prod.costo_prom ?? 0).toFixed(2)}</td>
+                <td>${Number(prod.precio_venta ?? 0).toFixed(2)}</td>
+                <td style="text-align:center;">
+                  <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
+                  <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
+                </td>
+              </tr>
+            `;
+          });
+          
+          const pagSpan = document.getElementById("paginaActual");
+          if (pagSpan) pagSpan.innerText = `Mostrando ${data.length} productos del proveedor 319`;
+        } catch (err) {
+          console.error("Error al cargar datos directos:", err);
+        }
+      });
+    </script>
 </body>
 </html>

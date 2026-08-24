@@ -69,11 +69,9 @@ if (btnVista2) {
 
 async function cargarProductos() {
     try {
-        // Intenta obtener los datos filtrados directamente o la lista completa
         const respuesta = await fetch('/api/productos?contacto=319');
         let data = await respuesta.json();
         
-        // Si el endpoint no filtró automáticamente, forzamos el filtro local por 319
         productos = data.filter(p => 
             String(p.pro1) === "319" || 
             String(p.pro2) === "319" || 
@@ -81,7 +79,6 @@ async function cargarProductos() {
             String(p.contacto) === "319"
         );
 
-        // Si la respuesta venía filtrada de origen pero el array quedó vacío con el filtro extra, usamos la data limpia
         if (productos.length === 0 && data.length > 0) {
             productos = data;
         }
@@ -255,6 +252,85 @@ if (btnMostrarTodos) {
         mostrarTodos = !mostrarTodos;
         btnMostrarTodos.innerText = mostrarTodos ? "Modo paginado" : "Mostrar todos";
         mostrarPagina(1);
+    };
+}
+
+function abrirModal(prod) {
+    productoEditando = prod;
+    if (editCodigo) editCodigo.value      = prod.codigo ?? "";
+    if (editDescripcion) editDescripcion.value = prod.descripcion ?? "";
+    if (editPrecio) editPrecio.value      = prod.precio_venta ?? "";
+    if (modalEditar) modalEditar.style.display = "block";
+}
+
+if (cerrarModal) cerrarModal.onclick = () => { if (modalEditar) modalEditar.style.display = "none"; };
+
+if (guardarEdicion) {
+    guardarEdicion.onclick = async () => {
+        if (!productoEditando) return;
+
+        const nuevo = {
+            codigo:       editCodigo.value,
+            descripcion:  editDescripcion.value,
+            precio_venta: parseFloat(editPrecio.value || "0")
+        };
+
+        await fetch(`/api/productos/${productoEditando.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevo)
+        });
+
+        if (modalEditar) modalEditar.style.display = "none";
+        cargarProductos();
+    };
+}
+
+if (btnNuevoProducto) btnNuevoProducto.onclick = () => { if (modalCrear) modalCrear.style.display = "block"; };
+if (cerrarCrear) cerrarCrear.onclick = () => { if (modalCrear) modalCrear.style.display = "none"; };
+
+if (guardarNuevo) {
+    guardarNuevo.onclick = async () => {
+        const nuevo = {
+            codigo:       newCodigo.value,
+            descripcion:  newDescripcion.value,
+            marca:        newMarca.value,
+            unidad:       newUnidad.value,
+            precio_venta: parseFloat(newPrecio.value || "0")
+        };
+
+        await fetch("/api/productos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevo)
+        });
+
+        if (modalCrear) modalCrear.style.display = "none";
+        cargarProductos();
+    };
+}
+
+async function eliminarProducto(id) {
+    if (!confirm("¿Eliminar producto?")) return;
+
+    await fetch(`/api/productos/${id}`, { method: "DELETE" });
+    cargarProductos();
+}
+
+if (toggleSidebar) {
+    toggleSidebar.onclick = () => {
+        const sidebar = document.getElementById("sidebar");
+        const main    = document.querySelector(".main-content");
+
+        if (sidebar && sidebar.style.display === "none") {
+            sidebar.style.display = "block";
+            if (main) main.style.marginLeft = "240px";
+            toggleSidebar.innerText = "Ocultar menú";
+        } else if (sidebar) {
+            sidebar.style.display = "none";
+            if (main) main.style.marginLeft = "20px";
+            toggleSidebar.innerText = "Mostrar menú";
+        }
     };
 }
 
