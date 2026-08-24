@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>ERP SUCRE - Inicio</title>
+    <link rel="stylesheet" href="/web/components/layout.css">
+    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
+    <script src="/web/components/sidebar/sidebar.js"></script>
+</head>
+
+<body>
+
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+
+        <h1 class="home-title">Bienvenido al ERP SUCRE</h1>
+
+        <div class="home-grid">
+
+            <div class="home-card" onclick="window.location.href='/web/dashboard/index.html'">
+                <div class="home-icon">📊</div>
+                <h3>Dashboard</h3>
+                <p>Indicadores, métricas y resumen general</p>
+            </div>
+
+            <div class="home-card" onclick="window.location.href='/web/productos/productos.html'">
+                <div class="home-icon">🛒</div>
+                <h3>Productos</h3>
+                <p>Gestión de catálogo, precios y stock</p>
+            </div>
+
+            <div class="home-card" onclick="window.location.href='/web/inventario/index.html'">
+                <div class="home-icon">📦</div>
+                <h3>Inventario</h3>
+                <p>Movimientos, entradas y salidas</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

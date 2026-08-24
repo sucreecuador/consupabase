@@ -12,10 +12,10 @@ WEB_DIR = os.path.join(BASE_DIR, "web")
 # Servir carpeta web
 app.mount("/web", StaticFiles(directory=WEB_DIR), name="web")
 
-# Página principal
+# Página principal (HOME)
 @app.get("/")
 def root():
-    return FileResponse(os.path.join(WEB_DIR, "dashboard", "index.html"))
+    return FileResponse(os.path.join(WEB_DIR, "index.html"))
 
 # -----------------------------
 #   CONEXIÓN SUPABASE
@@ -59,7 +59,7 @@ def actualizar_producto(id: int, producto: dict):
 @app.delete("/api/productos/{id}")
 def eliminar_producto(id: int):
     try:
-        data = supabase.table("productos").delete().eq("id", id).execute()
+        supabase.table("productos").delete().eq("id", id).execute()
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
