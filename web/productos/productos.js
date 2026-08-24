@@ -67,7 +67,7 @@ async function cargarProductos() {
         mostrarPagina(1);
     } catch (error) {
         tablaBody.innerHTML =
-            `<tr><td colspan="9">Error al conectar con el servidor</td></tr>`;
+            `<tr><td colspan="12">Error al conectar con el servidor</td></tr>`;
     }
 }
 
@@ -93,8 +93,9 @@ function actualizarEncabezados() {
         theadProductos.innerHTML = `
             <tr>
                 <th data-col="pro1">PRO1</th>
+                <th data-col="pro2">PRO2</th>
+                <th data-col="pro3">PRO3</th>
                 <th data-col="codigo">CÓDIGO</th>
-                <th data-col="codigo_proveedor">COD.PROV</th>
                 <th data-col="marca">MARCA</th>
                 <th data-col="descripcion">DESCRIPCIÓN</th>
                 <th data-col="saldo_temp">S.TEM</th>
@@ -141,7 +142,7 @@ function mostrarPagina(numPagina) {
     let lista = [];
 
     if (mostrarTodos) {
-        lista = productosFiltrados; // TODOS los filtrados
+        lista = productosFiltrados;
     } else {
         const inicio = (paginaActual - 1) * itemsPorPagina;
         const fin    = inicio + itemsPorPagina;
@@ -151,7 +152,7 @@ function mostrarPagina(numPagina) {
     tablaBody.innerHTML = "";
 
     if (lista.length === 0) {
-        tablaBody.innerHTML = `<tr><td colspan="9">No se encontraron productos</td></tr>`;
+        tablaBody.innerHTML = `<tr><td colspan="12">No se encontraron productos</td></tr>`;
         actualizarPaginacion();
         return;
     }
@@ -176,9 +177,10 @@ function mostrarPagina(numPagina) {
         } else {
             tablaBody.innerHTML += `
                 <tr>
-                    <td>${prod.pro1}</td>
+                    <td>${prod.pro1 ?? "—"}</td>
+                    <td>${prod.pro2 ?? "—"}</td>
+                    <td>${prod.pro3 ?? "—"}</td>
                     <td>${prod.codigo}</td>
-                    <td>${prod.codigo_proveedor}</td>
                     <td>${prod.marca}</td>
                     <td>${prod.descripcion}</td>
                     <td>${prod.saldo_temp}</td>
