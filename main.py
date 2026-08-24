@@ -1,17 +1,20 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
-
 import os
 
 app = FastAPI()
 
-# Supabase client
+# ================================
+#   CONFIGURAR SUPABASE
+# ================================
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# CORS
+# ================================
+#   CORS
+# ================================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,6 +25,7 @@ app.add_middleware(
 
 # ================================
 #   ENDPOINT /api/productos
+#   Filtra por cualquier contacto
 # ================================
 @app.get("/api/productos")
 async def get_productos(request: Request):
@@ -40,5 +44,11 @@ async def get_productos(request: Request):
     )
 
     data = query.execute()
-
     return data.data
+
+# ================================
+#   ENDPOINT DE PRUEBA
+# ================================
+@app.get("/")
+def root():
+    return {"status": "API funcionando"}
