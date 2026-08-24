@@ -58,6 +58,12 @@ if os.path.exists("web"):
     def root():
         return FileResponse("web/index.html")
 
+    # Redirección específica para productos.html según tu árbol de carpetas
+    @app.get("/web/productos")
+    @app.get("/web/productos/")
+    def productos_page():
+        return FileResponse("web/productos/productos.html")
+
     @app.get("/{file_name:path}")
     def servir_archivos_estaticos(file_name: str):
         path_relativo = os.path.join("web", file_name)
