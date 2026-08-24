@@ -80,6 +80,11 @@
     border-bottom: 1px solid #eee;
 }
 
+/* Zebra table */
+.tabla-productos tr:nth-child(even) {
+    background: #f7f7f7;
+}
+
 .sin-productos {
     text-align: center;
     padding: 20px;

@@ -30,7 +30,6 @@ function actualizarEncabezados() {
     if (vista === 1) {
         thead.innerHTML = `
             <tr>
-                <th data-col="id">ID</th>
                 <th data-col="codigo">CÓDIGO</th>
                 <th data-col="naci">NAC</th>
                 <th data-col="marca">MARCA</th>
@@ -44,11 +43,11 @@ function actualizarEncabezados() {
     } else {
         thead.innerHTML = `
             <tr>
-                <th data-col="id">ID</th>
+                <th data-col="pro1">PRO1</th>
                 <th data-col="codigo">CÓDIGO</th>
                 <th data-col="codigo_proveedor">COD.PROV</th>
                 <th data-col="marca">MARCA</th>
-                <th data-col="descripcion">NOMBRE</th>
+                <th data-col="descripcion">DESCRIPCIÓN</th>
                 <th data-col="saldo_temp">S.TEM</th>
                 <th data-col="costo_prom">COSTO</th>
                 <th data-col="precio_venta">P.VENTA</th>
@@ -107,7 +106,6 @@ function mostrarPagina(numPagina) {
         if (vista === 1) {
             tbody.innerHTML += `
                 <tr>
-                    <td>${prod.id}</td>
                     <td>${prod.codigo}</td>
                     <td>${prod.naci}</td>
                     <td>${prod.marca}</td>
@@ -124,7 +122,7 @@ function mostrarPagina(numPagina) {
         } else {
             tbody.innerHTML += `
                 <tr>
-                    <td>${prod.id}</td>
+                    <td>${prod.pro1}</td>
                     <td>${prod.codigo}</td>
                     <td>${prod.codigo_proveedor}</td>
                     <td>${prod.marca}</td>
@@ -202,7 +200,7 @@ vista1.onclick = () => {
     vista1.classList.add("activa");
     vista2.classList.remove("activa");
     actualizarEncabezados();
-    mostrarPagina(1);
+    cargarProductos();
 };
 
 vista2.onclick = () => {
@@ -210,7 +208,7 @@ vista2.onclick = () => {
     vista2.classList.add("activa");
     vista1.classList.remove("activa");
     actualizarEncabezados();
-    mostrarPagina(1);
+    cargarProductos();
 };
 
 // ===============================
