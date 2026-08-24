@@ -64,7 +64,7 @@ const toggleSidebar   = document.getElementById("toggleSidebar");
 async function cargarProductos() {
     try {
         const contacto = buscarPro1.value || 319;
-        const respuesta = await fetch(`/api/productos?contacto=${contacto}`);
+        const respuesta = await fetch(`https://consupabase-api.onrender.com/api/productos?contacto=${contacto}`);
         productos = await respuesta.json();
         productosFiltrados = [...productos];
         mostrarPagina(1);
