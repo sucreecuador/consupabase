@@ -1,39 +1,50 @@
 .dash-title {
     font-size: 28px;
+    font-weight: bold;
     margin-bottom: 5px;
+    color: #333;
 }
 
 .dash-subtitle {
     color: #666;
     margin-bottom: 20px;
+    font-size: 15px;
 }
 
 .dash-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 20px;
 }
 
 .dash-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 25px;
     text-align: center;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: 0.2s;
+    transition: 0.25s ease;
+    border: 1px solid #f0f0f0;
 }
 
 .dash-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.dash-icon {
+    font-size: 42px;
+    margin-bottom: 10px;
 }
 
 .dash-card h3 {
-    margin-top: 10px;
-    margin-bottom: 5px;
+    margin: 10px 0 5px 0;
+    font-size: 20px;
+    color: #222;
 }
 
 .dash-card p {
     color: #777;
+    font-size: 14px;
 }

@@ -1,48 +1,25 @@
-const API = "https://consupabase-api.onrender.com/dashboard";
+// ============================================================
+// Dashboard ERP SUCRE
+// ============================================================
 
-const kpiVentasDia = document.getElementById("kpiVentasDia");
-const kpiFacturasDia = document.getElementById("kpiFacturasDia");
-const kpiStockCritico = document.getElementById("kpiStockCritico");
-const kpiClientesActivos = document.getElementById("kpiClientesActivos");
+// Cargar módulo dentro del contenedor principal
+document.addEventListener("DOMContentLoaded", () => {
+    loadModule("dashboard-module.html");
+});
 
-const tablaUltimasFacturas = document.getElementById("tablaUltimasFacturas");
-const tablaStockBajo = document.getElementById("tablaStockBajo");
-
-// Cargar tablero
-async function cargarDashboard() {
-    const res = await fetch(API);
-    const json = await res.json();
-
-    // KPIs
-    kpiVentasDia.innerText = `$${json.kpis.ventas_dia.toFixed(2)}`;
-    kpiFacturasDia.innerText = json.kpis.facturas_dia;
-    kpiStockCritico.innerText = json.kpis.stock_critico;
-    kpiClientesActivos.innerText = json.kpis.clientes_activos;
-
-    // Últimas facturas
-    tablaUltimasFacturas.innerHTML = "";
-    json.ultimas_facturas.forEach(f => {
-        tablaUltimasFacturas.innerHTML += `
-            <tr>
-                <td>${f.numero}</td>
-                <td>${f.cliente}</td>
-                <td>${f.fecha}</td>
-                <td>$${f.total.toFixed(2)}</td>
-            </tr>
-        `;
-    });
-
-    // Stock bajo
-    tablaStockBajo.innerHTML = "";
-    json.stock_bajo.forEach(p => {
-        tablaStockBajo.innerHTML += `
-            <tr>
-                <td>${p.descripcion}</td>
-                <td>${p.stock}</td>
-            </tr>
-        `;
-    });
+// Función para cargar módulos HTML
+function loadModule(file) {
+    fetch(file)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("dashboard-module").innerHTML = html;
+        })
+        .catch(err => {
+            console.error("Error cargando módulo:", err);
+        });
 }
 
-// Inicial
-cargarDashboard();
+// Navegación global del ERP
+function sendNavigate(ruta) {
+    window.location.href = ruta;
+}
