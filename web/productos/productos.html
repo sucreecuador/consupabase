@@ -21,14 +21,13 @@
         <h1 class="productos-title">Productos</h1>
         <p class="productos-subtitle">Gestión de catálogo, precios y stock</p>
 
+        <button id="toggleSidebar" class="btn-toggle">Ocultar menú</button>
+
         <div class="productos-header">
-
-            <input type="text" id="buscarNombre" placeholder="Escribe para buscar en NOMBRE..." />
-
-            <button id="btnNuevoProducto" class="btn-nuevo">
-                + Nuevo Producto
-            </button>
-
+            <input type="text" id="buscarNombre" placeholder="Buscar por NOMBRE..." />
+            <input type="text" id="buscarMarca" placeholder="Buscar por MARCA..." />
+            <input type="text" id="buscarCodigo" placeholder="Buscar por CÓDIGO..." />
+            <button id="btnNuevoProducto" class="btn-nuevo">+ Nuevo Producto</button>
         </div>
 
         <div class="vista-selector">
@@ -39,22 +38,20 @@
         <table class="tabla-productos">
             <thead>
                 <tr>
-                    <th>CÓDIGO</th>
-                    <th>NAC</th>
-                    <th>MARCA</th>
-                    <th>NOMBRE</th>
-                    <th>UNI</th>
-                    <th>PVP</th>
-                    <th>S.TEM</th>
+                    <th data-col="codigo">CÓDIGO</th>
+                    <th data-col="naci">NAC</th>
+                    <th data-col="marca">MARCA</th>
+                    <th data-col="descripcion">NOMBRE</th>
+                    <th data-col="unidad">UNI</th>
+                    <th data-col="precio_venta">PVP</th>
+                    <th data-col="saldo_temp">S.TEM</th>
                     <th>ACCIONES</th>
                 </tr>
             </thead>
 
             <tbody id="tablaBody">
                 <tr>
-                    <td colspan="8" class="sin-productos">
-                        No se encontraron productos
-                    </td>
+                    <td colspan="8" class="sin-productos">Cargando...</td>
                 </tr>
             </tbody>
         </table>
@@ -72,6 +69,50 @@
             <button id="btnIr">Ir</button>
         </div>
 
+    </div>
+
+    <!-- MODAL EDITAR -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <h3>Editar Producto</h3>
+
+            <label>Código</label>
+            <input id="editCodigo">
+
+            <label>Descripción</label>
+            <input id="editDescripcion">
+
+            <label>Precio Venta</label>
+            <input id="editPrecio">
+
+            <button id="guardarEdicion">Guardar</button>
+            <button id="cerrarModal">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR -->
+    <div id="modalCrear" class="modal">
+        <div class="modal-content">
+            <h3>Nuevo Producto</h3>
+
+            <label>Código</label>
+            <input id="newCodigo">
+
+            <label>Descripción</label>
+            <input id="newDescripcion">
+
+            <label>Marca</label>
+            <input id="newMarca">
+
+            <label>Unidad</label>
+            <input id="newUnidad">
+
+            <label>Precio Venta</label>
+            <input id="newPrecio">
+
+            <button id="guardarNuevo">Crear</button>
+            <button id="cerrarCrear">Cerrar</button>
+        </div>
     </div>
 
 </body>

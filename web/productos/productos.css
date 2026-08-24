@@ -1,208 +1,116 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f3f3f3;
-    margin: 20px;
-    color: #333333;
+.productos-title {
+    font-size: 28px;
+    font-weight: bold;
 }
 
-.header h1 {
-    color: #107c41;
-    margin: 0 0 5px 0;
-    font-size: 24px;
+.productos-subtitle {
+    margin-bottom: 20px;
+    color: #555;
 }
 
-.sub {
-    color: #666666;
-    margin: 0 0 15px 0;
-    font-size: 13px;
+.btn-toggle {
+    background: #374151;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+.btn-toggle:hover {
+    background: #1f2937;
 }
 
-.toolbar {
+.productos-header {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
-    align-items: center;
 }
 
-.input-buscar {
-    padding: 6px 10px;
-    border: 1px solid #ababab;
-    border-radius: 2px;
-    font-size: 13px;
-    width: 280px;
-    outline: none;
+.productos-header input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
 }
 
 .btn-nuevo {
-    background-color: #107c41;
-    color: #ffffff;
-    border: 1px solid #0c5e31;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: bold;
+    background: #10b981;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: none;
     cursor: pointer;
-    border-radius: 2px;
+}
+.btn-nuevo:hover {
+    background: #059669;
 }
 
-.vistas-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.vista-selector {
     margin-bottom: 15px;
 }
 
-.btn-vista {
-    padding: 5px 14px;
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
-    color: #334155;
-    border-radius: 4px;
+.vista-btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
     cursor: pointer;
-    font-weight: bold;
+    background: white;
+}
+.vista-btn.activa {
+    background: #f3f4f6;
+    border-color: #111;
 }
 
-.vista1-activo {
-    background-color: #f97316 !important;
-    color: white !important;
-    border-color: #ea580c !important;
-}
-
-.vista2-activo {
-    background-color: #059669 !important;
-    color: white !important;
-    border-color: #047857 !important;
-}
-
-.tabla-container {
-    overflow-x: auto;
-    border: 1px solid #d4d4d4;
-    background-color: #ffffff;
-    border-radius: 4px;
-}
-
-table.erp-table {
+.tabla-productos {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
-    text-align: left;
+    background: white;
 }
 
-thead tr {
-    background-color: #107c41 !important;
-    color: #ffffff !important;
-}
-
-thead th {
-    padding: 6px 10px;
-    font-weight: 600;
-    border: 1px solid #0c5e31;
+.tabla-productos th {
+    background: #059669;
+    color: white;
+    padding: 10px;
     cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
 }
 
-thead th.col-acciones, tbody td.col-acciones {
-    width: 70px !important;
-    min-width: 70px !important;
-    max-width: 70px !important;
+.tabla-productos td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.sin-productos {
     text-align: center;
-    padding: 2px 4px !important;
+    padding: 20px;
+    color: #777;
 }
 
-tbody td {
-    padding: 4px 8px;
-    border: 1px solid #d4d4d4;
-    color: #222222;
-    white-space: nowrap;
-}
-
-tbody tr:nth-child(even) {
-    background-color: #f3f9f5;
-}
-
-tbody tr:hover {
-    background-color: #e2f0d9 !important;
-}
-
-.excel-code {
-    font-family: Consolas, monospace;
-    font-weight: bold;
-    color: #107c41;
-}
-
-.excel-number {
-    text-align: right;
-    font-weight: 600;
-}
-
-.acciones-wrapper {
+.paginacion {
+    margin-top: 20px;
     display: flex;
-    justify-content: center;
+    gap: 10px;
     align-items: center;
-    gap: 4px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    width: 350px;
+    margin: 100px auto;
+    border-radius: 10px;
+}
+
+.modal-content input {
     width: 100%;
-}
-
-.btn-editar, .btn-eliminar {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 24px !important;
-    height: 24px !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-    border-radius: 3px;
-    font-weight: bold;
-    font-size: 11px;
-    cursor: pointer;
-    border: 1px solid transparent;
-}
-
-.btn-editar {
-    background-color: #eff6ff !important;
-    color: #2563eb !important;
-    border-color: #bfdbfe !important;
-}
-
-.btn-eliminar {
-    background-color: #fef2f2 !important;
-    color: #dc2626 !important;
-    border-color: #fecaca !important;
-}
-
-.paginacion-bar {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    flex-wrap: wrap;
-}
-
-.paginacion-bar button {
-    border: 1px solid #d4d4d4;
-    background-color: #ffffff;
-    padding: 4px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: 2px;
-    font-weight: 600;
-}
-
-.input-pagina-saltar {
-    width: 55px;
-    padding: 3px 5px;
-    text-align: center;
-    border: 1px solid #107c41;
-    border-radius: 3px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #107c41;
-    outline: none;
-}
-
-.btn-ir-pagina {
-    background-color: #107c41 !important;
-    color: white !important;
-    border-color: #0c5e31 !important;
+    padding: 8px;
+    margin-bottom: 10px;
 }
