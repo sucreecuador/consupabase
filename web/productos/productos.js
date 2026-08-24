@@ -2,8 +2,8 @@
 // VARIABLES
 // ===============================
 
-let productos = [];            // todos los productos desde la API
-let productosFiltrados = [];   // productos después de filtros
+let productos = [];
+let productosFiltrados = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let mostrarTodos = false;
@@ -56,13 +56,12 @@ const cerrarCrear     = document.getElementById("cerrarCrear");
 const toggleSidebar   = document.getElementById("toggleSidebar");
 
 // ===============================
-// CARGAR PRODUCTOS (CORREGIDO)
+// CARGAR PRODUCTOS
 // ===============================
 
 async function cargarProductos() {
     try {
-        const contacto = buscarPro1.value || 319;  // contacto por defecto
-        const respuesta = await fetch(`/api/productos?contacto=${contacto}`);
+        const respuesta = await fetch("/api/productos");
         productos = await respuesta.json();
         productosFiltrados = [...productos];
         mostrarPagina(1);
@@ -96,6 +95,7 @@ function actualizarEncabezados() {
                 <th data-col="pro1">PRO1</th>
                 <th data-col="pro2">PRO2</th>
                 <th data-col="pro3">PRO3</th>
+                <th data-col="codigo_proveedor">CÓD. PROV.</th>
                 <th data-col="codigo">CÓDIGO</th>
                 <th data-col="marca">MARCA</th>
                 <th data-col="descripcion">DESCRIPCIÓN</th>
@@ -181,6 +181,7 @@ function mostrarPagina(numPagina) {
                     <td>${prod.pro1 ?? "—"}</td>
                     <td>${prod.pro2 ?? "—"}</td>
                     <td>${prod.pro3 ?? "—"}</td>
+                    <td>${prod.codigo_proveedor ?? ""}</td>
                     <td>${prod.codigo}</td>
                     <td>${prod.marca}</td>
                     <td>${prod.descripcion}</td>
@@ -244,7 +245,7 @@ btnIr.onclick = () => {
 };
 
 // ===============================
-// FILTROS (PRO1, PRO2, PRO3)
+// FILTROS
 // ===============================
 
 function aplicarFiltros() {
