@@ -1,37 +1,83 @@
-let productos = [];
-let productosOriginal = [];
+// ===============================
+// VARIABLES
+// ===============================
+
+let productos = [];            // todos los productos desde la API
+let productosFiltrados = [];   // productos después de filtros
 let paginaActual = 1;
 let itemsPorPagina = 20;
-let ordenActual = {};
-let vista = 1;
-let productoEditando = null;
 let mostrarTodos = false;
+let vista = 1;
+let ordenActual = {};
+let productoEditando = null;
 
 // ===============================
-//  CARGAR PRODUCTOS
+// REFERENCIAS DOM
+// ===============================
+
+const tablaBody       = document.getElementById("tablaBody");
+const theadProductos  = document.getElementById("theadProductos");
+
+const buscarNombre    = document.getElementById("buscarNombre");
+const buscarMarca     = document.getElementById("buscarMarca");
+const buscarCodigo    = document.getElementById("buscarCodigo");
+const buscarPro1      = document.getElementById("buscarPro1");
+
+const btnMostrarTodos = document.getElementById("btnMostrarTodos");
+const btnNuevoProducto= document.getElementById("btnNuevoProducto");
+
+const vista1          = document.getElementById("vista1");
+const vista2          = document.getElementById("vista2");
+
+const btnPrimero      = document.getElementById("btnPrimero");
+const btnAnterior     = document.getElementById("btnAnterior");
+const btnSiguiente    = document.getElementById("btnSiguiente");
+const btnUltimo       = document.getElementById("btnUltimo");
+const paginaActualSpan= document.getElementById("paginaActual");
+const irPagina        = document.getElementById("irPagina");
+const btnIr           = document.getElementById("btnIr");
+
+const modalEditar     = document.getElementById("modalEditar");
+const editCodigo      = document.getElementById("editCodigo");
+const editDescripcion = document.getElementById("editDescripcion");
+const editPrecio      = document.getElementById("editPrecio");
+const guardarEdicion  = document.getElementById("guardarEdicion");
+const cerrarModal     = document.getElementById("cerrarModal");
+
+const modalCrear      = document.getElementById("modalCrear");
+const newCodigo       = document.getElementById("newCodigo");
+const newDescripcion  = document.getElementById("newDescripcion");
+const newMarca        = document.getElementById("newMarca");
+const newUnidad       = document.getElementById("newUnidad");
+const newPrecio       = document.getElementById("newPrecio");
+const guardarNuevo    = document.getElementById("guardarNuevo");
+const cerrarCrear     = document.getElementById("cerrarCrear");
+
+const toggleSidebar   = document.getElementById("toggleSidebar");
+
+// ===============================
+// CARGAR PRODUCTOS
 // ===============================
 
 async function cargarProductos() {
     try {
         const respuesta = await fetch("/api/productos");
         productos = await respuesta.json();
-        productosOriginal = [...productos];
+        productosFiltrados = [...productos];
         mostrarPagina(1);
     } catch (error) {
-        document.getElementById("tablaBody").innerHTML =
+        tablaBody.innerHTML =
             `<tr><td colspan="9">Error al conectar con el servidor</td></tr>`;
     }
 }
 
 // ===============================
-//  ENCABEZADOS DINÁMICOS
+// ENCABEZADOS DINÁMICOS
 // ===============================
 
 function actualizarEncabezados() {
-    const thead = document.getElementById("theadProductos");
-
     if (vista === 1) {
-        thead.innerHTML = `
+        theadProductos.innerHTML = `
             <tr>
                 <th data-col="codigo">CÓDIGO</th>
                 <th data-col="naci">NAC</th>
@@ -44,7 +90,7 @@ function actualizarEncabezados() {
             </tr>
         `;
     } else {
-        thead.innerHTML = `
+        theadProductos.innerHTML = `
             <tr>
                 <th data-col="pro1">PRO1</th>
                 <th data-col="codigo">CÓDIGO</th>
@@ -63,7 +109,7 @@ function actualizarEncabezados() {
 }
 
 // ===============================
-//  ORDENAR COLUMNAS
+// ORDENAR COLUMNAS
 // ===============================
 
 function activarOrdenamiento() {
@@ -76,7 +122,7 @@ function ordenarPor(columna) {
     const asc = !ordenActual[columna];
     ordenActual[columna] = asc;
 
-    productos.sort((a, b) => {
+    productosFiltrados.sort((a, b) => {
         const x = (a[columna] ?? "").toString().toLowerCase();
         const y = (b[columna] ?? "").toString().toLowerCase();
         return asc ? x.localeCompare(y) : y.localeCompare(x);
@@ -86,31 +132,33 @@ function ordenarPor(columna) {
 }
 
 // ===============================
-//  MOSTRAR PAGINA
+// MOSTRAR PAGINA
 // ===============================
 
 function mostrarPagina(numPagina) {
     paginaActual = numPagina;
 
-    let lista = productos;
+    let lista = [];
 
-    if (!mostrarTodos) {
+    if (mostrarTodos) {
+        lista = productosFiltrados; // TODOS los filtrados
+    } else {
         const inicio = (paginaActual - 1) * itemsPorPagina;
-        const fin = inicio + itemsPorPagina;
-        lista = productos.slice(inicio, fin);
+        const fin    = inicio + itemsPorPagina;
+        lista = productosFiltrados.slice(inicio, fin);
     }
 
-    const tbody = document.getElementById("tablaBody");
-    tbody.innerHTML = "";
+    tablaBody.innerHTML = "";
 
     if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9">No se encontraron productos</td></tr>`;
+        tablaBody.innerHTML = `<tr><td colspan="9">No se encontraron productos</td></tr>`;
+        actualizarPaginacion();
         return;
     }
 
     lista.forEach(prod => {
         if (vista === 1) {
-            tbody.innerHTML += `
+            tablaBody.innerHTML += `
                 <tr>
                     <td>${prod.codigo}</td>
                     <td>${prod.naci}</td>
@@ -126,7 +174,7 @@ function mostrarPagina(numPagina) {
                 </tr>
             `;
         } else {
-            tbody.innerHTML += `
+            tablaBody.innerHTML += `
                 <tr>
                     <td>${prod.pro1}</td>
                     <td>${prod.codigo}</td>
@@ -149,63 +197,80 @@ function mostrarPagina(numPagina) {
 }
 
 // ===============================
-//  PAGINACIÓN
+// PAGINACIÓN
 // ===============================
 
 function actualizarPaginacion() {
     if (mostrarTodos) {
-        document.getElementById("paginaActual").innerText = `Mostrando todo`;
+        paginaActualSpan.innerText = `Mostrando ${productosFiltrados.length} productos`;
         return;
     }
 
-    const totalPaginas = Math.ceil(productos.length / itemsPorPagina);
-    document.getElementById("paginaActual").innerText =
-        `Página ${paginaActual} de ${totalPaginas}`;
+    const totalPaginas = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
+    paginaActualSpan.innerText = `Página ${paginaActual} de ${totalPaginas}`;
 }
 
-btnPrimero.onclick = () => mostrarPagina(1);
-btnAnterior.onclick = () => paginaActual > 1 && mostrarPagina(paginaActual - 1);
+btnPrimero.onclick = () => {
+    if (!mostrarTodos) mostrarPagina(1);
+};
+
+btnAnterior.onclick = () => {
+    if (!mostrarTodos && paginaActual > 1) mostrarPagina(paginaActual - 1);
+};
+
 btnSiguiente.onclick = () => {
-    const total = Math.ceil(productos.length / itemsPorPagina);
-    paginaActual < total && mostrarPagina(paginaActual + 1);
+    if (!mostrarTodos) {
+        const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
+        if (paginaActual < total) mostrarPagina(paginaActual + 1);
+    }
 };
+
 btnUltimo.onclick = () => {
-    const total = Math.ceil(productos.length / itemsPorPagina);
-    mostrarPagina(total);
+    if (!mostrarTodos) {
+        const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
+        mostrarPagina(total);
+    }
 };
+
 btnIr.onclick = () => {
-    const num = parseInt(irPagina.value);
-    const total = Math.ceil(productos.length / itemsPorPagina);
-    if (num >= 1 && num <= total) mostrarPagina(num);
+    if (!mostrarTodos) {
+        const num   = parseInt(irPagina.value);
+        const total = Math.ceil(productosFiltrados.length / itemsPorPagina) || 1;
+        if (num >= 1 && num <= total) mostrarPagina(num);
+    }
 };
 
 // ===============================
-//  FILTROS AVANZADOS
+// FILTROS (PRO1, PRO2, PRO3)
 // ===============================
 
 function aplicarFiltros() {
     const nombre = buscarNombre.value.toLowerCase();
-    const marca = buscarMarca.value.toLowerCase();
+    const marca  = buscarMarca.value.toLowerCase();
     const codigo = buscarCodigo.value.toLowerCase();
-    const pro1 = buscarPro1.value.toLowerCase();
+    const pro1   = buscarPro1.value.toLowerCase();
 
-    productos = productosOriginal.filter(p =>
+    productosFiltrados = productos.filter(p =>
         (p.descripcion ?? "").toLowerCase().includes(nombre) &&
         (p.marca ?? "").toLowerCase().includes(marca) &&
         (p.codigo ?? "").toLowerCase().includes(codigo) &&
-        (p.pro1 ?? "").toString().toLowerCase().includes(pro1)
+        (
+            (p.pro1 ?? "").toString().toLowerCase().includes(pro1) ||
+            (p.pro2 ?? "").toString().toLowerCase().includes(pro1) ||
+            (p.pro3 ?? "").toString().toLowerCase().includes(pro1)
+        )
     );
 
     mostrarPagina(1);
 }
 
 buscarNombre.oninput = aplicarFiltros;
-buscarMarca.oninput = aplicarFiltros;
+buscarMarca.oninput  = aplicarFiltros;
 buscarCodigo.oninput = aplicarFiltros;
-buscarPro1.oninput = aplicarFiltros;
+buscarPro1.oninput   = aplicarFiltros;
 
 // ===============================
-//  MOSTRAR TODOS
+// MOSTRAR TODOS
 // ===============================
 
 btnMostrarTodos.onclick = () => {
@@ -215,7 +280,7 @@ btnMostrarTodos.onclick = () => {
 };
 
 // ===============================
-//  VISTAS
+// VISTAS
 // ===============================
 
 vista1.onclick = () => {
@@ -235,26 +300,30 @@ vista2.onclick = () => {
 };
 
 // ===============================
-//  EDITAR PRODUCTO
+// EDITAR PRODUCTO
 // ===============================
 
 function abrirModal(prod) {
     productoEditando = prod;
 
-    editCodigo.value = prod.codigo;
-    editDescripcion.value = prod.descripcion;
-    editPrecio.value = prod.precio_venta;
+    editCodigo.value      = prod.codigo ?? "";
+    editDescripcion.value = prod.descripcion ?? "";
+    editPrecio.value      = prod.precio_venta ?? "";
 
     modalEditar.style.display = "block";
 }
 
-cerrarModal.onclick = () => modalEditar.style.display = "none";
+cerrarModal.onclick = () => {
+    modalEditar.style.display = "none";
+};
 
 guardarEdicion.onclick = async () => {
+    if (!productoEditando) return;
+
     const nuevo = {
-        codigo: editCodigo.value,
-        descripcion: editDescripcion.value,
-        precio_venta: editPrecio.value
+        codigo:       editCodigo.value,
+        descripcion:  editDescripcion.value,
+        precio_venta: parseFloat(editPrecio.value || "0")
     };
 
     await fetch(`/api/productos/${productoEditando.id}`, {
@@ -268,7 +337,7 @@ guardarEdicion.onclick = async () => {
 };
 
 // ===============================
-//  CREAR PRODUCTO
+// CREAR PRODUCTO
 // ===============================
 
 btnNuevoProducto.onclick = () => {
@@ -281,11 +350,11 @@ cerrarCrear.onclick = () => {
 
 guardarNuevo.onclick = async () => {
     const nuevo = {
-        codigo: newCodigo.value,
-        descripcion: newDescripcion.value,
-        marca: newMarca.value,
-        unidad: newUnidad.value,
-        precio_venta: newPrecio.value
+        codigo:       newCodigo.value,
+        descripcion:  newDescripcion.value,
+        marca:        newMarca.value,
+        unidad:       newUnidad.value,
+        precio_venta: parseFloat(newPrecio.value || "0")
     };
 
     await fetch("/api/productos", {
@@ -299,7 +368,7 @@ guardarNuevo.onclick = async () => {
 };
 
 // ===============================
-//  ELIMINAR PRODUCTO
+// ELIMINAR PRODUCTO
 // ===============================
 
 async function eliminarProducto(id) {
@@ -313,12 +382,12 @@ async function eliminarProducto(id) {
 }
 
 // ===============================
-//  OCULTAR SIDEBAR
+// SIDEBAR
 // ===============================
 
 toggleSidebar.onclick = () => {
     const sidebar = document.getElementById("sidebar");
-    const main = document.querySelector(".main-content");
+    const main    = document.querySelector(".main-content");
 
     if (sidebar.style.display === "none") {
         sidebar.style.display = "block";
@@ -332,7 +401,7 @@ toggleSidebar.onclick = () => {
 };
 
 // ===============================
-//  INICIO
+// INICIO
 // ===============================
 
 actualizarEncabezados();
