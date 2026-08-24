@@ -5,16 +5,10 @@ import os
 
 app = FastAPI()
 
-# ================================
-#   CONFIGURAR SUPABASE
-# ================================
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ================================
-#   CORS
-# ================================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,15 +17,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ================================
-#   ENDPOINT /api/productos
-#   Filtra por cualquier contacto
-# ================================
 @app.get("/api/productos")
 async def get_productos(request: Request):
     contacto = request.query_params.get("contacto")
 
-    # Si no envías contacto, usa 319 por defecto
     if not contacto:
         contacto = "319"
 
@@ -47,9 +36,6 @@ async def get_productos(request: Request):
     data = query.execute()
     return data.data
 
-# ================================
-#   ENDPOINT DE PRUEBA
-# ================================
 @app.get("/")
 def root():
     return {"status": "API funcionando"}

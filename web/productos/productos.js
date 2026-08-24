@@ -7,7 +7,7 @@ let productosFiltrados = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let mostrarTodos = false;
-let vista = 1;
+let vista = 2; // tu ERP usa vista 2 por defecto
 let ordenActual = {};
 let productoEditando = null;
 
@@ -56,7 +56,7 @@ const cerrarCrear     = document.getElementById("cerrarCrear");
 const toggleSidebar   = document.getElementById("toggleSidebar");
 
 // ===============================
-// CARGAR PRODUCTOS (CORREGIDO)
+// CARGAR PRODUCTOS
 // ===============================
 
 async function cargarProductos() {
@@ -77,36 +77,18 @@ async function cargarProductos() {
 // ===============================
 
 function actualizarEncabezados() {
-    if (vista === 1) {
-        theadProductos.innerHTML = `
-            <tr>
-                <th data-col="codigo">CÓDIGO</th>
-                <th data-col="naci">NAC</th>
-                <th data-col="marca">MARCA</th>
-                <th data-col="descripcion">NOMBRE</th>
-                <th data-col="unidad">UNI</th>
-                <th data-col="precio_venta">PVP</th>
-                <th data-col="saldo_temp">S.TEM</th>
-                <th>ACCIONES</th>
-            </tr>
-        `;
-    } else {
-        theadProductos.innerHTML = `
-            <tr>
-                <th data-col="pro1">PRO1</th>
-                <th data-col="pro2">PRO2</th>
-                <th data-col="pro3">PRO3</th>
-                <th data-col="codigo_proveedor">CÓD. PROV.</th>
-                <th data-col="codigo">CÓDIGO</th>
-                <th data-col="marca">MARCA</th>
-                <th data-col="descripcion">DESCRIPCIÓN</th>
-                <th data-col="saldo_temp">S.TEM</th>
-                <th data-col="costo_prom">COSTO</th>
-                <th data-col="precio_venta">P.VENTA</th>
-                <th>ACCIONES</th>
-            </tr>
-        `;
-    }
+    theadProductos.innerHTML = `
+        <tr>
+            <th data-col="codigo_proveedor">PROV</th>
+            <th data-col="codigo">PROD</th>
+            <th data-col="marca">MARCA</th>
+            <th data-col="descripcion">DESCRIPCIÓN</th>
+            <th data-col="saldo_temp">CTR</th>
+            <th data-col="costo_prom">COSTO</th>
+            <th data-col="precio_venta">P.VENTA</th>
+            <th>ACCIONES</th>
+        </tr>
+    `;
 
     activarOrdenamiento();
 }
@@ -160,42 +142,21 @@ function mostrarPagina(numPagina) {
     }
 
     lista.forEach(prod => {
-        if (vista === 1) {
-            tablaBody.innerHTML += `
-                <tr>
-                    <td>${prod.codigo}</td>
-                    <td>${prod.naci}</td>
-                    <td>${prod.marca}</td>
-                    <td>${prod.descripcion}</td>
-                    <td>${prod.unidad}</td>
-                    <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
-                    <td>${prod.saldo_temp}</td>
-                    <td>
-                        <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
-                        <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
-                    </td>
-                </tr>
-            `;
-        } else {
-            tablaBody.innerHTML += `
-                <tr>
-                    <td>${prod.pro1 ?? "—"}</td>
-                    <td>${prod.pro2 ?? "—"}</td>
-                    <td>${prod.pro3 ?? "—"}</td>
-                    <td>${prod.codigo_proveedor ?? ""}</td>
-                    <td>${prod.codigo}</td>
-                    <td>${prod.marca}</td>
-                    <td>${prod.descripcion}</td>
-                    <td>${prod.saldo_temp}</td>
-                    <td>${(prod.costo_prom ?? 0).toFixed(2)}</td>
-                    <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
-                    <td>
-                        <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
-                        <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
-                    </td>
-                </tr>
-            `;
-        }
+        tablaBody.innerHTML += `
+            <tr>
+                <td>${prod.codigo_proveedor ?? ""}</td>
+                <td>${prod.codigo}</td>
+                <td>${prod.marca}</td>
+                <td>${prod.descripcion}</td>
+                <td>${prod.saldo_temp}</td>
+                <td>${(prod.costo_prom ?? 0).toFixed(2)}</td>
+                <td>${(prod.precio_venta ?? 0).toFixed(2)}</td>
+                <td>
+                    <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
+                    <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
+                </td>
+            </tr>
+        `;
     });
 
     actualizarPaginacion();
@@ -281,26 +242,6 @@ buscarPro1.oninput   = aplicarFiltros;
 btnMostrarTodos.onclick = () => {
     mostrarTodos = !mostrarTodos;
     btnMostrarTodos.innerText = mostrarTodos ? "Modo paginado" : "Mostrar todos";
-    mostrarPagina(1);
-};
-
-// ===============================
-// VISTAS
-// ===============================
-
-vista1.onclick = () => {
-    vista = 1;
-    vista1.classList.add("activa");
-    vista2.classList.remove("activa");
-    actualizarEncabezados();
-    mostrarPagina(1);
-};
-
-vista2.onclick = () => {
-    vista = 2;
-    vista2.classList.add("activa");
-    vista1.classList.remove("activa");
-    actualizarEncabezados();
     mostrarPagina(1);
 };
 
