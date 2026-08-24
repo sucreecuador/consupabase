@@ -21,6 +21,67 @@ async function cargarProductos() {
 }
 
 // ===============================
+//  CAMBIAR ENCABEZADOS SEGÚN VISTA
+// ===============================
+
+function actualizarEncabezados() {
+    const thead = document.getElementById("theadProductos");
+
+    if (vista === 1) {
+        thead.innerHTML = `
+            <tr>
+                <th data-col="codigo">CÓDIGO</th>
+                <th data-col="naci">NAC</th>
+                <th data-col="marca">MARCA</th>
+                <th data-col="descripcion">NOMBRE</th>
+                <th data-col="unidad">UNI</th>
+                <th data-col="precio_venta">PVP</th>
+                <th data-col="saldo_temp">S.TEM</th>
+                <th>ACCIONES</th>
+            </tr>
+        `;
+    } else {
+        thead.innerHTML = `
+            <tr>
+                <th data-col="codigo">CÓDIGO</th>
+                <th data-col="codigo_proveedor">COD.PROV</th>
+                <th data-col="costo_prom">COSTO</th>
+                <th data-col="precio_fob">FOB</th>
+                <th data-col="precio_anterior">P.ANT</th>
+                <th data-col="viene">VIENE</th>
+                <th data-col="fecha_ultima_ingreso">F.ING</th>
+                <th>ACCIONES</th>
+            </tr>
+        `;
+    }
+
+    activarOrdenamiento();
+}
+
+// ===============================
+//  ORDENAR COLUMNAS
+// ===============================
+
+function activarOrdenamiento() {
+    document.querySelectorAll("th[data-col]").forEach(th => {
+        th.onclick = () => ordenarPor(th.dataset.col);
+    });
+}
+
+function ordenarPor(columna) {
+    const asc = !ordenActual[columna];
+    ordenActual[columna] = asc;
+
+    productos.sort((a, b) => {
+        const x = (a[columna] || "").toString().toLowerCase();
+        const y = (b[columna] || "").toString().toLowerCase();
+        return asc ? x.localeCompare(y) : y.localeCompare(x);
+    });
+
+    mostrarPagina(1);
+}
+
+// ===============================
 //  MOSTRAR PAGINA
 // ===============================
 
@@ -67,7 +128,10 @@ function mostrarPagina(numPagina) {
                     <td>${prod.precio_anterior}</td>
                     <td>${prod.viene}</td>
                     <td>${prod.fecha_ultima_ingreso}</td>
-                    <td>${prod.fecha_ultima_egreso}</td>
+                    <td>
+                        <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
+                        <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
+                    </td>
                 </tr>
             `;
         }
@@ -103,28 +167,7 @@ btnIr.onclick = () => {
 };
 
 // ===============================
-//  ORDENAR COLUMNAS
-// ===============================
-
-document.querySelectorAll("th[data-col]").forEach(th => {
-    th.onclick = () => ordenarPor(th.dataset.col);
-});
-
-function ordenarPor(columna) {
-    const asc = !ordenActual[columna];
-    ordenActual[columna] = asc;
-
-    productos.sort((a, b) => {
-        const x = (a[columna] || "").toString().toLowerCase();
-        const y = (b[columna] || "").toString().toLowerCase();
-        return asc ? x.localeCompare(y) : y.localeCompare(x);
-    });
-
-    mostrarPagina(1);
-}
-
-// ===============================
-//  BUSCADOR AVANZADO
+//  FILTROS AVANZADOS (Vista 1 y Vista 2)
 // ===============================
 
 function aplicarFiltros() {
@@ -138,31 +181,8 @@ function aplicarFiltros() {
         (p.codigo || "").toLowerCase().includes(codigo)
     );
 
-    const tbody = document.getElementById("tablaBody");
-    tbody.innerHTML = "";
-
-    if (filtrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8">No se encontraron productos</td></tr>`;
-        return;
-    }
-
-    filtrados.forEach(prod => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${prod.codigo}</td>
-                <td>${prod.naci}</td>
-                <td>${prod.marca}</td>
-                <td>${prod.descripcion}</td>
-                <td>${prod.unidad}</td>
-                <td>${prod.precio_venta}</td>
-                <td>${prod.saldo_temp}</td>
-                <td>
-                    <button onclick='abrirModal(${JSON.stringify(prod)})'>✏️</button>
-                    <button onclick='eliminarProducto(${prod.id})'>🗑️</button>
-                </td>
-            </tr>
-        `;
-    });
+    productos = filtrados;
+    mostrarPagina(1);
 }
 
 buscarNombre.oninput = aplicarFiltros;
@@ -177,6 +197,7 @@ vista1.onclick = () => {
     vista = 1;
     vista1.classList.add("activa");
     vista2.classList.remove("activa");
+    actualizarEncabezados();
     mostrarPagina(1);
 };
 
@@ -184,6 +205,7 @@ vista2.onclick = () => {
     vista = 2;
     vista2.classList.add("activa");
     vista1.classList.remove("activa");
+    actualizarEncabezados();
     mostrarPagina(1);
 };
 
@@ -288,4 +310,5 @@ toggleSidebar.onclick = () => {
 //  INICIO
 // ===============================
 
+actualizarEncabezados();
 cargarProductos();
