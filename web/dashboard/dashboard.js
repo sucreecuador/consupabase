@@ -7,7 +7,8 @@ function loadModule(file) {
         .then(r => r.text())
         .then(html => {
             document.getElementById("dashboard-module").innerHTML = html;
-        });
+        })
+        .catch(err => console.error("Error cargando módulo:", err));
 }
 
 function sendNavigate(ruta) {
