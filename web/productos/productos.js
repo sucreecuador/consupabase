@@ -180,12 +180,15 @@ function mostrarPagina(numPagina) {
                 </tr>
             `;
         } else {
+            // Se asegura de extraer codigo_proveedor o cod_proveedor según devuelva la API
+            const codProv = prod.codigo_proveedor ?? prod.cod_proveedor ?? "—";
+            
             tablaBody.innerHTML += `
                 <tr>
                     <td>${prod.pro1 ?? "—"}</td>
                     <td>${prod.pro2 ?? "—"}</td>
                     <td>${prod.pro3 ?? "—"}</td>
-                    <td>${prod.codigo_proveedor ?? "—"}</td>
+                    <td>${codProv}</td>
                     <td>${prod.codigo ?? ""}</td>
                     <td>${prod.marca ?? ""}</td>
                     <td>${prod.descripcion ?? ""}</td>
