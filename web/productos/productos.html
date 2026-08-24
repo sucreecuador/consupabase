@@ -3,26 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>ERP SUCRE - Productos</title>
-
     <link rel="stylesheet" href="/web/components/layout.css">
     <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
     <link rel="stylesheet" href="/web/productos/productos.css">
-
     <script src="/web/components/sidebar/sidebar.js"></script>
     <script src="/web/productos/productos.js" defer></script>
 </head>
-
 <body>
-
     <div id="sidebar"></div>
-
     <div class="main-content">
-
         <h1 class="productos-title">Productos</h1>
         <p class="productos-subtitle">Gestión de catálogo, precios y stock</p>
-
         <button id="toggleSidebar" class="btn-toggle">Ocultar menú</button>
-
         <div class="productos-header">
             <input type="text" id="buscarNombre" placeholder="Buscar por NOMBRE..." />
             <input type="text" id="buscarMarca" placeholder="Buscar por MARCA..." />
@@ -31,91 +23,73 @@
             <button id="btnMostrarTodos" class="btn-nuevo">Mostrar todos</button>
             <button id="btnNuevoProducto" class="btn-nuevo">+ Nuevo Producto</button>
         </div>
-
         <div class="vista-selector">
             <button class="vista-btn activa" id="vista1">Vista 1</button>
             <button class="vista-btn" id="vista2">Vista 2</button>
         </div>
-
         <table class="tabla-productos">
             <thead id="theadProductos">
                 <tr>
+                    <th data-col="pro1">PRO1</th>
+                    <th data-col="pro2">PRO2</th>
+                    <th data-col="pro3">PRO3</th>
+                    <th data-col="codigo_proveedor">CÓD. PROV.</th>
                     <th data-col="codigo">CÓDIGO</th>
-                    <th data-col="naci">NAC</th>
                     <th data-col="marca">MARCA</th>
-                    <th data-col="descripcion">NOMBRE</th>
-                    <th data-col="unidad">UNI</th>
-                    <th data-col="precio_venta">PVP</th>
+                    <th data-col="descripcion">DESCRIPCIÓN</th>
                     <th data-col="saldo_temp">S.TEM</th>
+                    <th data-col="costo_prom">COSTO</th>
+                    <th data-col="precio_venta">P.VENTA</th>
                     <th>ACCIONES</th>
                 </tr>
             </thead>
-
             <tbody id="tablaBody">
                 <tr>
-                    <td colspan="8" class="sin-productos">Cargando...</td>
+                    <td colspan="11" class="sin-productos">Cargando...</td>
                 </tr>
             </tbody>
         </table>
-
         <div class="paginacion">
             <button id="btnPrimero">Primero</button>
             <button id="btnAnterior">Anterior</button>
-
             <span id="paginaActual">Página 1 de 1</span>
-
             <button id="btnSiguiente">Siguiente</button>
             <button id="btnUltimo">Último</button>
-
             <input type="number" id="irPagina" min="1" value="1" />
             <button id="btnIr">Ir</button>
         </div>
-
     </div>
-
     <!-- MODAL EDITAR -->
     <div id="modalEditar" class="modal">
         <div class="modal-content">
             <h3>Editar Producto</h3>
-
             <label>Código</label>
             <input id="editCodigo">
-
             <label>Descripción</label>
             <input id="editDescripcion">
-
             <label>Precio Venta</label>
             <input id="editPrecio">
-
             <button id="guardarEdicion">Guardar</button>
             <button id="cerrarModal">Cerrar</button>
         </div>
     </div>
-
     <!-- MODAL CREAR -->
     <div id="modalCrear" class="modal">
         <div class="modal-content">
             <h3>Nuevo Producto</h3>
-
             <label>Código</label>
             <input id="newCodigo">
-
             <label>Descripción</label>
             <input id="newDescripcion">
-
             <label>Marca</label>
             <input id="newMarca">
-
             <label>Unidad</label>
             <input id="newUnidad">
-
             <label>Precio Venta</label>
             <input id="newPrecio">
-
             <button id="guardarNuevo">Crear</button>
             <button id="cerrarCrear">Cerrar</button>
         </div>
     </div>
-
 </body>
 </html>
