@@ -1,4 +1,5 @@
 let productos = [];
+let productosOriginal = [];
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let ordenActual = {};
@@ -14,10 +15,11 @@ async function cargarProductos() {
     try {
         const respuesta = await fetch("/api/productos");
         productos = await respuesta.json();
+        productosOriginal = [...productos];
         mostrarPagina(1);
     } catch (error) {
         document.getElementById("tablaBody").innerHTML =
-            `<tr><td colspan="8">Error al conectar con el servidor</td></tr>`;
+            `<tr><td colspan="9">Error al conectar con el servidor</td></tr>`;
     }
 }
 
@@ -75,8 +77,8 @@ function ordenarPor(columna) {
     ordenActual[columna] = asc;
 
     productos.sort((a, b) => {
-        const x = (a[columna] || "").toString().toLowerCase();
-        const y = (b[columna] || "").toString().toLowerCase();
+        const x = (a[columna] ?? "").toString().toLowerCase();
+        const y = (b[columna] ?? "").toString().toLowerCase();
         return asc ? x.localeCompare(y) : y.localeCompare(x);
     });
 
@@ -152,7 +154,6 @@ function mostrarPagina(numPagina) {
 
 function actualizarPaginacion() {
     if (mostrarTodos) {
-        paginaActual = 1;
         document.getElementById("paginaActual").innerText = `Mostrando todo`;
         return;
     }
@@ -188,11 +189,11 @@ function aplicarFiltros() {
     const codigo = buscarCodigo.value.toLowerCase();
     const pro1 = buscarPro1.value.toLowerCase();
 
-    productos = productos.filter(p =>
-        (p.descripcion || "").toLowerCase().includes(nombre) &&
-        (p.marca || "").toLowerCase().includes(marca) &&
-        (p.codigo || "").toLowerCase().includes(codigo) &&
-        (p.pro1 || "").toString().toLowerCase().includes(pro1)
+    productos = productosOriginal.filter(p =>
+        (p.descripcion ?? "").toLowerCase().includes(nombre) &&
+        (p.marca ?? "").toLowerCase().includes(marca) &&
+        (p.codigo ?? "").toLowerCase().includes(codigo) &&
+        (p.pro1 ?? "").toString().toLowerCase().includes(pro1)
     );
 
     mostrarPagina(1);
@@ -222,7 +223,7 @@ vista1.onclick = () => {
     vista1.classList.add("activa");
     vista2.classList.remove("activa");
     actualizarEncabezados();
-    cargarProductos();
+    mostrarPagina(1);
 };
 
 vista2.onclick = () => {
@@ -230,7 +231,7 @@ vista2.onclick = () => {
     vista2.classList.add("activa");
     vista1.classList.remove("activa");
     actualizarEncabezados();
-    cargarProductos();
+    mostrarPagina(1);
 };
 
 // ===============================
@@ -322,4 +323,17 @@ toggleSidebar.onclick = () => {
     if (sidebar.style.display === "none") {
         sidebar.style.display = "block";
         main.style.marginLeft = "240px";
-        toggleSidebar.innerText
+        toggleSidebar.innerText = "Ocultar menú";
+    } else {
+        sidebar.style.display = "none";
+        main.style.marginLeft = "20px";
+        toggleSidebar.innerText = "Mostrar menú";
+    }
+};
+
+// ===============================
+//  INICIO
+// ===============================
+
+actualizarEncabezados();
+cargarProductos();
