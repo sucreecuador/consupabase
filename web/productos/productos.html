@@ -7,24 +7,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #f1f5f9; color: #1e293b; display: flex; min-height: 100vh; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; }
         
-        .sidebar { width: 220px; background-color: #1e293b; color: #fff; flex-shrink: 0; padding-top: 20px; }
-        .sidebar h2 { padding: 0 20px 20px; font-size: 1.2rem; border-bottom: 1px solid #334155; }
-        .sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: #cbd5e1; text-decoration: none; font-size: 0.9rem; }
-        .sidebar nav a:hover, .sidebar nav a.active { background-color: #334155; color: #fff; }
-        
-        .main-content { flex: 1; padding: 24px; overflow-x: auto; }
-        .page-title-section { margin-bottom: 16px; }
+        .main-content { padding: 24px; width: 100%; overflow-x: auto; }
+        .page-title-section { margin-bottom: 20px; }
         .page-title-section h1 { font-size: 1.8rem; color: #0f172a; }
         .page-title-section p { color: #64748b; font-size: 0.9rem; }
-
-        .btn-ocultar-menu { background: #64748b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; font-size: 0.85rem; }
 
         .toolbar-top { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
         .search-select, .search-input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem; outline: none; }
         .search-input { width: 260px; }
-        
+
         .btn { border: none; padding: 8px 14px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
         .btn-buscar { background-color: #059669; color: white; }
         .btn-mostrar-todos { background-color: #059669; color: white; }
@@ -67,28 +60,11 @@
     </style>
 </head>
 <body>
-
-    <aside class="sidebar">
-        <h2>ERP SUCRE</h2>
-        <nav>
-            <a href="#"><i class="fa-solid fa-house"></i> Inicio</a>
-            <a href="#"><i class="fa-solid fa-chart-line"></i> Indicadores</a>
-            <a href="#" class="active"><i class="fa-solid fa-box"></i> Productos</a>
-            <a href="#"><i class="fa-solid fa-warehouse"></i> Inventario</a>
-            <a href="#"><i class="fa-solid fa-address-book"></i> Contactos</a>
-            <a href="#"><i class="fa-solid fa-file-invoice"></i> Reportes</a>
-            <a href="#"><i class="fa-solid fa-receipt"></i> Facturación</a>
-            <a href="#"><i class="fa-solid fa-gear"></i> Configuración</a>
-        </nav>
-    </aside>
-
     <main class="main-content">
         <div class="page-title-section">
             <h1>Productos</h1>
             <p>Gestión de catálogo, precios y stock</p>
         </div>
-
-        <button class="btn-ocultar-menu">Ocultar menú</button>
 
         <div class="toolbar-top">
             <select id="searchField" class="search-select">
