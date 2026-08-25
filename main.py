@@ -6,18 +6,32 @@ from supabase import create_client, Client
 from pydantic import BaseModel
 from typing import Optional
 
+# ============================
+# CONFIGURACIÓN SUPABASE
+# ============================
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY") or os.environ.get("SUPABASE_ANON_KEY")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("Faltan las variables de entorno SUPABASE_URL o SUPABASE_KEY/SUPABASE_ANON_KEY en Render")
-
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# ============================
+# INICIALIZAR FASTAPI
+# ============================
 app = FastAPI()
 
+# Carpeta web completa
 app.mount("/web", StaticFiles(directory="web"), name="web")
 
+# ============================
+# RUTA HOME (NO TOCAR)
+# ============================
+@app.get("/")
+def home():
+    return FileResponse("web/index.html")
+
+# ============================
+# API PRODUCTOS
+# ============================
 class Producto(BaseModel):
     codigo: str
     cod_prov: Optional[str] = ""
@@ -26,10 +40,6 @@ class Producto(BaseModel):
     stem: Optional[int] = 0
     costo: Optional[float] = 0.0
     pventa: Optional[float] = 0.0
-
-@app.get("/")
-def read_root():
-    return FileResponse("web/productos/productos.html")
 
 @app.get("/api/productos")
 def obtener_productos():
@@ -61,6 +71,17 @@ def actualizar_producto(codigo: str, producto: Producto):
 def eliminar_producto(codigo: str):
     try:
         response = supabase.table("productos").delete().eq("codigo", codigo).execute()
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================
+# API CONTACTOS (NO TOCAR)
+# ============================
+@app.get("/api/contactos")
+def obtener_contactos():
+    try:
+        response = supabase.table("clientes").select("*").execute()
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
