@@ -30,13 +30,19 @@ async function cargarProductos() {
         if (!response.ok) throw new Error("Error al obtener productos");
 
         const data = await response.json();
+        console.log("Respuesta backend:", data);
         
         if (Array.isArray(data)) {
             todosLosProductos = data;
+        } else if (data && Array.isArray(data.productos)) {
+            todosLosProductos = data.productos;
         } else if (data && Array.isArray(data.datos)) {
             todosLosProductos = data.datos;
         } else if (data && Array.isArray(data.data)) {
             todosLosProductos = data.data;
+        } else if (data && typeof data === 'object') {
+            const posibleArray = Object.values(data).find(val => Array.isArray(val));
+            todosLosProductos = posibleArray || [];
         } else {
             todosLosProductos = [];
         }
