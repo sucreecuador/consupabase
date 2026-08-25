@@ -3,146 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP SUCRE - Inicio</title>
-    <link rel="stylesheet" href="/web/components/layout.css">
+    <title>ERP SUCRE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: #e2e8f0;
+            background-color: #d1d5db;
             display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
         }
 
-        .header {
-            height: 55px;
-            background-color: #ffffff;
+        .window-frame {
+            width: 100%;
+            max-width: 1100px;
+            height: 92vh;
+            background-color: #eaeef3;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #b0b8c4;
+        }
+
+        .top-header {
+            height: 48px;
+            background-color: #f3f5f8;
+            border-bottom: 1px solid #d0d7de;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            border-bottom: 1px solid #cbd5e1;
+            padding: 0 20px;
         }
 
-        .header-brand {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: #0f172a;
-            letter-spacing: 0.5px;
+        .brand {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: #1e293b;
+            letter-spacing: -0.5px;
         }
 
-        .header-brand span {
+        .brand-icon {
             color: #10b981;
+            font-size: 1.1rem;
         }
 
-        .header-user {
+        .user-area {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #334155;
         }
 
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background-color: #475569;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
         .status-pill {
-            width: 50px;
+            width: 55px;
             height: 18px;
-            background: #e2e8f0;
+            background: linear-gradient(180deg, #64748b 0%, #334155 100%);
             border-radius: 10px;
-            border: 1px solid #cbd5e1;
             position: relative;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
         }
 
         .status-pill::after {
             content: '';
             position: absolute;
             right: 2px;
-            top: 1px;
+            top: 2px;
             width: 14px;
             height: 14px;
             background-color: #22c55e;
             border-radius: 50%;
+            box-shadow: 0 0 4px #22c55e;
         }
 
-        .app-body {
+        .main-container {
             display: flex;
             flex: 1;
             overflow: hidden;
+            position: relative;
         }
 
         .sidebar {
             width: 210px;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #243b55 0%, #141e30 100%);
+            padding-top: 8px;
             display: flex;
             flex-direction: column;
-            padding-top: 10px;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 3px 0 10px rgba(0,0,0,0.15);
+            z-index: 2;
         }
 
-        .sidebar nav a {
+        .sidebar a {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 12px 20px;
+            gap: 12px;
+            padding: 10px 20px;
             color: #94a3b8;
             text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: background 0.15s, color 0.15s;
         }
 
-        .sidebar nav a:hover {
+        .sidebar a:hover {
             color: #ffffff;
             background-color: rgba(255, 255, 255, 0.05);
         }
 
-        .sidebar nav a.active {
+        .sidebar a.active {
             color: #ffffff;
-            background-color: #2563eb;
+            background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+            border-left: 4px solid #60a5fa;
         }
 
-        .sidebar nav a i {
+        .sidebar a i {
             width: 20px;
             text-align: center;
-            font-size: 1.05rem;
+            font-size: 1rem;
         }
 
-        .main-content {
+        .content-area {
             flex: 1;
-            background-color: #f1f5f9;
-            padding: 28px 36px;
+            background-color: #f1f4f8;
+            padding: 24px 32px;
             display: flex;
             flex-direction: column;
+            position: relative;
             overflow-y: auto;
         }
 
-        .page-title {
-            font-size: 1.6rem;
+        .content-title {
+            font-size: 1.5rem;
             font-weight: 700;
             color: #0f172a;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #cbd5e1;
         }
 
-        .cards-grid {
+        .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            max-width: 1000px;
+            gap: 16px;
+            max-width: 820px;
         }
 
-        .card-btn {
-            height: 130px;
-            border-radius: 14px;
+        .module-card {
+            height: 125px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -150,56 +183,59 @@
             text-decoration: none;
             color: #1e293b;
             font-weight: 600;
-            font-size: 1.05rem;
-            gap: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            border: 1px solid rgba(0, 0, 0, 0.04);
+            font-size: 1rem;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
 
-        .card-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
         }
 
-        .card-btn i {
+        .module-card i {
             font-size: 2.2rem;
-            opacity: 0.85;
+            color: #334155;
+            stroke-width: 1;
         }
 
-        .card-contactos { background-color: #dbeafe; }
-        .card-productos { background-color: #ffedd5; }
-        .card-inventario { background-color: #dcfce7; }
-        .card-facturacion { background-color: #f3e8ff; }
-        .card-indicadores { background-color: #fef9c3; }
-        .card-reportes { background-color: #ccfbf1; }
-        .card-configuracion { background-color: #e2e8f0; }
-        
-        .card-placeholder {
-            background-color: #e2e8f0;
-            border-radius: 14px;
-            height: 130px;
+        .card-contactos { background-color: #b0cbe8; }
+        .card-productos { background-color: #f8c096; }
+        .card-inventario { background-color: #a8dba8; }
+        .card-facturacion { background-color: #cca9dd; }
+        .card-indicadores { background-color: #f6e58d; }
+        .card-reportes { background-color: #81ecec; }
+        .card-configuracion { background-color: #cccccc; }
+
+        .card-empty {
+            background-color: #dcdde1;
+            border-radius: 12px;
+            height: 125px;
             opacity: 0.6;
         }
 
-        .bottom-bar {
-            margin-top: auto;
-            align-self: center;
+        .bottom-floating-bar {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 4px 16px;
             display: flex;
             align-items: center;
             gap: 16px;
-            background: #ffffff;
-            padding: 6px 16px;
-            border-radius: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             border: 1px solid #cbd5e1;
             font-size: 0.85rem;
             color: #475569;
         }
 
-        .bottom-bar button {
+        .bottom-floating-bar button {
             border: none;
-            background: none;
+            background: transparent;
             cursor: pointer;
             color: #475569;
             font-size: 0.85rem;
@@ -211,80 +247,80 @@
 </head>
 <body>
 
-    <header class="header">
-        <div class="header-brand">
-            <span>&#10059;</span> ERP SUCRE
-        </div>
-        <div class="header-user">
-            <span>Bienvenido, <strong>Ricardo</strong></span>
-            <i class="fa-solid font-circle-user fa-circle-user fa-lg"></i>
-            <div class="status-pill"></div>
-        </div>
-    </header>
+    <div class="window-frame">
+        <header class="top-header">
+            <div class="brand">
+                <span class="brand-icon">❖</span> ERP SUCRE
+            </div>
+            <div class="user-area">
+                <span>Bienvenido, <strong>Ricardo</strong></span>
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="status-pill"></div>
+            </div>
+        </header>
 
-    <div class="app-body">
-        <aside class="sidebar">
-            <nav>
+        <div class="main-container">
+            <aside class="sidebar">
                 <a href="/" class="active"><i class="fa-solid fa-house"></i> Inicio</a>
-                <a href="/web/contactos/index.html"><i class="fa-solid fa-users"></i> Contactos</a>
-                <a href="/web/productos/productos.html"><i class="fa-solid fa-box"></i> Productos</a>
+                <a href="/web/contactos/index.html"><i class="fa-solid fa-user-group"></i> Contactos</a>
+                <a href="/web/productos/productos.html"><i class="fa-solid fa-cube"></i> Productos</a>
                 <a href="/web/inventario/index.html"><i class="fa-solid fa-basket-shopping"></i> Inventario</a>
-                <a href="/web/facturacion/index.html"><i class="fa-solid fa-file-invoice"></i> Facturación</a>
+                <a href="/web/facturacion/index.html"><i class="fa-solid fa-file-lines"></i> Facturación</a>
                 <a href="/web/dashboard/index.html"><i class="fa-solid fa-chart-line"></i> Indicadores</a>
-                <a href="/web/reportes/index.html"><i class="fa-solid fa-table-cells"></i> Reportes</a>
+                <a href="/web/reportes/index.html"><i class="fa-solid fa-table"></i> Reportes</a>
                 <a href="/web/configuracion/index.html"><i class="fa-solid fa-gear"></i> Configuración</a>
-            </nav>
-        </aside>
+            </aside>
 
-        <main class="main-content">
-            <h1 class="page-title">Inicio</h1>
+            <main class="content-area">
+                <h1 class="content-title">Inicio</h1>
 
-            <div class="cards-grid">
-                <a href="/web/contactos/index.html" class="card-btn card-contactos">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Contactos</span>
-                </a>
+                <div class="grid-container">
+                    <a href="/web/contactos/index.html" class="module-card card-contactos">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Contactos</span>
+                    </a>
 
-                <a href="/web/productos/productos.html" class="card-btn card-productos">
-                    <i class="fa-solid fa-box"></i>
-                    <span>Productos</span>
-                </a>
+                    <a href="/web/productos/productos.html" class="module-card card-productos">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span>Productos</span>
+                    </a>
 
-                <a href="/web/inventario/index.html" class="card-btn card-inventario">
-                    <i class="fa-solid fa-warehouse"></i>
-                    <span>Inventario</span>
-                </a>
+                    <a href="/web/inventario/index.html" class="module-card card-inventario">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span>Inventario</span>
+                    </a>
 
-                <a href="/web/facturacion/index.html" class="card-btn card-facturacion">
-                    <i class="fa-solid fa-receipt"></i>
-                    <span>Facturación</span>
-                </a>
+                    <a href="/web/facturacion/index.html" class="module-card card-facturacion">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>Facturación</span>
+                    </a>
 
-                <a href="/web/dashboard/index.html" class="card-btn card-indicadores">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Indicadores</span>
-                </a>
+                    <a href="/web/dashboard/index.html" class="module-card card-indicadores">
+                        <i class="fa-solid fa-chart-column"></i>
+                        <span>Indicadores</span>
+                    </a>
 
-                <a href="/web/reportes/index.html" class="card-btn card-reportes">
-                    <i class="fa-solid fa-table-cells"></i>
-                    <span>Reportes</span>
-                </a>
+                    <a href="/web/reportes/index.html" class="module-card card-reportes">
+                        <i class="fa-solid fa-table-cells"></i>
+                        <span>Reportes</span>
+                    </a>
 
-                <a href="/web/configuracion/index.html" class="card-btn card-configuracion">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>Configuración</span>
-                </a>
+                    <a href="/web/configuracion/index.html" class="module-card card-configuracion">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Configuración</span>
+                    </a>
 
-                <div class="card-placeholder"></div>
-                <div class="card-placeholder"></div>
-            </div>
+                    <div class="card-empty"></div>
+                    <div class="card-empty"></div>
+                </div>
 
-            <div class="bottom-bar">
-                <span>&#9679;</span>
-                <button><i class="fa-solid fa-download"></i> Export</button>
-                <button><i class="fa-regular fa-circle-question"></i> Help</button>
-            </div>
-        </main>
+                <div class="bottom-floating-bar">
+                    <span>&#9679;</span>
+                    <button><i class="fa-solid fa-download"></i> Export</button>
+                    <button><i class="fa-regular fa-circle-question"></i> Help</button>
+                </div>
+            </main>
+        </div>
     </div>
 
 </body>
