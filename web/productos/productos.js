@@ -26,7 +26,7 @@ function obtenerProp(obj, ...keys) {
 
 async function cargarProductos() {
     try {
-        const response = await fetch("/api/productos");
+        const response = await fetch(`${window.location.origin}/api/productos`);
         if (!response.ok) throw new Error("Error al obtener productos");
 
         const data = await response.json();
@@ -301,7 +301,8 @@ async function guardarProducto(event) {
     };
 
     try {
-        const url = esEdicion ? `/api/productos/${encodeURIComponent(codigo)}` : `/api/productos`;
+        const baseUrl = `${window.location.origin}/api/productos`;
+        const url = esEdicion ? `${baseUrl}/${encodeURIComponent(codigo)}` : baseUrl;
         const method = esEdicion ? "PUT" : "POST";
 
         const response = await fetch(url, {
@@ -328,7 +329,7 @@ async function eliminarProducto(codigo) {
     if (!confirmado) return;
 
     try {
-        const response = await fetch(`/api/productos/${encodeURIComponent(codigo)}`, {
+        const response = await fetch(`${window.location.origin}/api/productos/${encodeURIComponent(codigo)}`, {
             method: "DELETE"
         });
 
