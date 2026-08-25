@@ -1,13 +1,10 @@
 // web/productos/productos.js
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Cargar productos al iniciar
+    // 1. Cargar la lista inicial de productos
     buscarProductos();
 
-    // 2. Inyectar botón de Excel dinámicamente en el DOM
-    inyectarBotonExcel();
-
-    // 3. Listener para la tecla Enter en Contacto / Proveedor
+    // 2. Listener para enter en Contacto / Proveedor
     const inputContacto = document.getElementById("searchContacto");
     if (inputContacto) {
         inputContacto.addEventListener("keypress", (e) => {
@@ -19,47 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * Inyecta el botón 'Generar Excel' directamente en la pantalla
- */
-function inyectarBotonExcel() {
-    if (document.getElementById("btnExcelDinamico")) return;
-
-    const btnExcel = document.createElement("button");
-    btnExcel.id = "btnExcelDinamico";
-    btnExcel.type = "button";
-    btnExcel.className = "btn btn-outline-success ms-2 fw-bold";
-    btnExcel.innerHTML = '<i class="bi bi-file-earmark-excel me-1"></i> Generar Excel';
-    btnExcel.onclick = descargarExcelProveedor;
-
-    // Intentar colocarlo al lado del botón "+ Nuevo"
-    const btnNuevo = Array.from(document.querySelectorAll("button")).find(
-        btn => btn.textContent.includes("Nuevo") || btn.textContent.includes("+")
-    );
-
-    if (btnNuevo && btnNuevo.parentNode) {
-        btnNuevo.parentNode.insertBefore(btnExcel, btnNuevo);
-        return;
-    }
-
-    // Si no encuentra el botón "+ Nuevo", colocarlo al lado del botón "Buscar"
-    const btnBuscar = Array.from(document.querySelectorAll("button")).find(
-        btn => btn.textContent.includes("Buscar")
-    );
-
-    if (btnBuscar && btnBuscar.parentNode) {
-        btnBuscar.parentNode.appendChild(btnExcel);
-        return;
-    }
-
-    // Como último recurso, colocarlo en la cabecera principal
-    const header = document.querySelector(".d-flex.justify-content-between");
-    if (header) {
-        header.appendChild(btnExcel);
-    }
-}
-
-/**
- * Consulta la API y renderiza la tabla de productos
+ * Consulta los datos en la API y refresca la tabla
  */
 async function buscarProductos() {
     const nombre = document.getElementById("searchNombre")?.value.trim() || "";
@@ -73,21 +30,19 @@ async function buscarProductos() {
     if (codigo) params.append("codigo", codigo);
     if (contacto) params.append("contacto", contacto);
 
-    const tbody = document.getElementById("tablaProductosBody") || document.querySelector("tbody");
+    const tbody = document.getElementById("tablaProductosBody");
     if (tbody) {
         tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">Cargando productos...</td></tr>`;
     }
 
     try {
         const response = await fetch(`/api/productos?${params.toString()}`);
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const productos = await response.json();
         renderizarTablaProductos(productos);
     } catch (error) {
-        console.error("Error al buscar productos:", error);
+        console.error("Error al obtener productos:", error);
         if (tbody) {
             tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos: ${error.message}</td></tr>`;
         }
@@ -95,14 +50,14 @@ async function buscarProductos() {
 }
 
 /**
- * Renderiza los productos en la tabla
+ * Construye el cuerpo de la tabla HTML
  */
 function renderizarTablaProductos(productos) {
-    const tbody = document.getElementById("tablaProductosBody") || document.querySelector("tbody");
+    const tbody = document.getElementById("tablaProductosBody");
     if (!tbody) return;
 
     if (!productos || productos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">No se encontraron productos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">No se encontraron productos registrados.</td></tr>`;
         return;
     }
 
@@ -132,10 +87,10 @@ function renderizarTablaProductos(productos) {
                 <td class="text-end">$${costo}</td>
                 <td class="text-end">$${pVenta}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editarProducto(${p.id})">
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editarProducto(${p.id})" title="Editar">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${p.id})">
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${p.id})" title="Eliminar">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -151,14 +106,14 @@ function renderizarTablaProductos(productos) {
  */
 function mostrarTodos() {
     ["searchNombre", "searchMarca", "searchCodigo", "searchContacto"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
+        const input = document.getElementById(id);
+        if (input) input.value = "";
     });
     buscarProductos();
 }
 
 /**
- * Descarga directamente el archivo Excel desde el endpoint backend
+ * Función encargada de solicitar la descarga del Excel al Backend
  */
 function descargarExcelProveedor() {
     const contacto = document.getElementById("searchContacto")?.value.trim() || "";
@@ -168,5 +123,6 @@ function descargarExcelProveedor() {
         return;
     }
 
+    // Inicia la descarga mediante el endpoint del servidor
     window.location.href = `/api/productos/exportar-excel?contacto=${encodeURIComponent(contacto)}`;
 }
