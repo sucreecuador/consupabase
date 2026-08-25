@@ -1,4 +1,7 @@
 const API_URL = "/api/productos";
+let datosProductos = [];
+let columnaOrdenActual = '';
+let ordenAscendente = true;
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarProductos();
@@ -45,19 +48,37 @@ async function cargarProductos(filtros = {}) {
 
         if (!response.ok) throw new Error("Error al consultar la API");
 
-        const productos = await response.json();
+        datosProductos = await response.json();
+        
+        // Resetear indicador de orden al cargar nuevos datos
+        columnaOrdenActual = '';
+        ordenAscendente = true;
+        
+        renderizarTabla(datosProductos);
 
-        if (!productos || productos.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-muted">No se encontraron productos.</td></tr>`;
-            return;
-        }
+    } catch (error) {
+        console.error(error);
+        tabla.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos desde el servidor.</td></tr>`;
+    }
+}
 
-        tabla.innerHTML = productos.map(p => `
+function renderizarTabla(productos) {
+    const tabla = document.getElementById("tablaProductos");
+    if (!tabla) return;
+
+    if (!productos || productos.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-muted">No se encontraron productos.</td></tr>`;
+        return;
+    }
+
+    tabla.innerHTML = productos.map(p => {
+        const codProv = p.codigo_proveedor || p.cod_prov || '0';
+        return `
             <tr>
                 <td class="text-center">${p.pro1 || '—'}</td>
                 <td class="text-center">${p.pro2 || '—'}</td>
                 <td class="text-center">${p.pro3 || '—'}</td>
-                <td>${p.codigo_proveedor || p.cod_prov || '—'}</td>
+                <td>${codProv}</td>
                 <td><strong>${p.codigo || '—'}</strong></td>
                 <td>${p.marca || '—'}</td>
                 <td>${p.descripcion || '—'}</td>
@@ -65,14 +86,54 @@ async function cargarProductos(filtros = {}) {
                 <td class="text-end">$${Number(p.costo_prom || 0).toFixed(2)}</td>
                 <td class="text-end">$${Number(p.precio_venta || 0).toFixed(2)}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-primary p-1 me-1" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger p-1" title="Eliminar"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
-        `).join("");
+        `;
+    }).join("");
+}
 
-    } catch (error) {
-        console.error(error);
-        tabla.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos desde el servidor.</td></tr>`;
+function ordenarPor(columna) {
+    if (!datosProductos || datosProductos.length === 0) return;
+
+    if (columnaOrdenActual === columna) {
+        ordenAscendente = !ordenAscendente;
+    } else {
+        columnaOrdenActual = columna;
+        ordenAscendente = true;
     }
+
+    // Actualizar iconos visuales en las cabeceras
+    document.querySelectorAll('.sort-icon').forEach(span => span.textContent = '↕');
+    const spanActual = document.getElementById(`sort-${columna}`);
+    if (spanActual) {
+        spanActual.textContent = ordenAscendente ? '▲' : '▼';
+    }
+
+    datosProductos.sort((a, b) => {
+        let valA = a[columna];
+        let valB = b[columna];
+
+        // Normalizar valores nulos o indefinidos
+        if (valA === null || valA === undefined) valA = '';
+        if (valB === null || valB === undefined) valB = '';
+
+        // Si son numéricos
+        if (typeof valA === 'number' || typeof valB === 'number' || !isNaN(valA) && !isNaN(valB) && valA !== '' && valB !== '') {
+            valA = Number(valA);
+            valB = Number(valB);
+            return ordenAscendente ? valA - valB : valB - valA;
+        }
+
+        // Si son cadenas de texto
+        valA = String(valA).toLowerCase();
+        valB = String(valB).toLowerCase();
+
+        if (valA < valB) return ordenAscendente ? -1 : 1;
+        if (valA > valB) return ordenAscendente ? 1 : -1;
+        return 0;
+    });
+
+    renderizarTabla(datosProductos);
 }

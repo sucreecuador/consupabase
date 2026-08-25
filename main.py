@@ -65,7 +65,7 @@ def read_root():
 def health_check():
     return {"status": "ok", "supabase_connected": supabase is not None}
 
-# ENDPOINT OBTENER PRODUCTOS (Filtros opcionales)
+# ENDPOINT OBTENER PRODUCTOS (Filtros dinámicos opcionales)
 @app.get("/api/productos")
 def get_productos(
     contacto: Optional[str] = None,
