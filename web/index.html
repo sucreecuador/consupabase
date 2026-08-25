@@ -2,67 +2,289 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERP SUCRE - Inicio</title>
-
     <link rel="stylesheet" href="/web/components/layout.css">
-    <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
-    <script src="/web/components/sidebar/sidebar.js"></script>
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
+        body {
+            background-color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            height: 55px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .header-brand {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-brand span {
+            color: #10b981;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .status-pill {
+            width: 50px;
+            height: 18px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            position: relative;
+        }
+
+        .status-pill::after {
+            content: '';
+            position: absolute;
+            right: 2px;
+            top: 1px;
+            width: 14px;
+            height: 14px;
+            background-color: #22c55e;
+            border-radius: 50%;
+        }
+
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 210px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar nav a:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar nav a.active {
+            color: #ffffff;
+            background-color: #2563eb;
+        }
+
+        .sidebar nav a i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.05rem;
+        }
+
+        .main-content {
+            flex: 1;
+            background-color: #f1f5f9;
+            padding: 28px 36px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 24px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 1000px;
+        }
+
+        .card-btn {
+            height: 130px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 1.05rem;
+            gap: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .card-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-btn i {
+            font-size: 2.2rem;
+            opacity: 0.85;
+        }
+
+        .card-contactos { background-color: #dbeafe; }
+        .card-productos { background-color: #ffedd5; }
+        .card-inventario { background-color: #dcfce7; }
+        .card-facturacion { background-color: #f3e8ff; }
+        .card-indicadores { background-color: #fef9c3; }
+        .card-reportes { background-color: #ccfbf1; }
+        .card-configuracion { background-color: #e2e8f0; }
+        
+        .card-placeholder {
+            background-color: #e2e8f0;
+            border-radius: 14px;
+            height: 130px;
+            opacity: 0.6;
+        }
+
+        .bottom-bar {
+            margin-top: auto;
+            align-self: center;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #ffffff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            border: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .bottom-bar button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #475569;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
 <body>
 
-    <div id="sidebar"></div>
-
-    <div class="main-content">
-
-        <h1 class="home-title">Bienvenido al ERP SUCRE</h1>
-
-        <div class="home-grid">
-
-            <div class="home-card" onclick="window.location.href='/web/dashboard/index.html'">
-                <div class="home-icon">📊</div>
-                <h3>Dashboard</h3>
-                <p>Indicadores, métricas y resumen general</p>
-            </div>
-
-            <div class="home-card" onclick="window.location.href='/web/productos/productos.html'">
-                <div class="home-icon">🛒</div>
-                <h3>Productos</h3>
-                <p>Gestión de catálogo, precios y stock</p>
-            </div>
-
-            <div class="home-card" onclick="window.location.href='/web/inventario/index.html'">
-                <div class="home-icon">📦</div>
-                <h3>Inventario</h3>
-                <p>Movimientos, entradas y salidas</p>
-            </div>
-
-            <div class="home-card" onclick="window.location.href='/web/contactos/index.html'">
-                <div class="home-icon">📇</div>
-                <h3>Contactos</h3>
-                <p>Clientes, proveedores y terceros</p>
-            </div>
-
-            <div class="home-card" onclick="window.location.href='/web/reportes/index.html'">
-                <div class="home-icon">📑</div>
-                <h3>Reportes</h3>
-                <p>Informes, estadísticas y exportaciones</p>
-            </div>
-
-            <div class="home-card" onclick="window.location.href='/web/usuarios/index.html'">
-                <div class="home-icon">👤</div>
-                <h3>Usuarios</h3>
-                <p>Roles, permisos y accesos</p>
-            </div>
-
-            <div class="home-card" onclick="window.location.href='/web/configuracion/index.html'">
-                <div class="home-icon">⚙️</div>
-                <h3>Configuración</h3>
-                <p>Preferencias y ajustes del sistema</p>
-            </div>
-
+    <header class="header">
+        <div class="header-brand">
+            <span>&#10059;</span> ERP SUCRE
         </div>
+        <div class="header-user">
+            <span>Bienvenido, <strong>Ricardo</strong></span>
+            <i class="fa-solid font-circle-user fa-circle-user fa-lg"></i>
+            <div class="status-pill"></div>
+        </div>
+    </header>
 
+    <div class="app-body">
+        <aside class="sidebar">
+            <nav>
+                <a href="/" class="active"><i class="fa-solid fa-house"></i> Inicio</a>
+                <a href="/web/contactos/index.html"><i class="fa-solid fa-users"></i> Contactos</a>
+                <a href="/web/productos/productos.html"><i class="fa-solid fa-box"></i> Productos</a>
+                <a href="/web/inventario/index.html"><i class="fa-solid fa-basket-shopping"></i> Inventario</a>
+                <a href="/web/facturacion/index.html"><i class="fa-solid fa-file-invoice"></i> Facturación</a>
+                <a href="/web/dashboard/index.html"><i class="fa-solid fa-chart-line"></i> Indicadores</a>
+                <a href="/web/reportes/index.html"><i class="fa-solid fa-table-cells"></i> Reportes</a>
+                <a href="/web/configuracion/index.html"><i class="fa-solid fa-gear"></i> Configuración</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1 class="page-title">Inicio</h1>
+
+            <div class="cards-grid">
+                <a href="/web/contactos/index.html" class="card-btn card-contactos">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Contactos</span>
+                </a>
+
+                <a href="/web/productos/productos.html" class="card-btn card-productos">
+                    <i class="fa-solid fa-box"></i>
+                    <span>Productos</span>
+                </a>
+
+                <a href="/web/inventario/index.html" class="card-btn card-inventario">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span>Inventario</span>
+                </a>
+
+                <a href="/web/facturacion/index.html" class="card-btn card-facturacion">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Facturación</span>
+                </a>
+
+                <a href="/web/dashboard/index.html" class="card-btn card-indicadores">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Indicadores</span>
+                </a>
+
+                <a href="/web/reportes/index.html" class="card-btn card-reportes">
+                    <i class="fa-solid fa-table-cells"></i>
+                    <span>Reportes</span>
+                </a>
+
+                <a href="/web/configuracion/index.html" class="card-btn card-configuracion">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Configuración</span>
+                </a>
+
+                <div class="card-placeholder"></div>
+                <div class="card-placeholder"></div>
+            </div>
+
+            <div class="bottom-bar">
+                <span>&#9679;</span>
+                <button><i class="fa-solid fa-download"></i> Export</button>
+                <button><i class="fa-regular fa-circle-question"></i> Help</button>
+            </div>
+        </main>
     </div>
 
 </body>
