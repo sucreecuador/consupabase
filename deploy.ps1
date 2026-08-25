@@ -1,114 +1,39 @@
-﻿# ============================================================
-# 🚀 DEPLOY COMPLETO DEL ERP SUCRE (BACKEND + FRONTEND)
-# ============================================================
+﻿# deploy.ps1 - Script de despliegue ERP SUCRE
+$ErrorActionPreference = "Stop"
 
-Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE"
-Write-Host "============================================================"
+Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan
 
-# Ruta del proyecto
-$projectPath = "C:\Users\Supervisor\consupabase"
-Set-Location $projectPath
-
-# ============================================================
-# VERIFICACIONES
-# ============================================================
-
-Write-Host "`n🔍 Verificando main.py..."
-if (!(Test-Path "$projectPath\main.py")) {
-    Write-Host "❌ ERROR: No existe main.py"
-    exit
+# 1. Verificar presencia de archivos base
+if (-not (Test-Path "main.py")) {
+    Write-Host "❌ ERROR: No se encontró main.py" -ForegroundColor Red
+    exit 1
 }
-Write-Host "✔ OK: main.py encontrado"
+Write-Host "✔ OK: main.py encontrado" -ForegroundColor Green
 
-Write-Host "`n🔍 Verificando carpeta web..."
-if (!(Test-Path "$projectPath\web")) {
-    Write-Host "❌ ERROR: No existe carpeta web/"
-    exit
+if (-not (Test-Path "web")) {
+    Write-Host "❌ ERROR: No se encontró la carpeta web" -ForegroundColor Red
+    exit 1
 }
-Write-Host "✔ OK: carpeta web encontrada"
+Write-Host "✔ OK: carpeta web encontrada" -ForegroundColor Green
 
-# ============================================================
-# GIT: AGREGAR CAMBIOS
-# ============================================================
-
-Write-Host "`n📦 Verificando cambios pendientes..."
-
-$changes = git status --porcelain
-
-if ($changes) {
-    Write-Host "✔ Cambios detectados, creando commit..."
-
+# 2. Guardar y subir cambios a GitHub
+Write-Host "`n📦 Verificando cambios pendientes..." -ForegroundColor Yellow
+$status = git status --porcelain
+if ($status) {
+    Write-Host "✔ Cambios detectados, creando commit..." -ForegroundColor Green
     git add .
-
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    git commit -m "Deploy ERP Sucre - $timestamp"
-
-    Write-Host "⬆ Subiendo cambios a GitHub..."
-    git push
+    $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    git commit -m "Deploy ERP Sucre - $fecha"
+    
+    Write-Host "⬆ Subiendo cambios a GitHub..." -ForegroundColor Yellow
+    git push origin main
 } else {
-    Write-Host "⚠ No hay cambios en Git."
-    Write-Host "   → Se enviará deploy manual igualmente."
+    Write-Host "ℹ No hay cambios pendientes por commitear." -ForegroundColor Cyan
 }
 
-# ============================================================
-# DEPLOY BACKEND (Render)
-# ============================================================
-
-Write-Host "`n🚀 Enviando deploy del BACKEND a Render..."
-
-$apiKey = $env:RENDER_API_KEY
-
-if (-not $apiKey) {
-    Write-Host "❌ ERROR: No existe RENDER_API_KEY en variables de entorno."
-    exit
-}
-
-# ID del servicio backend en Render
-$backendId = "srv-d9l24qdaeets73ad9fvg"
-$backendUrl = "https://api.render.com/v1/services/$backendId/deploys"
-
-try {
-    $deployBackend = Invoke-RestMethod `
-        -Method POST `
-        -Uri $backendUrl `
-        -Headers @{ "Authorization" = "Bearer $apiKey" } `
-        -ContentType "application/json" `
-        -Body "{}"
-
-    Write-Host "`n✔ Backend desplegado correctamente"
-}
-catch {
-    Write-Host "❌ ERROR al desplegar backend."
-    Write-Host $_
-}
-
-# ============================================================
-# DEPLOY FRONTEND (Render STATIC)
-# ============================================================
-
-Write-Host "`n🚀 Enviando deploy del FRONTEND (carpeta /web)..."
-
-# ID del servicio STATIC en Render (TU ID REAL)
-$frontendId = "srv-da67qsafngtc738llj6g"
-
-$frontendUrl = "https://api.render.com/v1/services/$frontendId/deploys"
-
-try {
-    $deployFrontend = Invoke-RestMethod `
-        -Method POST `
-        -Uri $frontendUrl `
-        -Headers @{ "Authorization" = "Bearer $apiKey" } `
-        -ContentType "application/json" `
-        -Body "{}"
-
-    Write-Host "`n✔ Frontend desplegado correctamente"
-}
-catch {
-    Write-Host "❌ ERROR al desplegar frontend."
-    Write-Host $_
-}
-
-Write-Host "`n============================================================"
-Write-Host "   🎉 DEPLOY COMPLETO FINALIZADO"
-Write-Host "============================================================"
+Write-Host "`n============================================================" -ForegroundColor Cyan
+Write-Host "   🎉 DEPLOY FINALIZADO CON ÉXITO" -ForegroundColor Green
+Write-Host "   Render compilará y actualizará la app automáticamente." -ForegroundColor Gray
+Write-Host "============================================================" -ForegroundColor Cyan
