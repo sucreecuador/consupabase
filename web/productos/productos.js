@@ -12,16 +12,29 @@ document.addEventListener("DOMContentLoaded", () => {
     cargarProductos();
 });
 
+// Función auxiliar para leer llaves insensibles a mayúsculas/minúsculas o nombres alternativos
+function getProp(obj, ...keys) {
+    if (!obj) return '';
+    for (let k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+        const lowerKey = k.toLowerCase();
+        const found = Object.keys(obj).find(key => key.toLowerCase() === lowerKey);
+        if (found && obj[found] !== undefined && obj[found] !== null) return obj[found];
+    }
+    return '';
+}
+
 async function cargarProductos() {
     const tbody = document.querySelector("#tablaProductos tbody");
     tbody.innerHTML = `<tr><td colspan="11" class="status-msg" style="color:#64748b;">Cargando productos...</td></tr>`;
 
     try {
-        const endpoint = `/api/productos?tipo=${vistaActiva}`;
+        // Se usa la ruta absoluta desde la raíz para evitar el error de subcarpeta /web/productos/
+        const endpoint = `${window.location.origin}/api/productos?tipo=${vistaActiva}`;
         const response = await fetch(endpoint);
 
         if (!response.ok) {
-            throw new Error("HTTP Status " + response.status);
+            throw new Error("Error en la respuesta del servidor (Status " + response.status + ")");
         }
 
         const data = await response.json();
@@ -30,6 +43,8 @@ async function cargarProductos() {
             todosLosProductos = data;
         } else if (data && Array.isArray(data.datos)) {
             todosLosProductos = data.datos;
+        } else if (data && Array.isArray(data.data)) {
+            todosLosProductos = data.data;
         } else {
             todosLosProductos = [];
         }
@@ -38,7 +53,7 @@ async function cargarProductos() {
         paginaActual = 1;
         renderizarTabla();
     } catch (error) {
-        console.error("Error en fetch de productos:", error);
+        console.error("Error al cargar productos:", error);
         tbody.innerHTML = `<tr><td colspan="11" class="status-msg">Error al obtener datos del servidor.</td></tr>`;
         document.getElementById("infoPagina").innerText = "Mostrando 0-0 de 0";
     }
@@ -79,23 +94,29 @@ function renderizarTabla() {
     paginados.forEach(p => {
         const tr = document.createElement("tr");
 
-        const cod = p.codigo || p.cod_producto || p.id || "";
-        const codProv = p.cod_prov || p.codigo_proveedor || "-";
-        const pro1 = p.pro1 || "-";
-        const pro2 = p.pro2 || "-";
-        const pro3 = p.pro3 || "-";
-        const marca = p.marca || "-";
-        const descripcion = p.descripcion || p.nombre || "-";
-        const stem = p.stem !== undefined && p.stem !== null ? p.stem : (p.stock || 0);
-        const costo = p.costo !== undefined && p.costo !== null ? Number(p.costo).toFixed(2) : "0.00";
-        const pventa = p.pventa !== undefined && p.pventa !== null ? Number(p.pventa).toFixed(2) : (p.precio ? Number(p.precio).toFixed(2) : "0.00");
+        const cod = getProp(p, 'CODIGO', 'codigo', 'cod_producto', 'id');
+        const codProv = getProp(p, 'COD_PROV', 'cod_prov', 'codigo_proveedor') || '-';
+        const pro1 = getProp(p, 'PRO1', 'pro1') || '-';
+        const pro2 = getProp(p, 'PRO2', 'pro2') || '-';
+        const pro3 = getProp(p, 'PRO3', 'pro3') || '-';
+        const marca = getProp(p, 'MARCA', 'marca') || '-';
+        const descripcion = getProp(p, 'DESCRIPCION', 'descripcion', 'nombre') || '-';
+        
+        const rawStem = getProp(p, 'STEM', 'stem', 's.tem', 'stock');
+        const stem = rawStem !== '' ? rawStem : 0;
+        
+        const rawCosto = getProp(p, 'COSTO', 'costo');
+        const costo = rawCosto !== '' ? Number(rawCosto).toFixed(2) : "0.00";
+
+        const rawPventa = getProp(p, 'PVENTA', 'pventa', 'p.venta', 'precio', 'precio_venta');
+        const pventa = rawPventa !== '' ? Number(rawPventa).toFixed(2) : "0.00";
 
         tr.innerHTML = `
             <td>${pro1}</td>
             <td>${pro2}</td>
             <td>${pro3}</td>
             <td>${codProv}</td>
-            <td><strong>${cod}</strong></td>
+            <td><strong>${cod || '-'}</strong></td>
             <td>${marca}</td>
             <td>${descripcion}</td>
             <td>${stem}</td>
@@ -143,7 +164,7 @@ function ejecutarBusqueda() {
         productosFiltrados = [...todosLosProductos];
     } else {
         productosFiltrados = todosLosProductos.filter(p => {
-            const val = (p[campo] || p.descripcion || p.codigo || "").toString().toLowerCase();
+            const val = String(getProp(p, campo, campo.toUpperCase()) || getProp(p, 'DESCRIPCION', 'CODIGO')).toLowerCase();
             return val.includes(texto);
         });
     }
@@ -168,8 +189,8 @@ function ordenar(columna) {
     }
 
     productosFiltrados.sort((a, b) => {
-        let valA = a[columna] || "";
-        let valB = b[columna] || "";
+        let valA = getProp(a, columna, columna.toUpperCase());
+        let valB = getProp(b, columna, columna.toUpperCase());
 
         if (typeof valA === "string") valA = valA.toLowerCase();
         if (typeof valB === "string") valB = valB.toLowerCase();
@@ -183,7 +204,7 @@ function ordenar(columna) {
 }
 
 function abrirEdicion(codigo) {
-    const prod = todosLosProductos.find(p => (p.codigo || p.cod_producto || p.id || "").toString().toLowerCase() === codigo.toString().toLowerCase());
+    const prod = todosLosProductos.find(p => String(getProp(p, 'CODIGO', 'codigo', 'id')).toLowerCase() === String(codigo).toLowerCase());
 
     if (!prod) {
         alert("Código inválido o no encontrado.");
@@ -191,14 +212,14 @@ function abrirEdicion(codigo) {
     }
 
     document.getElementById("modalTitulo").innerText = "Editar Producto";
-    document.getElementById("form_codigo").value = prod.codigo || prod.cod_producto || "";
+    document.getElementById("form_codigo").value = getProp(prod, 'CODIGO', 'codigo');
     document.getElementById("form_codigo").readOnly = true;
-    document.getElementById("form_cod_prov").value = prod.cod_prov || "";
-    document.getElementById("form_marca").value = prod.marca || "";
-    document.getElementById("form_descripcion").value = prod.descripcion || prod.nombre || "";
-    document.getElementById("form_stem").value = prod.stem || prod.stock || 0;
-    document.getElementById("form_costo").value = prod.costo || 0;
-    document.getElementById("form_pventa").value = prod.pventa || prod.precio || 0;
+    document.getElementById("form_cod_prov").value = getProp(prod, 'COD_PROV', 'cod_prov');
+    document.getElementById("form_marca").value = getProp(prod, 'MARCA', 'marca');
+    document.getElementById("form_descripcion").value = getProp(prod, 'DESCRIPCION', 'descripcion', 'nombre');
+    document.getElementById("form_stem").value = getProp(prod, 'STEM', 'stem', 'stock') || 0;
+    document.getElementById("form_costo").value = getProp(prod, 'COSTO', 'costo') || 0;
+    document.getElementById("form_pventa").value = getProp(prod, 'PVENTA', 'pventa', 'precio') || 0;
 
     document.getElementById("modalEdicion").classList.add("active");
 }
@@ -231,7 +252,7 @@ async function guardarProducto(event) {
     };
 
     try {
-        const url = esEdicion ? `/api/productos/${encodeURIComponent(codigo)}` : `/api/productos`;
+        const url = esEdicion ? `${window.location.origin}/api/productos/${encodeURIComponent(codigo)}` : `${window.location.origin}/api/productos`;
         const method = esEdicion ? "PUT" : "POST";
 
         const response = await fetch(url, {
@@ -264,7 +285,7 @@ async function eliminarProducto(codigo) {
         return;
     }
 
-    const prod = todosLosProductos.find(p => (p.codigo || p.cod_producto || p.id || "").toString().toLowerCase() === codigo.toString().toLowerCase());
+    const prod = todosLosProductos.find(p => String(getProp(p, 'CODIGO', 'codigo', 'id')).toLowerCase() === String(codigo).toLowerCase());
 
     if (!prod) {
         alert("Código no encontrado. No se puede eliminar.");
@@ -275,7 +296,7 @@ async function eliminarProducto(codigo) {
     if (!confirmado) return;
 
     try {
-        const response = await fetch(`/api/productos/${encodeURIComponent(codigo)}`, {
+        const response = await fetch(`${window.location.origin}/api/productos/${encodeURIComponent(codigo)}`, {
             method: "DELETE"
         });
 
@@ -306,16 +327,16 @@ function exportarExcel() {
 
     productosFiltrados.forEach(p => {
         const row = [
-            p.pro1 || "",
-            p.pro2 || "",
-            p.pro3 || "",
-            p.cod_prov || "",
-            p.codigo || "",
-            p.marca || "",
-            `"${(p.descripcion || "").replace(/"/g, '""')}"`,
-            p.stem || 0,
-            p.costo || 0,
-            p.pventa || 0
+            getProp(p, 'PRO1', 'pro1'),
+            getProp(p, 'PRO2', 'pro2'),
+            getProp(p, 'PRO3', 'pro3'),
+            getProp(p, 'COD_PROV', 'cod_prov'),
+            getProp(p, 'CODIGO', 'codigo'),
+            getProp(p, 'MARCA', 'marca'),
+            `"${(getProp(p, 'DESCRIPCION', 'descripcion') || "").replace(/"/g, '""')}"`,
+            getProp(p, 'STEM', 'stem', 'stock') || 0,
+            getProp(p, 'COSTO', 'costo') || 0,
+            getProp(p, 'PVENTA', 'pventa', 'precio') || 0
         ].join(",");
         csvContent += row + "\n";
     });
