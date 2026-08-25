@@ -116,16 +116,16 @@ function mostrarTodos() {
 }
 
 /**
- * Descarga directamente un archivo Excel filtrado por el código de proveedor ingresado
+ * Descarga directamente el archivo Excel filtrado por el código de proveedor ingresado (ej. 319)
  */
 function descargarExcelProveedor() {
     const contacto = document.getElementById("searchContacto")?.value.trim() || "";
 
     if (!contacto) {
-        alert("Por favor ingresa un código de proveedor en el campo 'Contacto / Proveedor' (ejemplo: 319).");
+        alert("Por favor ingresa un código de proveedor en el campo 'Contacto / Proveedor' (por ejemplo: 319).");
         return;
     }
 
-    // Activa el endpoint de descarga en el servidor
+    // Activa la descarga llamando al backend
     window.location.href = `/api/productos/exportar-excel?contacto=${encodeURIComponent(contacto)}`;
 }
