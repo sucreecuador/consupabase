@@ -2,615 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Productos - ERP SUCRE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #1a202c;
-            color: #1e293b;
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-            border: 1px solid #cbd5e1;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .page-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #0f172a;
-            letter-spacing: -0.5px;
-        }
-
-        .toolbar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .search-container {
-            display: flex;
-            align-items: center;
-            background-color: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 2px 8px;
-            transition: all 0.2s ease;
-        }
-
-        .search-container:focus-within {
-            border-color: #059669;
-            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
-        }
-
-        .search-field-select {
-            background: transparent;
-            border: none;
-            border-right: 1px solid #cbd5e1;
-            padding: 6px 8px;
-            font-size: 0.85rem;
-            color: #475569;
-            outline: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .search-box {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 10px;
-            color: #94a3b8;
-            font-size: 0.85rem;
-        }
-
-        .search-box input {
-            background-color: transparent;
-            border: none;
-            color: #0f172a;
-            padding: 8px 12px 8px 32px;
-            font-size: 0.9rem;
-            width: 240px;
-            outline: none;
-        }
-
-        .btn-primary {
-            background: #059669;
-            color: #ffffff;
-            border: none;
-            padding: 9px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #047857;
-        }
-
-        .btn-excel {
-            background-color: transparent;
-            color: #059669;
-            border: 1px solid #059669;
-            padding: 9px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tabs-nav {
-            display: flex;
-            gap: 8px;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 16px;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: #64748b;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn:hover {
-            color: #0f172a;
-        }
-
-        .tab-btn.active-ventas {
-            color: #059669;
-            border-bottom-color: #059669;
-        }
-
-        .tab-btn.active-compras {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.85rem;
-            min-width: 1000px;
-            background-color: #ffffff;
-        }
-
-        th {
-            background-color: #e2e8f0;
-            color: #1e293b;
-            padding: 10px 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-            border: 1px solid #cbd5e1;
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.15s ease;
-        }
-
-        th:hover {
-            background-color: #cbd5e1;
-        }
-
-        .sort-icon {
-            margin-left: 6px;
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        th.sorted {
-            background-color: #cbd5e1;
-            color: #0f172a;
-        }
-
-        th.sorted .sort-icon {
-            color: #059669;
-        }
-
-        .theme-ventas th {
-            border-top: 3px solid #059669;
-        }
-
-        .theme-compras th {
-            border-top: 3px solid #2563eb;
-        }
-
-        tbody tr {
-            background-color: #ffffff;
-            transition: background-color 0.1s ease;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        tbody tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        td {
-            padding: 8px 12px;
-            color: #334155;
-            white-space: nowrap;
-            border: 1px solid #e2e8f0;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-        }
-
-        .btn-action {
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-            color: #ffffff;
-            font-size: 0.8rem;
-        }
-
-        .btn-action:hover {
-            opacity: 0.85;
-        }
-
-        .btn-edit {
-            background-color: #2563eb;
-        }
-
-        .btn-delete {
-            background-color: #dc2626;
-        }
-
-        .badge-code {
-            background-color: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-weight: 600;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-        }
-
-        .loading-td {
-            text-align: center;
-            padding: 24px;
-            color: #64748b;
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(15, 23, 42, 0.6);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-card {
-            background: #ffffff;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 600px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .modal-header {
-            background: #0f172a;
-            color: #ffffff;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .form-group.full {
-            grid-column: span 2;
-        }
-
-        .form-group label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-        }
-
-        .form-group input {
-            padding: 8px 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .form-group input:focus {
-            border-color: #059669;
-        }
-
-        .modal-footer {
-            padding: 16px 20px;
-            background: #f8fafc;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .pagination-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 14px;
-            margin-top: 8px;
-            color: #475569;
-            font-size: 0.85rem;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .pagination-controls {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-page {
-            background-color: #ffffff;
-            border: 1px solid #cbd5e1;
-            color: #334155;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s ease;
-        }
-
-        .btn-page:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .goto-page-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-left: 12px;
-        }
-
-        .goto-page-container input {
-            width: 55px;
-            padding: 4px 6px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            text-align: center;
-            outline: none;
-        }
-
-        .goto-page-container input:focus {
-            border-color: #059669;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="productos.js" defer></script>
 </head>
-<body>
 
-    <div class="container">
-        <div class="page-header">
-            <h1 class="page-title">Gestión de Productos</h1>
-            <div class="toolbar">
-                <div class="search-container">
-                    <select id="searchField" class="search-field-select" onchange="filtrarProductos()">
-                        <option value="todos">Buscar en todos</option>
-                        <option value="codigo">Código</option>
-                        <option value="cod_prov">Cód. Prov.</option>
-                        <option value="descripcion">Descripción</option>
-                        <option value="marca">Marca</option>
-                    </select>
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="searchInput" onkeyup="filtrarProductos()" placeholder="Escribe para buscar...">
-                    </div>
-                </div>
-                <button class="btn-primary" onclick="abrirModalCrear()">
-                    <i class="fa-solid fa-plus"></i> Nuevo Producto
-                </button>
-                <button class="btn-excel" onclick="exportarExcel()">
-                    <i class="fa-solid fa-file-excel"></i> Excel
-                </button>
-            </div>
-        </div>
+<body class="bg-light">
 
-        <div class="tabs-nav">
-            <button class="tab-btn active-ventas" id="btnTabVentas" onclick="cambiarVista('ventas')">
-                <i class="fa-solid fa-tags" style="color: #059669;"></i> Vista Ventas
-            </button>
-            <button class="tab-btn" id="btnTabCompras" onclick="cambiarVista('compras')">
-                <i class="fa-solid fa-boxes-packing" style="color: #2563eb;"></i> Vista Compras
-            </button>
-        </div>
+<div class="container-fluid mt-4">
 
-        <div id="vistaVentas" class="tab-content active">
-            <div class="table-responsive theme-ventas">
-                <table id="tablaVentas">
-                    <thead>
-                        <tr>
-                            <th onclick="ordenar('pro1')">PRO1 <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('pro2')">PRO2 <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('pro3')">PRO3 <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('cod_prov')">Cód. Prov <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('codigo')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('marca')">Marca <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('descripcion')">Descripción <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('stem')">S.TEM <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('costo')">Costo <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('pventa')">P.Venta <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th style="text-align: center; cursor: default;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="11" class="loading-td"><i class="fa-solid fa-spinner fa-spin"></i> Cargando productos...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination-container">
-                <span id="infoVentas">Mostrando 0-0 de 0</span>
-                <div class="pagination-controls">
-                    <button class="btn-page" id="btnPrevVentas" onclick="cambiarPagina(-1)">Anterior</button>
-                    <button class="btn-page" id="btnNextVentas" onclick="cambiarPagina(1)">Siguiente</button>
-                    <div class="goto-page-container">
-                        <label for="gotoPageVentasInput">Ir a página:</label>
-                        <input type="number" id="gotoPageVentasInput" min="1" placeholder="1">
-                        <button type="button" class="btn-page" onclick="irAPaginaEspecifica()">Ir</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <h3 class="mb-3">Gestión de Productos</h3>
 
-        <div id="vistaCompras" class="tab-content">
-            <div class="table-responsive theme-compras">
-                <table id="tablaCompras">
-                    <thead>
-                        <tr>
-                            <th onclick="ordenar('pro1')">PRO1 <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('pro2')">PRO2 <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('pro3')">PRO3 <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('cod_prov')">Cód. Prov <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('codigo')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('marca')">Marca <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('descripcion')">Descripción <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('stem')">S.TEM <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('costo')">Costo <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th onclick="ordenar('pventa')">P.Venta <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th style="text-align: center; cursor: default;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="11" class="loading-td"><i class="fa-solid fa-spinner fa-spin"></i> Cargando productos...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination-container">
-                <span id="infoCompras">Mostrando 0-0 de 0</span>
-                <div class="pagination-controls">
-                    <button class="btn-page" id="btnPrevCompras" onclick="cambiarPagina(-1)">Anterior</button>
-                    <button class="btn-page" id="btnNextCompras" onclick="cambiarPagina(1)">Siguiente</button>
-                    <div class="goto-page-container">
-                        <label for="gotoPageComprasInput">Ir a página:</label>
-                        <input type="number" id="gotoPageComprasInput" min="1" placeholder="1">
-                        <button type="button" class="btn-page" onclick="irAPaginaEspecifica()">Ir</button>
-                    </div>
-                </div>
-            </div>
+    <ul class="nav nav-tabs" id="tabsProductos">
+        <li class="nav-item">
+            <a class="nav-link active" id="tabVentas" href="#">Vista Ventas</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tabCompras" href="compras.html">Vista Compras</a>
+        </li>
+    </ul>
+
+    <div class="mt-3 d-flex justify-content-between">
+        <input type="text" id="buscarVentas" class="form-control w-25" placeholder="Buscar en todos">
+        <div>
+            <button class="btn btn-primary" id="btnNuevo">+ Nuevo Producto</button>
+            <button class="btn btn-success" id="btnExcel">Excel</button>
         </div>
     </div>
 
-    <div id="modalEdicion" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="modalTitulo">Editar Producto</h3>
-                <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="cerrarModal()"></i>
-            </div>
-            <form id="formProducto" onsubmit="guardarProducto(event)">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Código</label>
-                        <input type="text" id="edit_codigo" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Cód. Prov.</label>
-                        <input type="text" id="edit_cod_prov">
-                    </div>
-                    <div class="form-group full">
-                        <label>Marca</label>
-                        <input type="text" id="edit_marca">
-                    </div>
-                    <div class="form-group full">
-                        <label>Descripción</label>
-                        <input type="text" id="edit_descripcion" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Stock / S.TEM</label>
-                        <input type="number" id="edit_stem" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Costo</label>
-                        <input type="number" step="0.01" id="edit_costo" value="0.00">
-                    </div>
-                    <div class="form-group full">
-                        <label>Precio Venta</label>
-                        <input type="number" step="0.01" id="edit_pventa" value="0.00">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar Cambios</button>
-                </div>
-            </form>
+    <div class="table-responsive mt-3">
+        <table class="table table-striped table-hover" id="tablaProductosVentas">
+            <thead class="table-dark">
+                <tr>
+                    <th data-column="codigo">CÓDIGO</th>
+                    <th data-column="naci">ORI</th>
+                    <th data-column="marca">MARCA</th>
+                    <th data-column="descripcion">NOMBRE</th>
+                    <th data-column="unidad">UNI</th>
+                    <th data-column="precio_venta">PVP</th>
+                    <th data-column="saldo_temp">S.TEM</th>
+                    <th data-column="saldo">S UIO</th>
+                    <th data-column="saldobext">S GYE</th>
+                    <th data-column="peso">PESO</th>
+                    <th data-column="medidas">MEDIDAS</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyVentas"></tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-secondary" id="btnAnterior">Anterior</button>
+        <button class="btn btn-secondary" id="btnSiguiente">Siguiente</button>
+
+        <div class="d-flex align-items-center">
+            <span class="me-2">Ir a página:</span>
+            <input type="number" id="inputPagina" class="form-control w-25 me-2">
+            <button class="btn btn-info" id="btnIrPagina">Ir</button>
         </div>
     </div>
 
-    <script src="productos.js"></script>
+</div>
+
 </body>
 </html>
