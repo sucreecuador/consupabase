@@ -15,7 +15,7 @@
 
         body {
             background-color: #1a202c;
-            color: #f1f5f9;
+            color: #1e293b;
             padding: 20px;
             min-height: 100vh;
         }
@@ -24,33 +24,61 @@
             width: 100%;
             max-width: 100%;
             margin: 0 auto;
-            background-color: #242c3d;
-            border-radius: 12px;
+            background-color: #ffffff;
+            border-radius: 8px;
             padding: 24px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            border: 1px solid #323d52;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            border: 1px solid #cbd5e1;
         }
 
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 16px;
         }
 
         .page-title {
-            font-size: 1.75rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            color: #ffffff;
+            color: #0f172a;
             letter-spacing: -0.5px;
         }
 
         .toolbar {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+        }
+
+        /* Buscador avanzado */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 2px 8px;
+            transition: all 0.2s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .search-field-select {
+            background: transparent;
+            border: none;
+            border-right: 1px solid #cbd5e1;
+            padding: 6px 8px;
+            font-size: 0.85rem;
+            color: #475569;
+            outline: none;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         .search-box {
@@ -61,61 +89,54 @@
 
         .search-box i {
             position: absolute;
-            left: 14px;
+            left: 10px;
             color: #94a3b8;
+            font-size: 0.85rem;
         }
 
         .search-box input {
-            background-color: #1a202c;
-            border: 1px solid #3a4556;
-            color: #ffffff;
-            padding: 10px 16px 10px 40px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            width: 300px;
+            background-color: transparent;
+            border: none;
+            color: #0f172a;
+            padding: 8px 12px 8px 32px;
+            font-size: 0.9rem;
+            width: 240px;
             outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .search-box input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: #ffffff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 9px 16px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease;
         }
 
         .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+            background-color: #1d4ed8;
         }
 
+        /* Tabs Navigation */
         .tabs-nav {
             display: flex;
-            gap: 10px;
-            border-bottom: 2px solid #3a4556;
-            margin-bottom: 20px;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
         }
 
         .tab-btn {
             background: transparent;
             border: none;
-            color: #94a3b8;
-            padding: 12px 24px;
-            font-size: 1rem;
+            color: #64748b;
+            padding: 10px 20px;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -127,17 +148,17 @@
         }
 
         .tab-btn:hover {
-            color: #e2e8f0;
+            color: #0f172a;
         }
 
         .tab-btn.active-clientes {
-            color: #f97316;
-            border-bottom-color: #f97316;
+            color: #ea580c;
+            border-bottom-color: #ea580c;
         }
 
         .tab-btn.active-proveedores {
-            color: #10b981;
-            border-bottom-color: #10b981;
+            color: #059669;
+            border-bottom-color: #059669;
         }
 
         .tab-content {
@@ -148,54 +169,83 @@
             display: block;
         }
 
+        /* Tabla Estilo Excel (Hoja de cálculo) */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #3a4556;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             min-width: 1000px;
+            background-color: #ffffff;
         }
 
         th {
-            background-color: #0f172a;
-            color: #ffffff;
-            padding: 14px 12px;
-            font-weight: 600;
+            background-color: #e2e8f0;
+            color: #1e293b;
+            padding: 10px 12px;
+            font-weight: 700;
             text-transform: uppercase;
             font-size: 0.75rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             white-space: nowrap;
-        }
-
-        .theme-clientes th {
-            border-top: 3px solid #f97316;
-        }
-
-        .theme-proveedores th {
-            border-top: 3px solid #10b981;
-        }
-
-        tbody tr {
-            background-color: #2a3447;
-            border-bottom: 1px solid #364257;
+            border: 1px solid #cbd5e1;
+            cursor: pointer;
+            user-select: none;
             transition: background-color 0.15s ease;
         }
 
+        th:hover {
+            background-color: #cbd5e1;
+        }
+
+        .sort-icon {
+            margin-left: 6px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        th.sorted {
+            background-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        th.sorted .sort-icon {
+            color: #2563eb;
+        }
+
+        .theme-clientes th {
+            border-top: 3px solid #ea580c;
+        }
+
+        .theme-proveedores th {
+            border-top: 3px solid #059669;
+        }
+
+        tbody tr {
+            background-color: #ffffff;
+            transition: background-color 0.1s ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
         tbody tr:hover {
-            background-color: #323e54;
+            background-color: #f1f5f9;
         }
 
         td {
-            padding: 12px;
-            color: #e2e8f0;
+            padding: 8px 12px;
+            color: #334155;
             white-space: nowrap;
+            border: 1px solid #e2e8f0;
         }
 
         .action-btns {
@@ -205,16 +255,16 @@
 
         .btn-action {
             border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: opacity 0.2s ease;
             color: #ffffff;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .btn-action:hover {
@@ -222,38 +272,38 @@
         }
 
         .btn-edit {
-            background-color: #3b82f6;
+            background-color: #2563eb;
         }
 
         .btn-delete {
-            background-color: #ef4444;
+            background-color: #dc2626;
         }
 
         .badge-code {
-            background-color: #1a202c;
-            padding: 4px 8px;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
             border-radius: 4px;
             font-family: monospace;
-            font-weight: bold;
-            color: #94a3b8;
-            border: 1px solid #3a4556;
+            font-weight: 600;
+            color: #475569;
+            border: 1px solid #cbd5e1;
         }
 
         .loading-td {
             text-align: center;
-            padding: 30px;
-            color: #94a3b8;
+            padding: 24px;
+            color: #64748b;
         }
 
-        /* Pagination Styles */
+        /* Estilos de Paginación */
         .pagination-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 16px;
+            padding-top: 14px;
             margin-top: 8px;
-            color: #94a3b8;
-            font-size: 0.9rem;
+            color: #475569;
+            font-size: 0.85rem;
         }
 
         .pagination-controls {
@@ -263,13 +313,14 @@
         }
 
         .btn-page {
-            background-color: #1a202c;
-            border: 1px solid #3a4556;
-            color: #ffffff;
-            padding: 6px 12px;
-            border-radius: 6px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 5px 12px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.85rem;
             transition: all 0.2s ease;
         }
 
@@ -279,20 +330,34 @@
         }
 
         .btn-page:not(:disabled):hover {
-            background-color: #3b82f6;
-            border-color: #3b82f6;
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Encabezado y Barra de Búsqueda -->
         <div class="page-header">
             <h1 class="page-title">Gestión de Contactos</h1>
             <div class="toolbar">
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" onkeyup="filtrarContactos()" placeholder="Buscar contacto...">
+                <div class="search-container">
+                    <select id="searchField" class="search-field-select" onchange="filtrarContactos()">
+                        <option value="todos">Buscar en todos</option>
+                        <option value="codigo_cliente">Código</option>
+                        <option value="ruc">Cédula / RUC</option>
+                        <option value="nombre">Nombre</option>
+                        <option value="direccion">Dirección</option>
+                        <option value="telefono1">Teléfono</option>
+                        <option value="email">Email</option>
+                        <option value="requiere">Número de cuenta</option>
+                    </select>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" onkeyup="filtrarContactos()" placeholder="Escribe para buscar...">
+                    </div>
                 </div>
                 <button class="btn-primary">
                     <i class="fa-solid fa-plus"></i> Nuevo Contacto
@@ -300,12 +365,13 @@
             </div>
         </div>
 
+        <!-- Pestañas de Vista -->
         <div class="tabs-nav">
             <button class="tab-btn active-clientes" id="btnTabClientes" onclick="cambiarVista('clientes')">
-                <i class="fa-solid fa-users" style="color: #f97316;"></i> Vista Clientes
+                <i class="fa-solid fa-users" style="color: #ea580c;"></i> Vista Clientes
             </button>
             <button class="tab-btn" id="btnTabProveedores" onclick="cambiarVista('proveedores')">
-                <i class="fa-solid fa-truck-field" style="color: #10b981;"></i> Vista Proveedores
+                <i class="fa-solid fa-truck-field" style="color: #059669;"></i> Vista Proveedores
             </button>
         </div>
 
@@ -315,15 +381,15 @@
                 <table id="tablaClientes">
                     <thead>
                         <tr>
-                            <th>Código</th>
-                            <th>Cédula o RUC</th>
-                            <th>Nombre</th>
-                            <th>Dirección</th>
-                            <th>Teléfono</th>
-                            <th>Email</th>
-                            <th>Ciudad</th>
-                            <th>Transporte</th>
-                            <th style="text-align: center;">Acciones</th>
+                            <th onclick="ordenar('codigo_cliente')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('ruc')">Cédula o RUC <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('nombre')">Nombre <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('direccion')">Dirección <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('telefono1')">Teléfono <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('email')">Email <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('ciudad')">Ciudad <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('transporte')">Transporte <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th style="text-align: center; cursor: default;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -349,14 +415,14 @@
                 <table id="tablaProveedores">
                     <thead>
                         <tr>
-                            <th>Código</th>
-                            <th>Cédula o RUC</th>
-                            <th>Nombre</th>
-                            <th>Dirección</th>
-                            <th>Teléfono</th>
-                            <th>Email</th>
-                            <th>Número de Cuenta</th>
-                            <th style="text-align: center;">Acciones</th>
+                            <th onclick="ordenar('codigo_cliente')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('ruc')">Cédula o RUC <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('nombre')">Nombre <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('direccion')">Dirección <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('telefono1')">Teléfono <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('email')">Email <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('requiere')">Número de Cuenta <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th style="text-align: center; cursor: default;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

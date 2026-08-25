@@ -6,6 +6,10 @@ let paginaClientes = 1;
 let paginaProveedores = 1;
 const POR_PAGINA = 50;
 
+// Estado de Ordenamiento
+let columnaOrden = "";
+let direccionOrden = "asc"; // 'asc' o 'desc'
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarContactos();
 });
@@ -62,7 +66,7 @@ function renderizarVista() {
 
 function renderizarClientes() {
     const tbody = document.querySelector("#tablaClientes tbody");
-    const dataset = contactosFiltrados; // Muestra todos los datos sin importar la categoría
+    const dataset = contactosFiltrados;
     const total = dataset.length;
 
     const totalPaginas = Math.ceil(total / POR_PAGINA) || 1;
@@ -106,7 +110,7 @@ function renderizarClientes() {
 
 function renderizarProveedores() {
     const tbody = document.querySelector("#tablaProveedores tbody");
-    const dataset = contactosFiltrados; // Muestra todos los datos sin importar la categoría
+    const dataset = contactosFiltrados;
     const total = dataset.length;
 
     const totalPaginas = Math.ceil(total / POR_PAGINA) || 1;
@@ -157,23 +161,98 @@ function cambiarPagina(delta) {
 }
 
 function filtrarContactos() {
-    const text = document.getElementById("searchInput").value.toLowerCase();
+    const text = document.getElementById("searchInput").value.toLowerCase().trim();
+    const field = document.getElementById("searchField").value;
+
     contactosFiltrados = todosLosContactos.filter(c => {
-        const nombre = (c.nombre || "").toLowerCase();
-        const ruc = (c.ruc || "").toLowerCase();
-        const codigo = (c.codigo_cliente || "").toLowerCase();
-        const direccion = (c.direccion || "").toLowerCase();
-        return nombre.includes(text) || ruc.includes(text) || codigo.includes(text) || direccion.includes(text);
+        if (!text) return true;
+
+        if (field === "todos") {
+            return (
+                (c.codigo_cliente || "").toLowerCase().includes(text) ||
+                (c.ruc || "").toLowerCase().includes(text) ||
+                (c.nombre || "").toLowerCase().includes(text) ||
+                (c.razon_social || "").toLowerCase().includes(text) ||
+                (c.direccion || "").toLowerCase().includes(text) ||
+                (c.telefono1 || "").toLowerCase().includes(text) ||
+                (c.email || "").toLowerCase().includes(text) ||
+                (c.requiere || "").toLowerCase().includes(text)
+            );
+        } else if (field === "nombre") {
+            return (c.nombre || "").toLowerCase().includes(text) || (c.razon_social || "").toLowerCase().includes(text);
+        } else {
+            return (c[field] || "").toString().toLowerCase().includes(text);
+        }
     });
+
+    if (columnaOrden) {
+        aplicarOrdenamiento();
+    }
 
     paginaClientes = 1;
     paginaProveedores = 1;
     renderizarVista();
 }
 
+function ordenar(columna) {
+    if (columnaOrden === columna) {
+        direccionOrden = direccionOrden === "asc" ? "desc" : "asc";
+    } else {
+        columnaOrden = columna;
+        direccionOrden = "asc";
+    }
+
+    aplicarOrdenamiento();
+    actualizarIconosOrden();
+    renderizarVista();
+}
+
+function aplicarOrdenamiento() {
+    contactosFiltrados.sort((a, b) => {
+        let valA = a[columnaOrden] || "";
+        let valB = b[columnaOrden] || "";
+
+        if (columnaOrden === "nombre") {
+            valA = a.nombre || a.razon_social || "";
+            valB = b.nombre || b.razon_social || "";
+        }
+
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+
+        if (valA < valB) return direccionOrden === "asc" ? -1 : 1;
+        if (valA > valB) return direccionOrden === "asc" ? 1 : -1;
+        return 0;
+    });
+}
+
+function actualizarIconosOrden() {
+    const ths = document.querySelectorAll("th");
+    ths.forEach(th => {
+        th.classList.remove("sorted");
+        const icon = th.querySelector(".sort-icon");
+        if (icon) {
+            icon.className = "fa-solid fa-sort sort-icon";
+        }
+    });
+
+    const activeTableId = vistaActual === "clientes" ? "#tablaClientes" : "#tablaProveedores";
+    const currentTh = Array.from(document.querySelectorAll(`${activeTableId} th`)).find(th => 
+        th.getAttribute("onclick") && th.getAttribute("onclick").includes(`'${columnaOrden}'`)
+    );
+
+    if (currentTh) {
+        currentTh.classList.add("sorted");
+        const icon = currentTh.querySelector(".sort-icon");
+        if (icon) {
+            icon.className = direccionOrden === "asc" ? "fa-solid fa-sort-up sort-icon" : "fa-solid fa-sort-down sort-icon";
+        }
+    }
+}
+
 function mostrarError(mensaje) {
-    document.querySelector("#tablaClientes tbody").innerHTML = `<tr><td colspan="9" class="loading-td" style="color: #ef4444;">${mensaje}</td></tr>`;
-    document.querySelector("#tablaProveedores tbody").innerHTML = `<tr><td colspan="8" class="loading-td" style="color: #ef4444;">${mensaje}</td></tr>`;
+    document.querySelector("#tablaClientes tbody").innerHTML = `<tr><td colspan="9" class="loading-td" style="color: #dc2626;">${mensaje}</td></tr>`;
+    document.querySelector("#tablaProveedores tbody").innerHTML = `<tr><td colspan="8" class="loading-td" style="color: #dc2626;">${mensaje}</td></tr>`;
 }
 
 function editarContacto(id) {
