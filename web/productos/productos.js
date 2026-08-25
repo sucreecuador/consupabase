@@ -1,139 +1,131 @@
-const API_URL = "/api/productos";
-let datosProductos = [];
-let columnaOrdenActual = '';
-let ordenAscendente = true;
+// web/productos/productos.js
 
 document.addEventListener("DOMContentLoaded", () => {
-    cargarProductos();
+    // Cargar la lista de productos al iniciar la vista
+    buscarProductos();
 
-    const btnBuscar = document.getElementById("btnBuscar");
-    const btnMostrarTodos = document.getElementById("btnMostrarTodos");
-
-    if (btnBuscar) {
-        btnBuscar.addEventListener("click", () => {
-            const nombre = document.getElementById("buscarNombre")?.value || "";
-            const marca = document.getElementById("buscarMarca")?.value || "";
-            const codigo = document.getElementById("buscarCodigo")?.value || "";
-            const contacto = document.getElementById("buscarContacto")?.value || "";
-            cargarProductos({ nombre, marca, codigo, contacto });
-        });
-    }
-
-    if (btnMostrarTodos) {
-        btnMostrarTodos.addEventListener("click", () => {
-            document.getElementById("buscarNombre").value = "";
-            document.getElementById("buscarMarca").value = "";
-            document.getElementById("buscarCodigo").value = "";
-            document.getElementById("buscarContacto").value = "";
-            cargarProductos();
+    // Listener para detectar tecla Enter en el campo de Contacto/Proveedor
+    const inputContacto = document.getElementById("searchContacto");
+    if (inputContacto) {
+        inputContacto.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                buscarProductos();
+            }
         });
     }
 });
 
-async function cargarProductos(filtros = {}) {
-    const tabla = document.getElementById("tablaProductos");
-    if (!tabla) return;
+/**
+ * Consulta la API y renderiza la tabla de productos
+ */
+async function buscarProductos() {
+    const nombre = document.getElementById("searchNombre")?.value.trim() || "";
+    const marca = document.getElementById("searchMarca")?.value.trim() || "";
+    const codigo = document.getElementById("searchCodigo")?.value.trim() || "";
+    const contacto = document.getElementById("searchContacto")?.value.trim() || "";
 
-    tabla.innerHTML = `<tr><td colspan="11" class="text-center py-4"><i class="fas fa-spinner fa-spin me-2"></i>Cargando productos...</td></tr>`;
+    const params = new URLSearchParams();
+    if (nombre) params.append("nombre", nombre);
+    if (marca) params.append("marca", marca);
+    if (codigo) params.append("codigo", codigo);
+    if (contacto) params.append("contacto", contacto);
+
+    const tbody = document.getElementById("tablaProductosBody");
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">Cargando productos...</td></tr>`;
+    }
 
     try {
-        const query = new URLSearchParams();
-        if (filtros.nombre) query.append("nombre", filtros.nombre);
-        if (filtros.marca) query.append("marca", filtros.marca);
-        if (filtros.codigo) query.append("codigo", filtros.codigo);
-        if (filtros.contacto) query.append("contacto", filtros.contacto);
+        const response = await fetch(`/api/productos?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error(`Error en la respuesta del servidor (${response.status})`);
+        }
 
-        const url = query.toString() ? `${API_URL}?${query.toString()}` : API_URL;
-        const response = await fetch(url);
-
-        if (!response.ok) throw new Error("Error al consultar la API");
-
-        datosProductos = await response.json();
-        
-        // Resetear indicador de orden al cargar nuevos datos
-        columnaOrdenActual = '';
-        ordenAscendente = true;
-        
-        renderizarTabla(datosProductos);
-
+        const productos = await response.json();
+        renderizarTablaProductos(productos);
     } catch (error) {
-        console.error(error);
-        tabla.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos desde el servidor.</td></tr>`;
+        console.error("Error al buscar productos:", error);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al obtener datos: ${error.message}</td></tr>`;
+        }
     }
 }
 
-function renderizarTabla(productos) {
-    const tabla = document.getElementById("tablaProductos");
-    if (!tabla) return;
+/**
+ * Dibuja las filas dinámicamente en el HTML
+ */
+function renderizarTablaProductos(productos) {
+    const tbody = document.getElementById("tablaProductosBody");
+    if (!tbody) return;
 
     if (!productos || productos.length === 0) {
-        tabla.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-muted">No se encontraron productos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">No se encontraron productos registrados.</td></tr>`;
         return;
     }
 
-    tabla.innerHTML = productos.map(p => {
-        const codProv = p.codigo_proveedor || p.cod_prov || '0';
-        return `
+    let html = "";
+    productos.forEach(p => {
+        const pro1 = p.pro1 !== null && p.pro1 !== undefined ? p.pro1 : "—";
+        const pro2 = p.pro2 !== null && p.pro2 !== undefined ? p.pro2 : "—";
+        const pro3 = p.pro3 !== null && p.pro3 !== undefined ? p.pro3 : "—";
+        const codProv = p.codigo_proveedor || p.cod_prov || "—";
+        const codigo = p.codigo || "—";
+        const marca = p.marca || "—";
+        const descripcion = p.descripcion || "—";
+        const stock = p.stock_total !== undefined && p.stock_total !== null ? p.stock_total : (p.stem || 0);
+        const costo = p.costo !== undefined && p.costo !== null ? parseFloat(p.costo).toFixed(2) : "0.00";
+        const pVenta = p.precio_venta !== undefined && p.precio_venta !== null ? parseFloat(p.precio_venta).toFixed(2) : "0.00";
+
+        html += `
             <tr>
-                <td class="text-center">${p.pro1 || '—'}</td>
-                <td class="text-center">${p.pro2 || '—'}</td>
-                <td class="text-center">${p.pro3 || '—'}</td>
-                <td>${codProv}</td>
-                <td><strong>${p.codigo || '—'}</strong></td>
-                <td>${p.marca || '—'}</td>
-                <td>${p.descripcion || '—'}</td>
-                <td class="text-center">${p.saldo_temp ?? 0}</td>
-                <td class="text-end">$${Number(p.costo_prom || 0).toFixed(2)}</td>
-                <td class="text-end">$${Number(p.precio_venta || 0).toFixed(2)}</td>
+                <td class="text-center">${pro1}</td>
+                <td class="text-center">${pro2}</td>
+                <td class="text-center">${pro3}</td>
+                <td class="fw-bold">${codProv}</td>
+                <td class="fw-bold">${codigo}</td>
+                <td>${marca}</td>
+                <td>${descripcion}</td>
+                <td class="text-center">${stock}</td>
+                <td class="text-end">$${costo}</td>
+                <td class="text-end">$${pVenta}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary p-1 me-1" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-danger p-1" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editarProducto(${p.id})" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${p.id})" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </td>
             </tr>
         `;
-    }).join("");
-}
-
-function ordenarPor(columna) {
-    if (!datosProductos || datosProductos.length === 0) return;
-
-    if (columnaOrdenActual === columna) {
-        ordenAscendente = !ordenAscendente;
-    } else {
-        columnaOrdenActual = columna;
-        ordenAscendente = true;
-    }
-
-    // Actualizar iconos visuales en las cabeceras
-    document.querySelectorAll('.sort-icon').forEach(span => span.textContent = '↕');
-    const spanActual = document.getElementById(`sort-${columna}`);
-    if (spanActual) {
-        spanActual.textContent = ordenAscendente ? '▲' : '▼';
-    }
-
-    datosProductos.sort((a, b) => {
-        let valA = a[columna];
-        let valB = b[columna];
-
-        // Normalizar valores nulos o indefinidos
-        if (valA === null || valA === undefined) valA = '';
-        if (valB === null || valB === undefined) valB = '';
-
-        // Si son numéricos
-        if (typeof valA === 'number' || typeof valB === 'number' || !isNaN(valA) && !isNaN(valB) && valA !== '' && valB !== '') {
-            valA = Number(valA);
-            valB = Number(valB);
-            return ordenAscendente ? valA - valB : valB - valA;
-        }
-
-        // Si son cadenas de texto
-        valA = String(valA).toLowerCase();
-        valB = String(valB).toLowerCase();
-
-        if (valA < valB) return ordenAscendente ? -1 : 1;
-        if (valA > valB) return ordenAscendente ? 1 : -1;
-        return 0;
     });
 
-    renderizarTabla(datosProductos);
+    tbody.innerHTML = html;
+}
+
+/**
+ * Limpia los campos de búsqueda y recarga el listado
+ */
+function mostrarTodos() {
+    if (document.getElementById("searchNombre")) document.getElementById("searchNombre").value = "";
+    if (document.getElementById("searchMarca")) document.getElementById("searchMarca").value = "";
+    if (document.getElementById("searchCodigo")) document.getElementById("searchCodigo").value = "";
+    if (document.getElementById("searchContacto")) document.getElementById("searchContacto").value = "";
+    
+    buscarProductos();
+}
+
+/**
+ * Descarga directamente un archivo Excel filtrado por el código de proveedor ingresado
+ */
+function descargarExcelProveedor() {
+    const contacto = document.getElementById("searchContacto")?.value.trim() || "";
+
+    if (!contacto) {
+        alert("Por favor ingresa un código de proveedor en el campo 'Contacto / Proveedor' (ejemplo: 319).");
+        return;
+    }
+
+    // Activa el endpoint de descarga en el servidor
+    window.location.href = `/api/productos/exportar-excel?contacto=${encodeURIComponent(contacto)}`;
 }
