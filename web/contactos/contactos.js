@@ -63,6 +63,12 @@ function renderizarVista() {
     }
 }
 
+function obtenerCodigoContacto(c) {
+    if (!c) return "";
+    const val = c.codigo !== undefined && c.codigo !== null && c.codigo !== "" ? c.codigo : c.codigo_cliente;
+    return val !== undefined && val !== null ? String(val).trim() : "";
+}
+
 function renderizarClientes() {
     const tbody = document.querySelector("#tablaClientes tbody");
     const dataset = contactosFiltrados;
@@ -82,7 +88,7 @@ function renderizarClientes() {
     } else {
         paginados.forEach(c => {
             const tr = document.createElement("tr");
-            const codigoValor = c.codigo || c.codigo_cliente || '-';
+            const codigoValor = obtenerCodigoContacto(c) || '-';
             tr.innerHTML = `
                 <td><span class="badge-code">${codigoValor}</span></td>
                 <td>${c.ruc || '-'}</td>
@@ -127,7 +133,7 @@ function renderizarProveedores() {
     } else {
         paginados.forEach(p => {
             const tr = document.createElement("tr");
-            const codigoValor = p.codigo || p.codigo_cliente || '-';
+            const codigoValor = obtenerCodigoContacto(p) || '-';
             tr.innerHTML = `
                 <td><span class="badge-code">${codigoValor}</span></td>
                 <td>${p.ruc || '-'}</td>
@@ -188,10 +194,11 @@ function filtrarContactos() {
 
     contactosFiltrados = todosLosContactos.filter(c => {
         if (!text) return true;
+        const cod = obtenerCodigoContacto(c).toLowerCase();
 
         if (field === "todos") {
             return (
-                (c.codigo || c.codigo_cliente || "").toLowerCase().includes(text) ||
+                cod.includes(text) ||
                 (c.ruc || "").toLowerCase().includes(text) ||
                 (c.nombre || "").toLowerCase().includes(text) ||
                 (c.razon_social || "").toLowerCase().includes(text) ||
@@ -200,6 +207,8 @@ function filtrarContactos() {
                 (c.email || "").toLowerCase().includes(text) ||
                 (c.requiere || "").toLowerCase().includes(text)
             );
+        } else if (field === "codigo") {
+            return cod.includes(text);
         } else if (field === "nombre") {
             return (c.nombre || "").toLowerCase().includes(text) || (c.razon_social || "").toLowerCase().includes(text);
         } else {
@@ -235,8 +244,8 @@ function aplicarOrdenamiento() {
         let valB = b[columnaOrden] || "";
 
         if (columnaOrden === "codigo") {
-            valA = a.codigo || a.codigo_cliente || "";
-            valB = b.codigo || b.codigo_cliente || "";
+            valA = obtenerCodigoContacto(a);
+            valB = obtenerCodigoContacto(b);
         } else if (columnaOrden === "nombre") {
             valA = a.nombre || a.razon_social || "";
             valB = b.nombre || b.razon_social || "";
@@ -279,14 +288,14 @@ function iniciarEdicionPorCodigo() {
     const codigoInput = prompt("Ingrese el código del cliente a editar:");
     if (codigoInput === null) return;
 
-    const codigoLimpio = codigoInput.trim();
+    const codigoLimpio = codigoInput.trim().toLowerCase();
     if (!codigoLimpio) {
         alert("Código inválido o no encontrado.");
         return;
     }
 
     const contactoEncontrado = todosLosContactos.find(
-        c => String(c.codigo || c.codigo_cliente || "").toLowerCase() === codigoLimpio.toLowerCase()
+        c => obtenerCodigoContacto(c).toLowerCase() === codigoLimpio
     );
 
     if (!contactoEncontrado) {
@@ -298,8 +307,9 @@ function iniciarEdicionPorCodigo() {
 }
 
 function abrirFormularioEdicionPorObjeto(codigo) {
+    const codigoBuscado = String(codigo).trim().toLowerCase();
     const contacto = todosLosContactos.find(
-        c => String(c.codigo || c.codigo_cliente || "").toLowerCase() === String(codigo).toLowerCase()
+        c => obtenerCodigoContacto(c).toLowerCase() === codigoBuscado
     );
     if (contacto) {
         cargarFormularioModal(contacto);
@@ -307,7 +317,7 @@ function abrirFormularioEdicionPorObjeto(codigo) {
 }
 
 function cargarFormularioModal(contacto) {
-    document.getElementById("edit_codigo").value = contacto.codigo || contacto.codigo_cliente || "";
+    document.getElementById("edit_codigo").value = obtenerCodigoContacto(contacto);
     document.getElementById("edit_ruc").value = contacto.ruc || "";
     document.getElementById("edit_nombre").value = contacto.nombre || contacto.razon_social || "";
     document.getElementById("edit_direccion").value = contacto.direccion || "";
@@ -364,22 +374,29 @@ async function guardarEdicion(event) {
 }
 
 async function eliminarContactoPorCodigo(codigo) {
-    if (!codigo || codigo === "undefined" || codigo === "null") {
+    if (codigo === undefined || codigo === null || String(codigo).trim() === "" || String(codigo) === "undefined" || String(codigo) === "null" || String(codigo) === "-") {
         alert("Código inválido o no encontrado.");
         return;
     }
 
-    const existe = todosLosContactos.some(c => String(c.codigo || c.codigo_cliente || "").toLowerCase() === String(codigo).toLowerCase());
-    if (!existe) {
+    const codigoBuscado = String(codigo).trim().toLowerCase();
+
+    const contactoEncontrado = todosLosContactos.find(c => {
+        return obtenerCodigoContacto(c).toLowerCase() === codigoBuscado;
+    });
+
+    if (!contactoEncontrado) {
         alert("Código no encontrado. No se puede eliminar.");
         return;
     }
 
-    const confirmado = confirm(`¿Desea eliminar el cliente con código ${codigo}?`);
+    const codigoReal = obtenerCodigoContacto(contactoEncontrado);
+
+    const confirmado = confirm(`¿Desea eliminar el contacto con código ${codigoReal}?`);
     if (!confirmado) return;
 
     try {
-        const response = await fetch(`/api/contactos/${encodeURIComponent(codigo)}`, {
+        const response = await fetch(`/api/contactos/${encodeURIComponent(codigoReal)}`, {
             method: "DELETE"
         });
 
