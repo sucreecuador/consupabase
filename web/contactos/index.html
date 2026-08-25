@@ -53,7 +53,6 @@
             gap: 12px;
         }
 
-        /* Buscador avanzado */
         .search-container {
             display: flex;
             align-items: center;
@@ -123,7 +122,6 @@
             background-color: #1d4ed8;
         }
 
-        /* Tabs Navigation */
         .tabs-nav {
             display: flex;
             gap: 8px;
@@ -169,7 +167,6 @@
             display: block;
         }
 
-        /* Tabla Estilo Excel (Hoja de cálculo) */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -295,7 +292,7 @@
             color: #64748b;
         }
 
-        /* Estilos de Paginación */
+        /* Controles de Paginación Avanzada */
         .pagination-container {
             display: flex;
             justify-content: space-between;
@@ -304,24 +301,39 @@
             margin-top: 8px;
             color: #475569;
             font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .pagination-controls {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        .pagination-numbers {
+            display: flex;
+            gap: 4px;
         }
 
         .btn-page {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
             color: #334155;
-            padding: 5px 12px;
+            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.85rem;
             transition: all 0.2s ease;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .btn-page.active {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
         }
 
         .btn-page:disabled {
@@ -334,12 +346,33 @@
             color: #ffffff;
             border-color: #2563eb;
         }
+
+        .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 12px;
+        }
+
+        .page-jump input {
+            width: 55px;
+            padding: 4px 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .page-jump input:focus {
+            border-color: #2563eb;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Encabezado y Barra de Búsqueda -->
+        <!-- Encabezado y Toolbar -->
         <div class="page-header">
             <h1 class="page-title">Gestión de Contactos</h1>
             <div class="toolbar">
@@ -359,13 +392,16 @@
                         <input type="text" id="searchInput" onkeyup="filtrarContactos()" placeholder="Escribe para buscar...">
                     </div>
                 </div>
-                <button class="btn-primary">
+                <button class="btn-primary" onclick="iniciarEdicionPorCodigo()">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar por Código
+                </button>
+                <button class="btn-primary" style="background-color: #059669;">
                     <i class="fa-solid fa-plus"></i> Nuevo Contacto
                 </button>
             </div>
         </div>
 
-        <!-- Pestañas de Vista -->
+        <!-- Pestañas -->
         <div class="tabs-nav">
             <button class="tab-btn active-clientes" id="btnTabClientes" onclick="cambiarVista('clientes')">
                 <i class="fa-solid fa-users" style="color: #ea580c;"></i> Vista Clientes
@@ -403,8 +439,12 @@
                 <span id="infoClientes">Mostrando 0-0 de 0</span>
                 <div class="pagination-controls">
                     <button class="btn-page" id="btnPrevClientes" onclick="cambiarPagina(-1)">Anterior</button>
-                    <span id="pageClientes">Página 1</span>
+                    <div id="numPagesClientes" class="pagination-numbers"></div>
                     <button class="btn-page" id="btnNextClientes" onclick="cambiarPagina(1)">Siguiente</button>
+                    <div class="page-jump">
+                        <span>Ir a la página:</span>
+                        <input type="number" id="jumpClientes" min="1" onkeydown="if(event.key==='Enter') irAPaginaDirecta(this.value)">
+                    </div>
                 </div>
             </div>
         </div>
@@ -436,8 +476,12 @@
                 <span id="infoProveedores">Mostrando 0-0 de 0</span>
                 <div class="pagination-controls">
                     <button class="btn-page" id="btnPrevProveedores" onclick="cambiarPagina(-1)">Anterior</button>
-                    <span id="pageProveedores">Página 1</span>
+                    <div id="numPagesProveedores" class="pagination-numbers"></div>
                     <button class="btn-page" id="btnNextProveedores" onclick="cambiarPagina(1)">Siguiente</button>
+                    <div class="page-jump">
+                        <span>Ir a la página:</span>
+                        <input type="number" id="jumpProveedores" min="1" onkeydown="if(event.key==='Enter') irAPaginaDirecta(this.value)">
+                    </div>
                 </div>
             </div>
         </div>
