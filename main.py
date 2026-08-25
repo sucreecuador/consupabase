@@ -1,4 +1,4 @@
-# ENDPOINT OBTENER PRODUCTOS
+# ENDPOINT OBTENER PRODUCTOS (Sin límite de corte y búsqueda exacta en PRO1, PRO2, PRO3)
 @app.get("/api/productos")
 def get_productos(
     contacto: Optional[str] = None,
@@ -13,10 +13,11 @@ def get_productos(
         )
     
     try:
-        response = supabase.table("productos").select("*").execute()
+        # Se agrega .range(0, 10000) para evitar que Supabase limite la respuesta por defecto
+        response = supabase.table("productos").select("*").range(0, 10000).execute()
         filtrados = response.data or []
         
-        # Filtro por Código de Proveedor (Busca el número ÚNICAMENTE en pro1, pro2 o pro3)
+        # Filtro por Código de Proveedor (Busca el número en pro1, pro2 o pro3)
         if contacto and contacto.strip():
             val_c = contacto.strip().lower()
             filtrados = [
