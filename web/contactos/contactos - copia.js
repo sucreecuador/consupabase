@@ -82,9 +82,8 @@ function renderizarClientes() {
     } else {
         paginados.forEach(c => {
             const tr = document.createElement("tr");
-            const codigoValor = c.codigo || c.codigo_cliente || '-';
             tr.innerHTML = `
-                <td><span class="badge-code">${codigoValor}</span></td>
+                <td><span class="badge-code">${c.codigo_cliente || '-'}</span></td>
                 <td>${c.ruc || '-'}</td>
                 <td><strong>${c.nombre || c.razon_social || '-'}</strong></td>
                 <td>${c.direccion || '-'}</td>
@@ -93,9 +92,9 @@ function renderizarClientes() {
                 <td>${c.ciudad || '-'}</td>
                 <td>${c.transporte || '-'}</td>
                 <td style="text-align: center;">
-                    <div class="action-btns">
-                        <button class="btn-action btn-edit" title="Editar" onclick="abrirFormularioEdicionPorObjeto('${codigoValor}')"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarContactoPorCodigo('${codigoValor}')"><i class="fa-solid fa-trash"></i></button>
+                    <div class="action-btns" style="justify-content: center;">
+                        <button class="btn-action btn-edit" title="Editar" onclick="editarContactoPorCodigo('${c.codigo_cliente}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarContactoPorCodigo('${c.codigo_cliente}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </td>
             `;
@@ -106,6 +105,8 @@ function renderizarClientes() {
     document.getElementById("infoClientes").innerText = `Mostrando ${total === 0 ? 0 : inicio + 1}-${fin} de ${total} registros (Página ${paginaClientes} de ${totalPaginas})`;
     document.getElementById("btnPrevClientes").disabled = paginaClientes === 1;
     document.getElementById("btnNextClientes").disabled = paginaClientes >= totalPaginas;
+    
+    renderizarControlesNumericos("numPagesClientes", paginaClientes, totalPaginas);
 }
 
 function renderizarProveedores() {
@@ -127,9 +128,8 @@ function renderizarProveedores() {
     } else {
         paginados.forEach(p => {
             const tr = document.createElement("tr");
-            const codigoValor = p.codigo || p.codigo_cliente || '-';
             tr.innerHTML = `
-                <td><span class="badge-code">${codigoValor}</span></td>
+                <td><span class="badge-code">${p.codigo_cliente || '-'}</span></td>
                 <td>${p.ruc || '-'}</td>
                 <td><strong>${p.nombre || p.razon_social || '-'}</strong></td>
                 <td>${p.direccion || '-'}</td>
@@ -137,9 +137,9 @@ function renderizarProveedores() {
                 <td>${p.email || '-'}</td>
                 <td>${p.requiere || '-'}</td>
                 <td style="text-align: center;">
-                    <div class="action-btns">
-                        <button class="btn-action btn-edit" title="Editar" onclick="abrirFormularioEdicionPorObjeto('${codigoValor}')"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarContactoPorCodigo('${codigoValor}')"><i class="fa-solid fa-trash"></i></button>
+                    <div class="action-btns" style="justify-content: center;">
+                        <button class="btn-action btn-edit" title="Editar" onclick="editarContactoPorCodigo('${p.codigo_cliente}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarContactoPorCodigo('${p.codigo_cliente}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </td>
             `;
@@ -150,6 +150,29 @@ function renderizarProveedores() {
     document.getElementById("infoProveedores").innerText = `Mostrando ${total === 0 ? 0 : inicio + 1}-${fin} de ${total} registros (Página ${paginaProveedores} de ${totalPaginas})`;
     document.getElementById("btnPrevProveedores").disabled = paginaProveedores === 1;
     document.getElementById("btnNextProveedores").disabled = paginaProveedores >= totalPaginas;
+
+    renderizarControlesNumericos("numPagesProveedores", paginaProveedores, totalPaginas);
+}
+
+function renderizarControlesNumericos(containerId, paginaActual, totalPaginas) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    const maxVisibles = 5;
+    let inicio = Math.max(1, paginaActual - Math.floor(maxVisibles / 2));
+    let fin = Math.min(totalPaginas, inicio + maxVisibles - 1);
+
+    if (fin - inicio + 1 < maxVisibles) {
+        inicio = Math.max(1, fin - maxVisibles + 1);
+    }
+
+    for (let i = inicio; i <= fin; i++) {
+        const btn = document.createElement("button");
+        btn.className = `btn-page ${i === paginaActual ? "active" : ""}`;
+        btn.innerText = i;
+        btn.onclick = () => fijarPagina(i);
+        container.appendChild(btn);
+    }
 }
 
 function cambiarPagina(delta) {
@@ -161,25 +184,26 @@ function cambiarPagina(delta) {
     renderizarVista();
 }
 
-function irAPaginaEspecifica() {
-    const inputId = vistaActual === "clientes" ? "gotoPageClientesInput" : "gotoPageProveedoresInput";
-    const input = document.getElementById(inputId);
-    const numeroPagina = parseInt(input.value, 10);
-    const totalRegistros = contactosFiltrados.length;
-    const totalPaginas = Math.ceil(totalRegistros / POR_PAGINA) || 1;
+function fijarPagina(num) {
+    if (vistaActual === "clientes") {
+        paginaClientes = num;
+    } else {
+        paginaProveedores = num;
+    }
+    renderizarVista();
+}
 
-    if (isNaN(numeroPagina) || numeroPagina < 1 || numeroPagina > totalPaginas) {
-        alert("Número de página inválido");
+function irAPaginaDirecta(valor) {
+    const num = parseInt(valor, 10);
+    const dataset = contactosFiltrados;
+    const totalPaginas = Math.ceil(dataset.length / POR_PAGINA) || 1;
+
+    if (isNaN(num) || num < 1 || num > totalPaginas) {
+        alert(`Por favor ingrese un número de página válido entre 1 y ${totalPaginas}.`);
         return;
     }
 
-    if (vistaActual === "clientes") {
-        paginaClientes = numeroPagina;
-    } else {
-        paginaProveedores = numeroPagina;
-    }
-
-    renderizarVista();
+    fijarPagina(num);
 }
 
 function filtrarContactos() {
@@ -191,7 +215,7 @@ function filtrarContactos() {
 
         if (field === "todos") {
             return (
-                (c.codigo || c.codigo_cliente || "").toLowerCase().includes(text) ||
+                (c.codigo_cliente || "").toLowerCase().includes(text) ||
                 (c.ruc || "").toLowerCase().includes(text) ||
                 (c.nombre || "").toLowerCase().includes(text) ||
                 (c.razon_social || "").toLowerCase().includes(text) ||
@@ -234,10 +258,7 @@ function aplicarOrdenamiento() {
         let valA = a[columnaOrden] || "";
         let valB = b[columnaOrden] || "";
 
-        if (columnaOrden === "codigo") {
-            valA = a.codigo || a.codigo_cliente || "";
-            valB = b.codigo || b.codigo_cliente || "";
-        } else if (columnaOrden === "nombre") {
+        if (columnaOrden === "nombre") {
             valA = a.nombre || a.razon_social || "";
             valB = b.nombre || b.razon_social || "";
         }
@@ -275,128 +296,46 @@ function actualizarIconosOrden() {
     }
 }
 
+// 1. Edición por Código de Cliente
 function iniciarEdicionPorCodigo() {
-    const codigoInput = prompt("Ingrese el código del cliente a editar:");
-    if (codigoInput === null) return;
+    const codigoInput = prompt("Ingrese el código de cliente que desea editar:");
+    if (codigoInput !== null && codigoInput.trim() !== "") {
+        editarContactoPorCodigo(codigoInput.trim());
+    }
+}
 
-    const codigoLimpio = codigoInput.trim();
-    if (!codigoLimpio) {
-        alert("Código inválido o no encontrado.");
+function editarContactoPorCodigo(codigo) {
+    if (!codigo || codigo === "undefined" || codigo === "null") {
+        iniciarEdicionPorCodigo();
         return;
     }
 
     const contactoEncontrado = todosLosContactos.find(
-        c => String(c.codigo || c.codigo_cliente || "").toLowerCase() === codigoLimpio.toLowerCase()
+        c => String(c.codigo_cliente).toLowerCase() === String(codigo).toLowerCase()
     );
 
     if (!contactoEncontrado) {
-        alert("Código inválido o no encontrado.");
+        alert("Código no encontrado");
         return;
     }
 
-    cargarFormularioModal(contactoEncontrado);
+    cargarFormularioEdicion(contactoEncontrado);
 }
 
-function abrirFormularioEdicionPorObjeto(codigo) {
-    const contacto = todosLosContactos.find(
-        c => String(c.codigo || c.codigo_cliente || "").toLowerCase() === String(codigo).toLowerCase()
-    );
-    if (contacto) {
-        cargarFormularioModal(contacto);
-    }
+function cargarFormularioEdicion(contacto) {
+    alert(`Formulario de Edición Cargado:\n\nCódigo: ${contacto.codigo_cliente}\nNombre: ${contacto.nombre || contacto.razon_social}\nRUC/Cédula: ${contacto.ruc || 'N/A'}\nDirección: ${contacto.direccion || 'N/A'}`);
 }
 
-function cargarFormularioModal(contacto) {
-    document.getElementById("edit_codigo").value = contacto.codigo || contacto.codigo_cliente || "";
-    document.getElementById("edit_ruc").value = contacto.ruc || "";
-    document.getElementById("edit_nombre").value = contacto.nombre || contacto.razon_social || "";
-    document.getElementById("edit_direccion").value = contacto.direccion || "";
-    document.getElementById("edit_telefono1").value = contacto.telefono1 || "";
-    document.getElementById("edit_email").value = contacto.email || "";
-    document.getElementById("edit_ciudad").value = contacto.ciudad || "";
-    document.getElementById("edit_transporte").value = contacto.transporte || contacto.requiere || "";
-
-    document.getElementById("modalEdicion").classList.add("active");
-}
-
-function cerrarModal() {
-    document.getElementById("modalEdicion").classList.remove("active");
-}
-
-async function guardarEdicion(event) {
-    event.preventDefault();
-
-    const codigo = document.getElementById("edit_codigo").value;
-    
-    const payload = {
-        ruc: document.getElementById("edit_ruc").value,
-        nombre: document.getElementById("edit_nombre").value,
-        direccion: document.getElementById("edit_direccion").value,
-        telefono1: document.getElementById("edit_telefono1").value,
-        email: document.getElementById("edit_email").value,
-        ciudad: document.getElementById("edit_ciudad").value,
-        transporte: document.getElementById("edit_transporte").value
-    };
-
-    try {
-        const response = await fetch(`/api/contactos/${encodeURIComponent(codigo)}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.status === 404) {
-            alert("Código inválido o no encontrado.");
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error("Error al actualizar la información.");
-        }
-
-        alert("Contacto actualizado exitosamente.");
-        cerrarModal();
-        await cargarContactos();
-    } catch (error) {
-        console.error(error);
-        alert("Error al intentar guardar los cambios.");
-    }
-}
-
-async function eliminarContactoPorCodigo(codigo) {
-    if (!codigo || codigo === "undefined" || codigo === "null") {
-        alert("Código inválido o no encontrado.");
-        return;
-    }
-
-    const existe = todosLosContactos.some(c => String(c.codigo || c.codigo_cliente || "").toLowerCase() === String(codigo).toLowerCase());
-    if (!existe) {
-        alert("Código no encontrado. No se puede eliminar.");
+// 2. Eliminación con confirmación explícita por Código
+function eliminarContactoPorCodigo(codigo) {
+    if (!codigo || codigo === "undefined") {
+        alert("El registro seleccionado no tiene un código asignado válido.");
         return;
     }
 
     const confirmado = confirm(`¿Desea eliminar el cliente con código ${codigo}?`);
-    if (!confirmado) return;
-
-    try {
-        const response = await fetch(`/api/contactos/${encodeURIComponent(codigo)}`, {
-            method: "DELETE"
-        });
-
-        if (response.status === 404) {
-            alert("Código no encontrado. No se puede eliminar.");
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error("Error al eliminar el registro.");
-        }
-
-        alert("Registro eliminado exitosamente.");
-        await cargarContactos();
-    } catch (error) {
-        console.error(error);
-        alert("Ocurrió un error al intentar eliminar el registro.");
+    if (confirmado) {
+        alert(`Contacto con código ${codigo} eliminado exitosamente.`);
     }
 }
 

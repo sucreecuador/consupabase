@@ -248,7 +248,6 @@
         .action-btns {
             display: flex;
             gap: 6px;
-            justify-content: center;
         }
 
         .btn-action {
@@ -293,92 +292,7 @@
             color: #64748b;
         }
 
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(15, 23, 42, 0.6);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-card {
-            background: #ffffff;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 600px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .modal-header {
-            background: #0f172a;
-            color: #ffffff;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .form-group.full {
-            grid-column: span 2;
-        }
-
-        .form-group label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-        }
-
-        .form-group input {
-            padding: 8px 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .form-group input:focus {
-            border-color: #2563eb;
-        }
-
-        .modal-footer {
-            padding: 16px 20px;
-            background: #f8fafc;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
+        /* Controles de Paginación Avanzada */
         .pagination-container {
             display: flex;
             justify-content: space-between;
@@ -397,6 +311,11 @@
             gap: 6px;
         }
 
+        .pagination-numbers {
+            display: flex;
+            gap: 4px;
+        }
+
         .btn-page {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
@@ -407,6 +326,14 @@
             font-weight: 600;
             font-size: 0.85rem;
             transition: all 0.2s ease;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .btn-page.active {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
         }
 
         .btn-page:disabled {
@@ -414,24 +341,30 @@
             cursor: not-allowed;
         }
 
-        .goto-page-container {
+        .btn-page:not(:disabled):hover {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+
+        .page-jump {
             display: flex;
             align-items: center;
             gap: 6px;
             margin-left: 12px;
         }
 
-        .goto-page-container input {
+        .page-jump input {
             width: 55px;
             padding: 4px 6px;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
-            font-size: 0.85rem;
             text-align: center;
+            font-size: 0.85rem;
             outline: none;
         }
 
-        .goto-page-container input:focus {
+        .page-jump input:focus {
             border-color: #2563eb;
         }
     </style>
@@ -439,18 +372,20 @@
 <body>
 
     <div class="container">
+        <!-- Encabezado y Toolbar -->
         <div class="page-header">
             <h1 class="page-title">Gestión de Contactos</h1>
             <div class="toolbar">
                 <div class="search-container">
                     <select id="searchField" class="search-field-select" onchange="filtrarContactos()">
                         <option value="todos">Buscar en todos</option>
-                        <option value="codigo">Código</option>
+                        <option value="codigo_cliente">Código</option>
                         <option value="ruc">Cédula / RUC</option>
                         <option value="nombre">Nombre</option>
                         <option value="direccion">Dirección</option>
                         <option value="telefono1">Teléfono</option>
                         <option value="email">Email</option>
+                        <option value="requiere">Número de cuenta</option>
                     </select>
                     <div class="search-box">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -460,9 +395,13 @@
                 <button class="btn-primary" onclick="iniciarEdicionPorCodigo()">
                     <i class="fa-solid fa-pen-to-square"></i> Editar por Código
                 </button>
+                <button class="btn-primary" style="background-color: #059669;">
+                    <i class="fa-solid fa-plus"></i> Nuevo Contacto
+                </button>
             </div>
         </div>
 
+        <!-- Pestañas -->
         <div class="tabs-nav">
             <button class="tab-btn active-clientes" id="btnTabClientes" onclick="cambiarVista('clientes')">
                 <i class="fa-solid fa-users" style="color: #ea580c;"></i> Vista Clientes
@@ -472,12 +411,13 @@
             </button>
         </div>
 
+        <!-- Vista Clientes -->
         <div id="vistaClientes" class="tab-content active">
             <div class="table-responsive theme-clientes">
                 <table id="tablaClientes">
                     <thead>
                         <tr>
-                            <th onclick="ordenar('codigo')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('codigo_cliente')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
                             <th onclick="ordenar('ruc')">Cédula o RUC <i class="fa-solid fa-sort sort-icon"></i></th>
                             <th onclick="ordenar('nombre')">Nombre <i class="fa-solid fa-sort sort-icon"></i></th>
                             <th onclick="ordenar('direccion')">Dirección <i class="fa-solid fa-sort sort-icon"></i></th>
@@ -499,22 +439,23 @@
                 <span id="infoClientes">Mostrando 0-0 de 0</span>
                 <div class="pagination-controls">
                     <button class="btn-page" id="btnPrevClientes" onclick="cambiarPagina(-1)">Anterior</button>
+                    <div id="numPagesClientes" class="pagination-numbers"></div>
                     <button class="btn-page" id="btnNextClientes" onclick="cambiarPagina(1)">Siguiente</button>
-                    <div class="goto-page-container">
-                        <label for="gotoPageClientesInput">Ir a página:</label>
-                        <input type="number" id="gotoPageClientesInput" min="1" placeholder="1">
-                        <button type="button" class="btn-page" onclick="irAPaginaEspecifica()">Ir</button>
+                    <div class="page-jump">
+                        <span>Ir a la página:</span>
+                        <input type="number" id="jumpClientes" min="1" onkeydown="if(event.key==='Enter') irAPaginaDirecta(this.value)">
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Vista Proveedores -->
         <div id="vistaProveedores" class="tab-content">
             <div class="table-responsive theme-proveedores">
                 <table id="tablaProveedores">
                     <thead>
                         <tr>
-                            <th onclick="ordenar('codigo')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
+                            <th onclick="ordenar('codigo_cliente')">Código <i class="fa-solid fa-sort sort-icon"></i></th>
                             <th onclick="ordenar('ruc')">Cédula o RUC <i class="fa-solid fa-sort sort-icon"></i></th>
                             <th onclick="ordenar('nombre')">Nombre <i class="fa-solid fa-sort sort-icon"></i></th>
                             <th onclick="ordenar('direccion')">Dirección <i class="fa-solid fa-sort sort-icon"></i></th>
@@ -535,63 +476,14 @@
                 <span id="infoProveedores">Mostrando 0-0 de 0</span>
                 <div class="pagination-controls">
                     <button class="btn-page" id="btnPrevProveedores" onclick="cambiarPagina(-1)">Anterior</button>
+                    <div id="numPagesProveedores" class="pagination-numbers"></div>
                     <button class="btn-page" id="btnNextProveedores" onclick="cambiarPagina(1)">Siguiente</button>
-                    <div class="goto-page-container">
-                        <label for="gotoPageProveedoresInput">Ir a página:</label>
-                        <input type="number" id="gotoPageProveedoresInput" min="1" placeholder="1">
-                        <button type="button" class="btn-page" onclick="irAPaginaEspecifica()">Ir</button>
+                    <div class="page-jump">
+                        <span>Ir a la página:</span>
+                        <input type="number" id="jumpProveedores" min="1" onkeydown="if(event.key==='Enter') irAPaginaDirecta(this.value)">
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="modalEdicion" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Editar Contacto</h3>
-                <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="cerrarModal()"></i>
-            </div>
-            <form id="formEdicionContacto" onsubmit="guardarEdicion(event)">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Código (No Modificable)</label>
-                        <input type="text" id="edit_codigo" readonly style="background:#f1f5f9; font-weight:bold;">
-                    </div>
-                    <div class="form-group">
-                        <label>Cédula / RUC</label>
-                        <input type="text" id="edit_ruc" required>
-                    </div>
-                    <div class="form-group full">
-                        <label>Nombre / Razón Social</label>
-                        <input type="text" id="edit_nombre" required>
-                    </div>
-                    <div class="form-group full">
-                        <label>Dirección</label>
-                        <input type="text" id="edit_direccion">
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono</label>
-                        <input type="text" id="edit_telefono1">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="edit_email">
-                    </div>
-                    <div class="form-group">
-                        <label>Ciudad</label>
-                        <input type="text" id="edit_ciudad">
-                    </div>
-                    <div class="form-group">
-                        <label>Transporte / Cuenta</label>
-                        <input type="text" id="edit_transporte">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar Cambios</button>
-                </div>
-            </form>
         </div>
     </div>
 
