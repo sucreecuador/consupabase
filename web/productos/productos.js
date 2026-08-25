@@ -1,63 +1,151 @@
 // web/productos/productos.js
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. Cargar la lista inicial de productos
-    buscarProductos();
+// Estado global de la pantalla
+let estadoActual = {
+    vista: 'ventas', // 'ventas' | 'compras'
+    criterio: 'nombre',
+    valor: '',
+    productosCache: []
+};
 
-    // 2. Listener para enter en Contacto / Proveedor
-    const inputContacto = document.getElementById("searchContacto");
-    if (inputContacto) {
-        inputContacto.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                buscarProductos();
-            }
-        });
-    }
+document.addEventListener("DOMContentLoaded", () => {
+    inicializarEventos();
+    ejecutarBusqueda();
 });
 
 /**
- * Consulta los datos en la API y refresca la tabla
+ * Registra los escuchadores de eventos principales
  */
-async function buscarProductos() {
-    const nombre = document.getElementById("searchNombre")?.value.trim() || "";
-    const marca = document.getElementById("searchMarca")?.value.trim() || "";
-    const codigo = document.getElementById("searchCodigo")?.value.trim() || "";
-    const contacto = document.getElementById("searchContacto")?.value.trim() || "";
+function inicializarEventos() {
+    const inputValor = document.getElementById("searchValor");
+    if (inputValor) {
+        inputValor.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                ejecutarBusqueda();
+            }
+        });
+    }
 
-    const params = new URLSearchParams();
-    if (nombre) params.append("nombre", nombre);
-    if (marca) params.append("marca", marca);
-    if (codigo) params.append("codigo", codigo);
-    if (contacto) params.append("contacto", contacto);
+    const selectCriterio = document.getElementById("searchCriterio");
+    if (selectCriterio) {
+        selectCriterio.addEventListener("change", (e) => {
+            estadoActual.criterio = e.target.value;
+        });
+    }
+}
+
+/**
+ * Alterna entre 'Vista Ventas' y 'Vista Compras'
+ */
+function cambiarVista(nuevaVista) {
+    if (estadoActual.vista === nuevaVista) return;
+
+    estadoActual.vista = nuevaVista;
+
+    // Actualizar botones de vista
+    const btnVentas = document.getElementById("btnVistaVentas");
+    const btnCompras = document.getElementById("btnVistaCompras");
+
+    if (nuevaVista === 'ventas') {
+        btnVentas?.classList.add("active");
+        btnCompras?.classList.remove("active");
+    } else {
+        btnCompras?.classList.add("active");
+        btnVentas?.classList.remove("active");
+    }
+
+    // Renderizar la tabla con las columnas correspondientes
+    renderizarEncabezados();
+    renderizarFilas(estadoActual.productosCache);
+}
+
+/**
+ * Construye dinámicamente las cabeceras según la vista activa
+ */
+function renderizarEncabezados() {
+    const headerRow = document.getElementById("tablaHeaderRow");
+    if (!headerRow) return;
+
+    if (estadoActual.vista === 'ventas') {
+        headerRow.innerHTML = `
+            <th>CÓDIGO ↕</th>
+            <th>MARCA ↕</th>
+            <th>DESCRIPCIÓN ↕</th>
+            <th class="text-center">STOCK ↕</th>
+            <th class="text-end">P.VENTA ↕</th>
+            <th class="text-center">ACCIONES</th>
+        `;
+    } else {
+        headerRow.innerHTML = `
+            <th class="text-center">PRO1 ↕</th>
+            <th class="text-center">PRO2 ↕</th>
+            <th class="text-center">PRO3 ↕</th>
+            <th>CÓD. PROV. ↕</th>
+            <th>CÓDIGO ↕</th>
+            <th>MARCA ↕</th>
+            <th>DESCRIPCIÓN ↕</th>
+            <th class="text-center">S.TEM ↕</th>
+            <th class="text-end">COSTO ↕</th>
+            <th class="text-end">P.VENTA ↕</th>
+            <th class="text-center">ACCIONES</th>
+        `;
+    }
+}
+
+/**
+ * Consulta la API Backend con el criterio y valor unificados
+ */
+async function ejecutarBusqueda() {
+    const selectCriterio = document.getElementById("searchCriterio");
+    const inputValor = document.getElementById("searchValor");
+
+    const criterio = selectCriterio ? selectCriterio.value : "nombre";
+    const valor = inputValor ? inputValor.value.trim() : "";
+
+    estadoActual.criterio = criterio;
+    estadoActual.valor = valor;
 
     const tbody = document.getElementById("tablaProductosBody");
+    const totalCols = estadoActual.vista === 'ventas' ? 6 : 11;
     if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">Cargando productos...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center py-4">Cargando catálogo...</td></tr>`;
     }
 
     try {
+        const params = new URLSearchParams();
+        if (criterio && valor) {
+            params.append("criterio", criterio);
+            params.append("valor", valor);
+        }
+
         const response = await fetch(`/api/productos?${params.toString()}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP Error status: ${response.status}`);
 
         const productos = await response.json();
-        renderizarTablaProductos(productos);
+        estadoActual.productosCache = productos;
+
+        renderizarEncabezados();
+        renderizarFilas(productos);
+
     } catch (error) {
-        console.error("Error al obtener productos:", error);
+        console.error("Error al buscar productos:", error);
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center text-danger py-4">Error al obtener datos del servidor.</td></tr>`;
         }
     }
 }
 
 /**
- * Construye el cuerpo de la tabla HTML
+ * Renders las filas dentro del tbody según la Vista seleccionada
  */
-function renderizarTablaProductos(productos) {
+function renderizarFilas(productos) {
     const tbody = document.getElementById("tablaProductosBody");
     if (!tbody) return;
 
+    const totalCols = estadoActual.vista === 'ventas' ? 6 : 11;
+
     if (!productos || productos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-4">No se encontraron productos registrados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center py-4 text-muted">No se encontraron productos registrados.</td></tr>`;
         return;
     }
 
@@ -66,63 +154,101 @@ function renderizarTablaProductos(productos) {
         const pro1 = p.pro1 ?? "—";
         const pro2 = p.pro2 ?? "—";
         const pro3 = p.pro3 ?? "—";
-        const codProv = p.codigo_proveedor || p.cod_prov || "0";
+        const codProv = p.cod_prov || p.codigo_proveedor || "—";
         const codigo = p.codigo || "—";
         const marca = p.marca || "—";
         const descripcion = p.descripcion || "—";
-        const stock = p.stock_total ?? p.stem ?? 0;
-        const costo = p.costo !== undefined && p.costo !== null ? parseFloat(p.costo).toFixed(2) : "0.00";
-        const pVenta = p.precio_venta !== undefined && p.precio_venta !== null ? parseFloat(p.precio_venta).toFixed(2) : "0.00";
+        const stock = p.s_tem ?? p.stock_total ?? 0;
+        const costo = p.costo !== undefined ? parseFloat(p.costo).toFixed(2) : "0.00";
+        const pVenta = p.precio_venta !== undefined ? parseFloat(p.precio_venta).toFixed(2) : "0.00";
 
-        html += `
-            <tr>
-                <td class="text-center">${pro1}</td>
-                <td class="text-center">${pro2}</td>
-                <td class="text-center">${pro3}</td>
-                <td class="fw-bold">${codProv}</td>
-                <td class="fw-bold">${codigo}</td>
-                <td>${marca}</td>
-                <td>${descripcion}</td>
-                <td class="text-center">${stock}</td>
-                <td class="text-end">$${costo}</td>
-                <td class="text-end">$${pVenta}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editarProducto(${p.id})" title="Editar">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${p.id})" title="Eliminar">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
+        if (estadoActual.vista === 'ventas') {
+            html += `
+                <tr>
+                    <td class="fw-bold">${codigo}</td>
+                    <td>${marca}</td>
+                    <td>${descripcion}</td>
+                    <td class="text-center fw-semibold">${stock}</td>
+                    <td class="text-end fw-bold text-success">$${pVenta}</td>
+                    <td class="text-center">
+                        <button class="btn-action-icon" onclick="editarProducto(${p.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                        <button class="btn-action-icon" onclick="eliminarProducto(${p.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        } else {
+            // Vista Compras
+            html += `
+                <tr>
+                    <td class="text-center">${pro1}</td>
+                    <td class="text-center">${pro2}</td>
+                    <td class="text-center">${pro3}</td>
+                    <td class="fw-bold">${codProv}</td>
+                    <td class="fw-bold">${codigo}</td>
+                    <td>${marca}</td>
+                    <td>${descripcion}</td>
+                    <td class="text-center fw-semibold">${stock}</td>
+                    <td class="text-end">$${costo}</td>
+                    <td class="text-end">$${pVenta}</td>
+                    <td class="text-center">
+                        <button class="btn-action-icon" onclick="editarProducto(${p.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                        <button class="btn-action-icon" onclick="eliminarProducto(${p.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        }
     });
 
     tbody.innerHTML = html;
 }
 
 /**
- * Restablece los filtros de búsqueda
+ * Limpia los filtros y muestra todos los registros
  */
 function mostrarTodos() {
-    ["searchNombre", "searchMarca", "searchCodigo", "searchContacto"].forEach(id => {
-        const input = document.getElementById(id);
-        if (input) input.value = "";
-    });
-    buscarProductos();
+    const inputValor = document.getElementById("searchValor");
+    if (inputValor) inputValor.value = "";
+    
+    estadoActual.valor = "";
+    ejecutarBusqueda();
 }
 
 /**
- * Función encargada de solicitar la descarga del Excel al Backend
+ * Solicita la generación y descarga del reporte Excel según el criterio y vista activa
  */
-function descargarExcelProveedor() {
-    const contacto = document.getElementById("searchContacto")?.value.trim() || "";
-
-    if (!contacto) {
-        alert("Por favor ingresa un código de proveedor en el campo 'Contacto / Proveedor' (ejemplo: 319).");
-        return;
+function generarExcel() {
+    const params = new URLSearchParams();
+    
+    if (estadoActual.criterio && estadoActual.valor) {
+        params.append("criterio", estadoActual.criterio);
+        params.append("valor", estadoActual.valor);
     }
+    params.append("vista", estadoActual.vista);
 
-    // Inicia la descarga mediante el endpoint del servidor
-    window.location.href = `/api/productos/exportar-excel?contacto=${encodeURIComponent(contacto)}`;
+    // Inicia la descarga mediante el endpoint dinámico
+    window.location.href = `/api/productos/exportar-excel?${params.toString()}`;
+}
+
+/**
+ * Toggle lateral para ocultar o mostrar la barra
+ */
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebarMenu");
+    if (sidebar) {
+        sidebar.classList.toggle("d-none");
+    }
+}
+
+function nuevoProducto() {
+    alert("Formulario de creación de producto");
+}
+
+function editarProducto(id) {
+    alert(`Editar producto con ID: ${id}`);
+}
+
+function eliminarProducto(id) {
+    if (confirm(`¿Desea eliminar el producto con ID: ${id}?`)) {
+        alert("Producto eliminado.");
+    }
 }

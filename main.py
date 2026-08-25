@@ -1,13 +1,13 @@
 # main.py
 import io
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from starlette.responses import Response
 import pandas as pd
 
-app = FastAPI(title="ERP SUCRE API")
+app = FastAPI(title="ERP SUCRE - Sistema de Gestión")
 
 
 # ==========================================
@@ -15,8 +15,8 @@ app = FastAPI(title="ERP SUCRE API")
 # ==========================================
 class NoCacheStaticFiles(StaticFiles):
     """
-    Desactiva las respuestas 304 Not Modified y fuerza encabezados
-    Cache-Control para que los navegadores recarguen siempre la interfaz.
+    Desactiva las respuestas 304 Not Modified y fuerza encabezados Cache-Control
+    para asegurar que Render y los navegadores recarguen siempre los archivos más recientes.
     """
     def is_not_modified(self, response_headers, request_headers) -> bool:
         return False
@@ -29,55 +29,145 @@ class NoCacheStaticFiles(StaticFiles):
         return response
 
 
-# Montar la carpeta /web usando la versión sin caché
+# Montar la carpeta /web usando NoCacheStaticFiles
 app.mount("/web", NoCacheStaticFiles(directory="web", html=True), name="web")
 
 
 # ==========================================
-# 2. ENDPOINTS DE PRODUCTOS
+# Base de Datos de Ejemplo / Simulación
+# ==========================================
+# Nota: Reemplaza este arreglo con la llamada a tu base de datos Supabase / PostgreSQL / COBOL
+DB_PRODUCTOS: List[Dict[str, Any]] = [
+    {
+        "id": 1, "pro1": 977, "pro2": 141, "pro3": 319, "cod_prov": "GUKINNL01",
+        "codigo": "GNT333", "marca": "KINNED", "descripcion": "GUANTES KINNED 2 TALLA L AMARILLO",
+        "s_tem": 19, "costo": 10.39, "precio_venta": 18.00
+    },
+    {
+        "id": 2, "pro1": 319, "pro2": None, "pro3": None, "cod_prov": "ALUMINIO 10 AZUL",
+        "codigo": "AIS010", "marca": "BOREALSNOW", "descripcion": "AISLANTE ALUMINIO 10 MM ELECTRICO",
+        "s_tem": 0, "costo": 6.38, "precio_venta": 9.00
+    },
+    {
+        "id": 3, "pro1": 319, "pro2": None, "pro3": None, "cod_prov": "ALUMINIO 10 NEGRO",
+        "codigo": "AIS011", "marca": "BOREALSNOW", "descripcion": "AISLANTE ALUMINIO 10 MM NEGRO",
+        "s_tem": 0, "costo": 6.38, "precio_venta": 9.00
+    },
+    {
+        "id": 4, "pro1": 977, "pro2": 141, "pro3": 319, "cod_prov": "CARAI903",
+        "codigo": "AIS005", "marca": "BOREALSNOW", "descripcion": "AISLANTE ALUMINIO 12 MM AZUL",
+        "s_tem": 16, "costo": 6.75, "precio_venta": 10.00
+    },
+    {
+        "id": 5, "pro1": 319, "pro2": None, "pro3": None, "cod_prov": "CARAI913",
+        "codigo": "AIS015", "marca": "OUTDOOR", "descripcion": "AISLANTE ALUMINIO 12 MM NEGRO",
+        "s_tem": 0, "costo": 6.75, "precio_venta": 10.00
+    },
+    {
+        "id": 6, "pro1": 977, "pro2": 319, "pro3": None, "cod_prov": "CARAI922",
+        "codigo": "AIS009", "marca": "BOREALSNOW", "descripcion": "AISLANTE ALUMINIO 12 MM VERDE",
+        "s_tem": 94, "costo": 6.92, "precio_venta": 10.50
+    },
+    {
+        "id": 7, "pro1": 319, "pro2": 319, "pro3": 977, "cod_prov": "ESPONJA 8 MM",
+        "codigo": "AIS006", "marca": "BOREALSNOW", "descripcion": "AISLANTE ESPONJA COLOR 8 MM LIVIANO",
+        "s_tem": 0, "costo": 5.25, "precio_venta": 8.00
+    }
+]
+
+
+def filtrar_lista_productos(criterio: Optional[str], valor: Optional[str]) -> List[Dict[str, Any]]:
+    """Filtra la lista de productos según el criterio y valor recibido."""
+    if not criterio or not valor:
+        return DB_PRODUCTOS
+
+    val = valor.strip().lower()
+    mapa_campos = {
+        "nombre": "descripcion",
+        "descripcion": "descripcion",
+        "marca": "marca",
+        "codigo": "codigo",
+        "contacto": "cod_prov",
+        "cod_prov": "cod_prov"
+    }
+    
+    campo_real = mapa_campos.get(criterio.lower(), "descripcion")
+
+    resultados = []
+    for p in DB_PRODUCTOS:
+        val_campo = str(p.get(campo_real, "") or "").lower()
+        if val in val_campo:
+            resultados.append(p)
+    return resultados
+
+
+# ==========================================
+# 2. ENDPOINTS DE LA API
 # ==========================================
 
-# Simulación / Consulta de productos (Reemplazar con tu consulta a la Base de Datos)
 @app.get("/api/productos")
 def listar_productos(
-    nombre: Optional[str] = Query(None),
-    marca: Optional[str] = Query(None),
-    codigo: Optional[str] = Query(None),
-    contacto: Optional[str] = Query(None)
+    criterio: Optional[str] = Query(None),
+    valor: Optional[str] = Query(None)
 ):
-    # Aquí va la consulta a tu base de datos Supabase / COBOL / PostgreSQL
-    # Ejemplo de estructura de retorno
-    return []
+    """Retorna la lista de productos filtrada por un solo campo/criterio."""
+    return filtrar_lista_productos(criterio, valor)
 
 
 @app.get("/api/productos/exportar-excel")
-def exportar_excel_proveedor(contacto: Optional[str] = Query(None)):
+def exportar_excel_productos(
+    criterio: Optional[str] = Query(None),
+    valor: Optional[str] = Query(None),
+    vista: str = Query("ventas")
+):
     """
-    Genera y descarga un archivo Excel filtrado por el código de proveedor (ej. 319).
+    Genera un archivo Excel (.xlsx) estructurado dinámicamente según la vista activa:
+    - 'ventas': Columnas orientadas a comercialización (Código, Marca, Descripción, Stock, Precio Venta).
+    - 'compras': Columnas orientadas a abastecimiento (PRO1, PRO2, PRO3, Cód. Prov, Código, Marca, Descripción, Stock, Costo, Precio Venta).
     """
-    if not contacto:
-        raise HTTPException(status_code=400, detail="Debe especificar un código de contacto/proveedor")
+    productos = filtrar_lista_productos(criterio, valor)
 
-    # TODO: Obtener datos filtrados de tu base de datos por el campo contacto / cod_prov
-    # Ejemplo de estructura para el DataFrame:
-    datos_ejemplo = [
-        {
-            "PRO1": 793, "PRO2": None, "PRO3": None,
-            "COD_PROV": contacto, "CODIGO": "BOM030", "MARCA": "AMBER",
-            "DESCRIPCION": "BOMBA TALLER C/TANQUE HIERRO GRANDE",
-            "STOCK": 0, "COSTO": 9.17, "PRECIO_VENTA": 13.00
-        }
-    ]
+    if not productos:
+        raise HTTPException(status_code=404, detail="No hay productos que coincidan con los criterios para exportar.")
 
-    df = pd.DataFrame(datos_ejemplo)
+    filas_exportar = []
+    for p in productos:
+        costo = p.get("costo", 0.0)
+        p_venta = p.get("precio_venta", 0.0)
+        margen = p_venta - costo
 
-    # Crear el buffer binario en memoria
+        if vista.lower() == "ventas":
+            filas_exportar.append({
+                "CÓDIGO": p.get("codigo", ""),
+                "MARCA": p.get("marca", ""),
+                "DESCRIPCIÓN": p.get("descripcion", ""),
+                "STOCK DISPONIBLE": p.get("s_tem", 0),
+                "PRECIO DE VENTA ($)": p_venta,
+                "MARGEN ESTIMADO ($)": round(margen, 2)
+            })
+        else:  # vista == 'compras'
+            filas_exportar.append({
+                "PRO1": p.get("pro1") if p.get("pro1") is not None else "—",
+                "PRO2": p.get("pro2") if p.get("pro2") is not None else "—",
+                "PRO3": p.get("pro3") if p.get("pro3") is not None else "—",
+                "CÓD. PROVEEDOR": p.get("cod_prov", ""),
+                "CÓDIGO": p.get("codigo", ""),
+                "MARCA": p.get("marca", ""),
+                "DESCRIPCIÓN": p.get("descripcion", ""),
+                "STOCK (S.TEM)": p.get("s_tem", 0),
+                "COSTO ($)": costo,
+                "PRECIO VENTA ($)": p_venta
+            })
+
+    df = pd.DataFrame(filas_exportar)
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Productos_Proveedor", index=False)
+        sheet_name = "Vista_Ventas" if vista.lower() == "ventas" else "Vista_Compras"
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
 
     output.seek(0)
-    filename = f"productos_proveedor_{contacto}.xlsx"
+    filename = f"reporte_productos_{vista.lower()}.xlsx"
 
     return StreamingResponse(
         output,
