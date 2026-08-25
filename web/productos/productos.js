@@ -1,254 +1,330 @@
-// web/productos/productos.js
+let todosLosProductos = [];
+let productosFiltrados = [];
+let vistaActiva = 'ventas';
 
-// Estado global de la pantalla
-let estadoActual = {
-    vista: 'ventas', // 'ventas' | 'compras'
-    criterio: 'nombre',
-    valor: '',
-    productosCache: []
-};
+let paginaActual = 1;
+const REGISTROS_POR_PAGINA = 50;
+
+let columnaOrden = '';
+let ordenAscendente = true;
 
 document.addEventListener("DOMContentLoaded", () => {
-    inicializarEventos();
-    ejecutarBusqueda();
+    cargarProductos();
 });
 
-/**
- * Registra los escuchadores de eventos principales
- */
-function inicializarEventos() {
-    const inputValor = document.getElementById("searchValor");
-    if (inputValor) {
-        inputValor.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                ejecutarBusqueda();
-            }
-        });
-    }
-
-    const selectCriterio = document.getElementById("searchCriterio");
-    if (selectCriterio) {
-        selectCriterio.addEventListener("change", (e) => {
-            estadoActual.criterio = e.target.value;
-        });
-    }
-}
-
-/**
- * Alterna entre 'Vista Ventas' y 'Vista Compras'
- */
-function cambiarVista(nuevaVista) {
-    if (estadoActual.vista === nuevaVista) return;
-
-    estadoActual.vista = nuevaVista;
-
-    // Actualizar botones de vista
-    const btnVentas = document.getElementById("btnVistaVentas");
-    const btnCompras = document.getElementById("btnVistaCompras");
-
-    if (nuevaVista === 'ventas') {
-        btnVentas?.classList.add("active");
-        btnCompras?.classList.remove("active");
-    } else {
-        btnCompras?.classList.add("active");
-        btnVentas?.classList.remove("active");
-    }
-
-    // Renderizar la tabla con las columnas correspondientes
-    renderizarEncabezados();
-    renderizarFilas(estadoActual.productosCache);
-}
-
-/**
- * Construye dinámicamente las cabeceras según la vista activa
- */
-function renderizarEncabezados() {
-    const headerRow = document.getElementById("tablaHeaderRow");
-    if (!headerRow) return;
-
-    if (estadoActual.vista === 'ventas') {
-        headerRow.innerHTML = `
-            <th>CÓDIGO ↕</th>
-            <th>MARCA ↕</th>
-            <th>DESCRIPCIÓN ↕</th>
-            <th class="text-center">STOCK ↕</th>
-            <th class="text-end">P.VENTA ↕</th>
-            <th class="text-center">ACCIONES</th>
-        `;
-    } else {
-        headerRow.innerHTML = `
-            <th class="text-center">PRO1 ↕</th>
-            <th class="text-center">PRO2 ↕</th>
-            <th class="text-center">PRO3 ↕</th>
-            <th>CÓD. PROV. ↕</th>
-            <th>CÓDIGO ↕</th>
-            <th>MARCA ↕</th>
-            <th>DESCRIPCIÓN ↕</th>
-            <th class="text-center">S.TEM ↕</th>
-            <th class="text-end">COSTO ↕</th>
-            <th class="text-end">P.VENTA ↕</th>
-            <th class="text-center">ACCIONES</th>
-        `;
-    }
-}
-
-/**
- * Consulta la API Backend con el criterio y valor unificados
- */
-async function ejecutarBusqueda() {
-    const selectCriterio = document.getElementById("searchCriterio");
-    const inputValor = document.getElementById("searchValor");
-
-    const criterio = selectCriterio ? selectCriterio.value : "nombre";
-    const valor = inputValor ? inputValor.value.trim() : "";
-
-    estadoActual.criterio = criterio;
-    estadoActual.valor = valor;
-
-    const tbody = document.getElementById("tablaProductosBody");
-    const totalCols = estadoActual.vista === 'ventas' ? 6 : 11;
-    if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center py-4">Cargando catálogo...</td></tr>`;
-    }
+async function cargarProductos() {
+    const tbody = document.querySelector("#tablaProductos tbody");
+    tbody.innerHTML = `<tr><td colspan="11" class="status-msg" style="color:#64748b;">Cargando productos...</td></tr>`;
 
     try {
-        const params = new URLSearchParams();
-        if (criterio && valor) {
-            params.append("criterio", criterio);
-            params.append("valor", valor);
+        const endpoint = `/api/productos?tipo=${vistaActiva}`;
+        const response = await fetch(endpoint);
+
+        if (!response.ok) {
+            throw new Error("HTTP Status " + response.status);
         }
 
-        const response = await fetch(`/api/productos?${params.toString()}`);
-        if (!response.ok) throw new Error(`HTTP Error status: ${response.status}`);
+        const data = await response.json();
 
-        const productos = await response.json();
-        estadoActual.productosCache = productos;
+        if (Array.isArray(data)) {
+            todosLosProductos = data;
+        } else if (data && Array.isArray(data.datos)) {
+            todosLosProductos = data.datos;
+        } else {
+            todosLosProductos = [];
+        }
 
-        renderizarEncabezados();
-        renderizarFilas(productos);
-
+        productosFiltrados = [...todosLosProductos];
+        paginaActual = 1;
+        renderizarTabla();
     } catch (error) {
-        console.error("Error al buscar productos:", error);
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center text-danger py-4">Error al obtener datos del servidor.</td></tr>`;
-        }
+        console.error("Error en fetch de productos:", error);
+        tbody.innerHTML = `<tr><td colspan="11" class="status-msg">Error al obtener datos del servidor.</td></tr>`;
+        document.getElementById("infoPagina").innerText = "Mostrando 0-0 de 0";
     }
 }
 
-/**
- * Renders las filas dentro del tbody según la Vista seleccionada
- */
-function renderizarFilas(productos) {
-    const tbody = document.getElementById("tablaProductosBody");
-    if (!tbody) return;
+function cambiarVista(vista) {
+    if (vistaActiva === vista) return;
+    vistaActiva = vista;
 
-    const totalCols = estadoActual.vista === 'ventas' ? 6 : 11;
+    document.getElementById("tabVentas").classList.toggle("active", vista === 'ventas');
+    document.getElementById("tabCompras").classList.toggle("active", vista === 'compras');
 
-    if (!productos || productos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${totalCols}" class="text-center py-4 text-muted">No se encontraron productos registrados.</td></tr>`;
+    cargarProductos();
+}
+
+function renderizarTabla() {
+    const tbody = document.querySelector("#tablaProductos tbody");
+    const total = productosFiltrados.length;
+
+    if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="status-msg" style="color:#64748b;">No hay productos registrados.</td></tr>`;
+        document.getElementById("infoPagina").innerText = "Mostrando 0-0 de 0";
+        document.getElementById("btnPrev").disabled = true;
+        document.getElementById("btnNext").disabled = true;
         return;
     }
 
-    let html = "";
-    productos.forEach(p => {
-        const pro1 = p.pro1 ?? "—";
-        const pro2 = p.pro2 ?? "—";
-        const pro3 = p.pro3 ?? "—";
-        const codProv = p.cod_prov || p.codigo_proveedor || "—";
-        const codigo = p.codigo || "—";
-        const marca = p.marca || "—";
-        const descripcion = p.descripcion || "—";
-        const stock = p.s_tem ?? p.stock_total ?? 0;
-        const costo = p.costo !== undefined ? parseFloat(p.costo).toFixed(2) : "0.00";
-        const pVenta = p.precio_venta !== undefined ? parseFloat(p.precio_venta).toFixed(2) : "0.00";
+    const totalPaginas = Math.ceil(total / REGISTROS_POR_PAGINA) || 1;
+    if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+    if (paginaActual < 1) paginaActual = 1;
 
-        if (estadoActual.vista === 'ventas') {
-            html += `
-                <tr>
-                    <td class="fw-bold">${codigo}</td>
-                    <td>${marca}</td>
-                    <td>${descripcion}</td>
-                    <td class="text-center fw-semibold">${stock}</td>
-                    <td class="text-end fw-bold text-success">$${pVenta}</td>
-                    <td class="text-center">
-                        <button class="btn-action-icon" onclick="editarProducto(${p.id})" title="Editar"><i class="bi bi-pencil"></i></button>
-                        <button class="btn-action-icon" onclick="eliminarProducto(${p.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        } else {
-            // Vista Compras
-            html += `
-                <tr>
-                    <td class="text-center">${pro1}</td>
-                    <td class="text-center">${pro2}</td>
-                    <td class="text-center">${pro3}</td>
-                    <td class="fw-bold">${codProv}</td>
-                    <td class="fw-bold">${codigo}</td>
-                    <td>${marca}</td>
-                    <td>${descripcion}</td>
-                    <td class="text-center fw-semibold">${stock}</td>
-                    <td class="text-end">$${costo}</td>
-                    <td class="text-end">$${pVenta}</td>
-                    <td class="text-center">
-                        <button class="btn-action-icon" onclick="editarProducto(${p.id})" title="Editar"><i class="bi bi-pencil"></i></button>
-                        <button class="btn-action-icon" onclick="eliminarProducto(${p.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        }
+    const inicio = (paginaActual - 1) * REGISTROS_POR_PAGINA;
+    const fin = Math.min(inicio + REGISTROS_POR_PAGINA, total);
+    const paginados = productosFiltrados.slice(inicio, fin);
+
+    tbody.innerHTML = "";
+
+    paginados.forEach(p => {
+        const tr = document.createElement("tr");
+
+        const cod = p.codigo || p.cod_producto || p.id || "";
+        const codProv = p.cod_prov || p.codigo_proveedor || "-";
+        const pro1 = p.pro1 || "-";
+        const pro2 = p.pro2 || "-";
+        const pro3 = p.pro3 || "-";
+        const marca = p.marca || "-";
+        const descripcion = p.descripcion || p.nombre || "-";
+        const stem = p.stem !== undefined && p.stem !== null ? p.stem : (p.stock || 0);
+        const costo = p.costo !== undefined && p.costo !== null ? Number(p.costo).toFixed(2) : "0.00";
+        const pventa = p.pventa !== undefined && p.pventa !== null ? Number(p.pventa).toFixed(2) : (p.precio ? Number(p.precio).toFixed(2) : "0.00");
+
+        tr.innerHTML = `
+            <td>${pro1}</td>
+            <td>${pro2}</td>
+            <td>${pro3}</td>
+            <td>${codProv}</td>
+            <td><strong>${cod}</strong></td>
+            <td>${marca}</td>
+            <td>${descripcion}</td>
+            <td>${stem}</td>
+            <td>$${costo}</td>
+            <td>$${pventa}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="btn-action btn-edit" title="Editar" onclick="abrirEdicion('${cod}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarProducto('${cod}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
     });
 
-    tbody.innerHTML = html;
+    document.getElementById("infoPagina").innerText = `Mostrando ${inicio + 1}-${fin} de ${total} (Página ${paginaActual} de ${totalPaginas})`;
+    document.getElementById("btnPrev").disabled = paginaActual === 1;
+    document.getElementById("btnNext").disabled = paginaActual >= totalPaginas;
 }
 
-/**
- * Limpia los filtros y muestra todos los registros
- */
+function cambiarPagina(delta) {
+    paginaActual += delta;
+    renderizarTabla();
+}
+
+function irAPaginaEspecifica() {
+    const input = document.getElementById("gotoPageInput");
+    const num = parseInt(input.value, 10);
+    const totalPaginas = Math.ceil(productosFiltrados.length / REGISTROS_POR_PAGINA) || 1;
+
+    if (isNaN(num) || num < 1 || num > totalPaginas) {
+        alert("Número de página inválido.");
+        return;
+    }
+
+    paginaActual = num;
+    renderizarTabla();
+}
+
+function ejecutarBusqueda() {
+    const texto = document.getElementById("searchInput").value.toLowerCase().trim();
+    const campo = document.getElementById("searchField").value;
+
+    if (!texto) {
+        productosFiltrados = [...todosLosProductos];
+    } else {
+        productosFiltrados = todosLosProductos.filter(p => {
+            const val = (p[campo] || p.descripcion || p.codigo || "").toString().toLowerCase();
+            return val.includes(texto);
+        });
+    }
+
+    paginaActual = 1;
+    renderizarTabla();
+}
+
 function mostrarTodos() {
-    const inputValor = document.getElementById("searchValor");
-    if (inputValor) inputValor.value = "";
-    
-    estadoActual.valor = "";
-    ejecutarBusqueda();
+    document.getElementById("searchInput").value = "";
+    productosFiltrados = [...todosLosProductos];
+    paginaActual = 1;
+    renderizarTabla();
 }
 
-/**
- * Solicita la generación y descarga del reporte Excel según el criterio y vista activa
- */
-function generarExcel() {
-    const params = new URLSearchParams();
-    
-    if (estadoActual.criterio && estadoActual.valor) {
-        params.append("criterio", estadoActual.criterio);
-        params.append("valor", estadoActual.valor);
+function ordenar(columna) {
+    if (columnaOrden === columna) {
+        ordenAscendente = !ordenAscendente;
+    } else {
+        columnaOrden = columna;
+        ordenAscendente = true;
     }
-    params.append("vista", estadoActual.vista);
 
-    // Inicia la descarga mediante el endpoint dinámico
-    window.location.href = `/api/productos/exportar-excel?${params.toString()}`;
+    productosFiltrados.sort((a, b) => {
+        let valA = a[columna] || "";
+        let valB = b[columna] || "";
+
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+
+        if (valA < valB) return ordenAscendente ? -1 : 1;
+        if (valA > valB) return ordenAscendente ? 1 : -1;
+        return 0;
+    });
+
+    renderizarTabla();
 }
 
-/**
- * Toggle lateral para ocultar o mostrar la barra
- */
-function toggleSidebar() {
-    const sidebar = document.getElementById("sidebarMenu");
-    if (sidebar) {
-        sidebar.classList.toggle("d-none");
+function abrirEdicion(codigo) {
+    const prod = todosLosProductos.find(p => (p.codigo || p.cod_producto || p.id || "").toString().toLowerCase() === codigo.toString().toLowerCase());
+
+    if (!prod) {
+        alert("Código inválido o no encontrado.");
+        return;
+    }
+
+    document.getElementById("modalTitulo").innerText = "Editar Producto";
+    document.getElementById("form_codigo").value = prod.codigo || prod.cod_producto || "";
+    document.getElementById("form_codigo").readOnly = true;
+    document.getElementById("form_cod_prov").value = prod.cod_prov || "";
+    document.getElementById("form_marca").value = prod.marca || "";
+    document.getElementById("form_descripcion").value = prod.descripcion || prod.nombre || "";
+    document.getElementById("form_stem").value = prod.stem || prod.stock || 0;
+    document.getElementById("form_costo").value = prod.costo || 0;
+    document.getElementById("form_pventa").value = prod.pventa || prod.precio || 0;
+
+    document.getElementById("modalEdicion").classList.add("active");
+}
+
+function abrirModalCrear() {
+    document.getElementById("modalTitulo").innerText = "Nuevo Producto";
+    document.getElementById("formProducto").reset();
+    document.getElementById("form_codigo").readOnly = false;
+    document.getElementById("modalEdicion").classList.add("active");
+}
+
+function cerrarModal() {
+    document.getElementById("modalEdicion").classList.remove("active");
+}
+
+async function guardarProducto(event) {
+    event.preventDefault();
+
+    const codigo = document.getElementById("form_codigo").value.trim();
+    const esEdicion = document.getElementById("form_codigo").readOnly;
+
+    const payload = {
+        codigo: codigo,
+        cod_prov: document.getElementById("form_cod_prov").value.trim(),
+        marca: document.getElementById("form_marca").value.trim(),
+        descripcion: document.getElementById("form_descripcion").value.trim(),
+        stem: parseInt(document.getElementById("form_stem").value, 10) || 0,
+        costo: parseFloat(document.getElementById("form_costo").value) || 0,
+        pventa: parseFloat(document.getElementById("form_pventa").value) || 0
+    };
+
+    try {
+        const url = esEdicion ? `/api/productos/${encodeURIComponent(codigo)}` : `/api/productos`;
+        const method = esEdicion ? "PUT" : "POST";
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.status === 404) {
+            alert("Código inválido o no encontrado.");
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("Error en la solicitud");
+        }
+
+        alert(esEdicion ? "Producto actualizado correctamente." : "Producto registrado correctamente.");
+        cerrarModal();
+        cargarProductos();
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        alert("Ocurrió un error al procesar los cambios.");
     }
 }
 
-function nuevoProducto() {
-    alert("Formulario de creación de producto");
-}
-
-function editarProducto(id) {
-    alert(`Editar producto con ID: ${id}`);
-}
-
-function eliminarProducto(id) {
-    if (confirm(`¿Desea eliminar el producto con ID: ${id}?`)) {
-        alert("Producto eliminado.");
+async function eliminarProducto(codigo) {
+    if (!codigo || codigo === "-") {
+        alert("Código no encontrado. No se puede eliminar.");
+        return;
     }
+
+    const prod = todosLosProductos.find(p => (p.codigo || p.cod_producto || p.id || "").toString().toLowerCase() === codigo.toString().toLowerCase());
+
+    if (!prod) {
+        alert("Código no encontrado. No se puede eliminar.");
+        return;
+    }
+
+    const confirmado = confirm(`¿Desea eliminar el producto con código ${codigo}?`);
+    if (!confirmado) return;
+
+    try {
+        const response = await fetch(`/api/productos/${encodeURIComponent(codigo)}`, {
+            method: "DELETE"
+        });
+
+        if (response.status === 404) {
+            alert("Código no encontrado. No se puede eliminar.");
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("Error en eliminación");
+        }
+
+        alert("Registro eliminado exitosamente.");
+        cargarProductos();
+    } catch (error) {
+        console.error("Error al eliminar:", error);
+        alert("Ocurrió un error al intentar eliminar el registro.");
+    }
+}
+
+function exportarExcel() {
+    if (productosFiltrados.length === 0) {
+        alert("No hay registros para exportar.");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,PRO1,PRO2,PRO3,COD_PROV,CODIGO,MARCA,DESCRIPCION,STEM,COSTO,PVENTA\n";
+
+    productosFiltrados.forEach(p => {
+        const row = [
+            p.pro1 || "",
+            p.pro2 || "",
+            p.pro3 || "",
+            p.cod_prov || "",
+            p.codigo || "",
+            p.marca || "",
+            `"${(p.descripcion || "").replace(/"/g, '""')}"`,
+            p.stem || 0,
+            p.costo || 0,
+            p.pventa || 0
+        ].join(",");
+        csvContent += row + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Productos_${vistaActiva}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
