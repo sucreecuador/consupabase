@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -17,15 +18,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inicializar Supabase
+# Inicializar Supabase usando variables de entorno
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("WARNING: SUPABASE_URL o SUPABASE_KEY no están configuradas.")
-    supabase: Optional[Client] = None
-else:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Optional[Client] = None
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"Error inicializando Supabase: {e}")
 
 # Esquemas Pydantic para Productos
 class ProductoCreate(BaseModel):
@@ -54,15 +56,20 @@ class ProductoUpdate(BaseModel):
     pro3: Optional[str] = None
     codigo_proveedor: Optional[str] = None
 
+# Redirección de la raíz para evitar el error 404
+@app.get("/")
+def read_root():
+    return RedirectResponse(url="/web/productos/productos.html")
+
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "supabase_connected": supabase is not None}
 
-# ENDPOINT OBTENER PRODUCTOS (Filtrado forzado en backend por Proveedor 319)
+# ENDPOINT OBTENER PRODUCTOS (Filtrado backend por Proveedor 319)
 @app.get("/api/productos")
 def get_productos(contacto: str = "319"):
     if not supabase:
-        raise HTTPException(status_code=500, detail="Supabase no está configurado")
+        raise HTTPException(status_code=500, detail="Supabase no está configurado correctamente en las variables de entorno.")
     
     try:
         response = supabase.table("productos").select("*").execute()
@@ -71,7 +78,7 @@ def get_productos(contacto: str = "319"):
         if not contacto:
             return todos
 
-        # Filtrado estricto en el backend Python por pro1, pro2, pro3 o contacto
+        # Filtrado estricto en el backend Python
         filtrados = [
             p for p in todos
             if str(p.get("pro1", "")) == str(contacto)
@@ -88,7 +95,6 @@ def get_productos(contacto: str = "319"):
 def create_producto(producto: ProductoCreate):
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase no está configurado")
-    
     try:
         data = producto.dict(exclude_unset=True)
         response = supabase.table("productos").insert(data).execute()
@@ -100,7 +106,6 @@ def create_producto(producto: ProductoCreate):
 def update_producto(producto_id: int, producto: ProductoUpdate):
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase no está configurado")
-    
     try:
         data = producto.dict(exclude_unset=True)
         response = supabase.table("productos").update(data).eq("id", producto_id).execute()
@@ -112,13 +117,12 @@ def update_producto(producto_id: int, producto: ProductoUpdate):
 def delete_producto(producto_id: int):
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase no está configurado")
-    
     try:
         response = supabase.table("productos").delete().eq("id", producto_id).execute()
         return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Servir archivos estáticos del frontend
+# Servir carpeta estática de la web
 if os.path.exists("web"):
     app.mount("/web", StaticFiles(directory="web", html=True), name="web")
