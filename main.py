@@ -65,7 +65,7 @@ def read_root():
 def health_check():
     return {"status": "ok", "supabase_connected": supabase is not None}
 
-# ENDPOINT OBTENER PRODUCTOS (Filtros dinámicos sin valor quemado)
+# ENDPOINT OBTENER PRODUCTOS (Filtros opcionales)
 @app.get("/api/productos")
 def get_productos(
     contacto: Optional[str] = None,
@@ -155,6 +155,6 @@ def delete_producto(producto_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Servir archivos estáticos
+# Servir archivos estáticos de la carpeta web
 if os.path.exists("web"):
     app.mount("/web", StaticFiles(directory="web", html=True), name="web")

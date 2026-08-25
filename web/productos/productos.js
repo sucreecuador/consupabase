@@ -1,47 +1,78 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    const tablaBody = document.getElementById("tablaBody");
-    const paginaActualSpan = document.getElementById("paginaActual");
+const API_URL = "/api/productos";
+
+document.addEventListener("DOMContentLoaded", () => {
+    cargarProductos();
+
+    const btnBuscar = document.getElementById("btnBuscar");
+    const btnMostrarTodos = document.getElementById("btnMostrarTodos");
+
+    if (btnBuscar) {
+        btnBuscar.addEventListener("click", () => {
+            const nombre = document.getElementById("buscarNombre")?.value || "";
+            const marca = document.getElementById("buscarMarca")?.value || "";
+            const codigo = document.getElementById("buscarCodigo")?.value || "";
+            const contacto = document.getElementById("buscarContacto")?.value || "";
+            cargarProductos({ nombre, marca, codigo, contacto });
+        });
+    }
+
+    if (btnMostrarTodos) {
+        btnMostrarTodos.addEventListener("click", () => {
+            document.getElementById("buscarNombre").value = "";
+            document.getElementById("buscarMarca").value = "";
+            document.getElementById("buscarCodigo").value = "";
+            document.getElementById("buscarContacto").value = "";
+            cargarProductos();
+        });
+    }
+});
+
+async function cargarProductos(filtros = {}) {
+    const tabla = document.getElementById("tablaProductos");
+    if (!tabla) return;
+
+    tabla.innerHTML = `<tr><td colspan="11" class="text-center py-4"><i class="fas fa-spinner fa-spin me-2"></i>Cargando productos...</td></tr>`;
 
     try {
-        const respuesta = await fetch('/api/productos?contacto=319');
-        const data = await respuesta.json();
+        const query = new URLSearchParams();
+        if (filtros.nombre) query.append("nombre", filtros.nombre);
+        if (filtros.marca) query.append("marca", filtros.marca);
+        if (filtros.codigo) query.append("codigo", filtros.codigo);
+        if (filtros.contacto) query.append("contacto", filtros.contacto);
 
-        if (!tablaBody) return;
-        tablaBody.innerHTML = "";
+        const url = query.toString() ? `${API_URL}?${query.toString()}` : API_URL;
+        const response = await fetch(url);
 
-        if (!data || data.length === 0) {
-            tablaBody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No se encontraron registros para el proveedor 319</td></tr>`;
+        if (!response.ok) throw new Error("Error al consultar la API");
+
+        const productos = await response.json();
+
+        if (!productos || productos.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="11" class="text-center py-4 text-muted">No se encontraron productos.</td></tr>`;
             return;
         }
 
-        data.forEach(prod => {
-            const codProv = prod.codigo_proveedor ?? prod.cod_proveedor ?? "—";
-            tablaBody.innerHTML += `
-                <tr>
-                    <td>${prod.pro1 ?? "—"}</td>
-                    <td>${prod.pro2 ?? "—"}</td>
-                    <td>${prod.pro3 ?? "—"}</td>
-                    <td>${codProv}</td>
-                    <td>${prod.codigo ?? ""}</td>
-                    <td>${prod.marca ?? ""}</td>
-                    <td>${prod.descripcion ?? ""}</td>
-                    <td>${prod.saldo_temp ?? 0}</td>
-                    <td>${Number(prod.costo_prom ?? 0).toFixed(2)}</td>
-                    <td>${Number(prod.precio_venta ?? 0).toFixed(2)}</td>
-                    <td style="text-align:center;">
-                        <button onclick='alert("Editar: " + ${prod.id})'>✏️</button>
-                        <button onclick='alert("Eliminar: " + ${prod.id})'>🗑️</button>
-                    </td>
-                </tr>
-            `;
-        });
+        tabla.innerHTML = productos.map(p => `
+            <tr>
+                <td class="text-center">${p.pro1 || '—'}</td>
+                <td class="text-center">${p.pro2 || '—'}</td>
+                <td class="text-center">${p.pro3 || '—'}</td>
+                <td>${p.codigo_proveedor || p.cod_prov || '—'}</td>
+                <td><strong>${p.codigo || '—'}</strong></td>
+                <td>${p.marca || '—'}</td>
+                <td>${p.descripcion || '—'}</td>
+                <td class="text-center">${p.saldo_temp ?? 0}</td>
+                <td class="text-end">$${Number(p.costo_prom || 0).toFixed(2)}</td>
+                <td class="text-end">$${Number(p.precio_venta || 0).toFixed(2)}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join("");
 
-        if (paginaActualSpan) {
-            paginaActualSpan.innerText = `Mostrando ${data.length} productos del proveedor 319`;
-        }
     } catch (error) {
-        if (tablaBody) {
-            tablaBody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red;">Error al cargar datos del proveedor 319</td></tr>`;
-        }
+        console.error(error);
+        tabla.innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos desde el servidor.</td></tr>`;
     }
-});
+}
