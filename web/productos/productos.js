@@ -1,13 +1,12 @@
-// Configuración de Supabase (Sustituye con las llaves de tu proyecto)
-const SUPABASE_URL = 'https://consupabase-apiv2.onrender.com'; // O la URL de tu proyecto Supabase
-const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Variables de Estado
-let currentSortColumn = 'id';
+// Estado local de la vista
+let productosData = [];
+let currentSortColumn = 'codigo';
 let currentSortAscending = true;
 let paginaActual = 1;
 const registrosPorPagina = 15;
+
+// Endpoint de la API
+const API_URL = '/api/productos'; // Ajusta a tu ruta real (ej: 'https://consupabase-apiv2.onrender.com/api/productos')
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarEventos();
@@ -18,17 +17,15 @@ function inicializarEventos() {
     // Toggle Sidebar
     const btnToggle = document.getElementById('btnToggleSidebar');
     const sidebar = document.getElementById('sidebar');
-    btnToggle.addEventListener('click', () => {
-        if (sidebar.style.display === 'none') {
-            sidebar.style.display = 'block';
-            btnToggle.textContent = 'Ocultar menú';
-        } else {
-            sidebar.style.display = 'none';
-            btnToggle.textContent = 'Mostrar menú';
-        }
-    });
+    if (btnToggle && sidebar) {
+        btnToggle.addEventListener('click', () => {
+            const isHidden = sidebar.style.display === 'none';
+            sidebar.style.display = isHidden ? 'block' : 'none';
+            btnToggle.textContent = isHidden ? 'Ocultar menú' : 'Mostrar menú';
+        });
+    }
 
-    // Ordenamiento por Encabezados
+    // Eventos de click para Ordenamiento (Sort)
     const headers = document.querySelectorAll('#tablaProductosVentas thead th[data-column]');
     headers.forEach(header => {
         header.addEventListener('click', () => {
@@ -42,18 +39,27 @@ function inicializarEventos() {
             }
 
             actualizarIconosOrdenamiento(headers, header);
-            cargarProductos();
+            ordenarYRenderizar();
         });
     });
 
-    // Buscador "Mostrar Todos" / Restablecer
+    // Filtros de búsqueda en tiempo real
+    const inputsBusqueda = ['buscarNombre', 'buscarMarca', 'buscarCodigo', 'buscarGeneral'];
+    inputsBusqueda.forEach(id => {
+        document.getElementById(id)?.addEventListener('input', () => {
+            paginaActual = 1;
+            ordenarYRenderizar();
+        });
+    });
+
+    // Botón "Mostrar todos"
     document.getElementById('btnMostrarTodos')?.addEventListener('click', () => {
-        document.getElementById('buscarNombre').value = '';
-        document.getElementById('buscarMarca').value = '';
-        document.getElementById('buscarCodigo').value = '';
-        document.getElementById('buscarGeneral').value = '';
+        inputsBusqueda.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
         paginaActual = 1;
-        cargarProductos();
+        ordenarYRenderizar();
     });
 
     // Paginación
@@ -61,21 +67,25 @@ function inicializarEventos() {
         if (paginaActual > 1) {
             paginaActual--;
             document.getElementById('inputPagina').value = paginaActual;
-            cargarProductos();
+            ordenarYRenderizar();
         }
     });
 
     document.getElementById('btnSiguiente')?.addEventListener('click', () => {
-        paginaActual++;
-        document.getElementById('inputPagina').value = paginaActual;
-        cargarProductos();
+        const totalPaginas = Math.ceil(obtenerProductosFiltrados().length / registrosPorPagina);
+        if (paginaActual < totalPaginas) {
+            paginaActual++;
+            document.getElementById('inputPagina').value = paginaActual;
+            ordenarYRenderizar();
+        }
     });
 
     document.getElementById('btnIrPagina')?.addEventListener('click', () => {
-        const pageInput = parseInt(document.getElementById('inputPagina').value);
-        if (pageInput && pageInput > 0) {
-            paginaActual = pageInput;
-            cargarProductos();
+        const input = document.getElementById('inputPagina');
+        const pageVal = parseInt(input.value);
+        if (pageVal && pageVal > 0) {
+            paginaActual = pageVal;
+            ordenarYRenderizar();
         }
     });
 }
@@ -97,46 +107,74 @@ async function cargarProductos() {
     tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4 text-muted">Cargando productos...</td></tr>';
 
     try {
-        const desde = (paginaActual - 1) * registrosPorPagina;
-        const hasta = desde + registrosPorPagina - 1;
-
-        const valNombre = document.getElementById('buscarNombre').value.trim();
-        const valMarca = document.getElementById('buscarMarca').value.trim();
-        const valCodigo = document.getElementById('buscarCodigo').value.trim();
-        const valGeneral = document.getElementById('buscarGeneral').value.trim();
-
-        let query = supabaseClient
-            .from('productos')
-            .select('*')
-            .order(currentSortColumn, { ascending: currentSortAscending })
-            .range(desde, hasta);
-
-        // Filtros específicos
-        if (valNombre) query = query.ilike('descripcion', `%${valNombre}%`);
-        if (valMarca) query = query.ilike('marca', `%${valMarca}%`);
-        if (valCodigo) query = query.ilike('codigo', `%${valCodigo}%`);
-        if (valGeneral) {
-            query = query.or(`codigo.ilike.%${valGeneral}%,descripcion.ilike.%${valGeneral}%,marca.ilike.%${valGeneral}%`);
+        const response = await fetch(API_URL);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error Status: ${response.status}`);
         }
 
-        const { data: productos, error } = await query;
-
-        if (error) throw error;
-
-        renderizarTabla(productos);
+        const data = await response.json();
+        
+        // Asignar los datos recibidos (acepta array directo o { data: [...] })
+        productosData = Array.isArray(data) ? data : (data.data || []);
+        
+        ordenarYRenderizar();
 
     } catch (err) {
-        console.error('Error al consultar Supabase:', err);
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-danger py-4">Error al cargar datos: ${err.message}</td></tr>`;
+        console.error('Error al cargar productos:', err);
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-danger py-4">Error al cargar datos: ${err.message || 'No se pudo conectar con el servidor'}</td></tr>`;
     }
 }
 
-function renderizarTabla(productos) {
+function obtenerProductosFiltrados() {
+    const valNombre = document.getElementById('buscarNombre')?.value.toLowerCase().trim() || '';
+    const valMarca = document.getElementById('buscarMarca')?.value.toLowerCase().trim() || '';
+    const valCodigo = document.getElementById('buscarCodigo')?.value.toLowerCase().trim() || '';
+    const valGeneral = document.getElementById('buscarGeneral')?.value.toLowerCase().trim() || '';
+
+    return productosData.filter(p => {
+        const matchNombre = !valNombre || (p.descripcion && p.descripcion.toLowerCase().includes(valNombre));
+        const matchMarca = !valMarca || (p.marca && p.marca.toLowerCase().includes(valMarca));
+        const matchCodigo = !valCodigo || (p.codigo && p.codigo.toLowerCase().includes(valCodigo));
+        
+        const matchGeneral = !valGeneral || 
+            (p.codigo && p.codigo.toLowerCase().includes(valGeneral)) ||
+            (p.descripcion && p.descripcion.toLowerCase().includes(valGeneral)) ||
+            (p.marca && p.marca.toLowerCase().includes(valGeneral));
+
+        return matchNombre && matchMarca && matchCodigo && matchGeneral;
+    });
+}
+
+function ordenarYRenderizar() {
+    let filtrados = obtenerProductosFiltrados();
+
+    // Lógica de ordenamiento dinámico por columna seleccionada
+    filtrados.sort((a, b) => {
+        let valA = a[currentSortColumn] ?? '';
+        let valB = b[currentSortColumn] ?? '';
+
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return currentSortAscending ? -1 : 1;
+        if (valA > valB) return currentSortAscending ? 1 : -1;
+        return 0;
+    });
+
+    // Paginación local
+    const desde = (paginaActual - 1) * registrosPorPagina;
+    const paginados = filtrados.slice(desde, desde + registrosPorPagina);
+
+    renderizarTabla(paginados, filtrados.length);
+}
+
+function renderizarTabla(productos, totalRegistros) {
     const tbody = document.getElementById('tbodyVentas');
     tbody.innerHTML = '';
 
     if (!productos || productos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4 text-muted">No se encontraron productos registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4 text-muted">No se encontraron productos registered.</td></tr>';
         return;
     }
 
