@@ -1,17 +1,17 @@
 /* ============================================================
    ERP SUCRE – Módulo de Compras (Versión PRO)
-   - Conexión real a Supabase (tabla: productos)
-   - Exportación a Excel (CSV)
-   - Modal de edición
-   - Modal de eliminación
+   Conexión real a Supabase (tabla: productos)
+   Exportación a Excel (CSV)
+   Modal de edición
+   Modal de eliminación
    ============================================================ */
 
 let clientSupabase = null;
 
 if (typeof supabase !== "undefined" && supabase.createClient) {
     clientSupabase = supabase.createClient(
-        "https://utcqgkeiyqvfxfhjupfc.supabase.co",   // ← TU URL REAL
-        "TU_ANON_KEY_REAL"                           // ← TU ANON KEY REAL
+        "https://utcqgkeiyqvfxfhjupfc.supabase.co",   // URL REAL
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts"
     );
 }
 
@@ -98,33 +98,9 @@ function inicializarEventos() {
         });
     });
 
-    const btnExport = document.getElementById("btnExportExcel");
-    if (btnExport) {
-        btnExport.addEventListener("click", exportarExcel);
-    }
-
-    const btnNuevo = document.getElementById("btnNuevo");
-    if (btnNuevo) {
-        btnNuevo.addEventListener("click", () => {
-            const modal = new bootstrap.Modal(document.getElementById("modalNuevaCompra"));
-            modal.show();
-        });
-    }
-
-    const btnGuardarNueva = document.getElementById("btnGuardarNuevaCompra");
-    if (btnGuardarNueva) {
-        btnGuardarNueva.addEventListener("click", guardarNuevaCompra);
-    }
-
-    const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
-    if (btnGuardarEdicion) {
-        btnGuardarEdicion.addEventListener("click", guardarEdicionProducto);
-    }
-
-    const btnConfirmarEliminar = document.getElementById("btnConfirmarEliminar");
-    if (btnConfirmarEliminar) {
-        btnConfirmarEliminar.addEventListener("click", confirmarEliminarProducto);
-    }
+    document.getElementById("btnExportExcel").addEventListener("click", exportarExcel);
+    document.getElementById("btnGuardarEdicion").addEventListener("click", guardarEdicionProducto);
+    document.getElementById("btnConfirmarEliminar").addEventListener("click", confirmarEliminarProducto);
 }
 
 /* ============================
@@ -139,25 +115,24 @@ async function cargarDatosCompras() {
             .limit(50000);
 
         if (error) {
-            console.error("❌ Error Supabase:", error);
-            alert("Supabase no permitió leer la tabla productos. Revisa RLS.");
+            alert("Supabase bloqueó la lectura. Revisa RLS.");
+            console.error(error);
             return;
         }
 
         if (!data || data.length === 0) {
-            alert("La tabla 'productos' está vacía o RLS bloquea la lectura.");
+            alert("La tabla 'productos' está vacía.");
             return;
         }
 
-        console.log(`✔ Supabase cargó ${data.length} registros.`);
         productosData = data;
 
         ordenarDatosGlobales();
         aplicarFiltros();
 
     } catch (e) {
-        console.error("❌ Error inesperado:", e);
         alert("No se pudo conectar a Supabase.");
+        console.error(e);
     }
 }
 
@@ -236,10 +211,6 @@ function aplicarFiltros() {
 
     paginaActual = 1;
     renderizarTabla();
-
-    if (window.actualizarResumenRegistros) {
-        window.actualizarResumenRegistros(productosData.length, productosFiltrados.length);
-    }
 }
 
 /* ============================
@@ -320,51 +291,6 @@ function exportarExcel() {
     a.download = "compras_sucre.csv";
     a.click();
     URL.revokeObjectURL(url);
-}
-
-/* ============================
-   NUEVA COMPRA (BÁSICO)
-   ============================ */
-async function guardarNuevaCompra() {
-    const codigo = document.getElementById("nuevoCodigo").value.trim();
-    const marca = document.getElementById("nuevoMarca").value.trim();
-    const naci = document.getElementById("nuevoNaci").value.trim();
-    const descripcion = document.getElementById("nuevoDescripcion").value.trim();
-    const costo = parseFloat(document.getElementById("nuevoCosto").value);
-
-    if (!codigo || !descripcion || isNaN(costo)) {
-        alert("Completa al menos código, descripción y costo.");
-        return;
-    }
-
-    const nuevo = {
-        codigo,
-        marca,
-        naci,
-        descripcion,
-        precio_compra: costo,
-        unidad: "UNI",
-        saldo_temp: 0,
-        saldo: 0,
-        saldobext: 0,
-        peso: 0,
-        medidas: "0"
-    };
-
-    const { error } = await clientSupabase
-        .from("productos")
-        .insert(nuevo);
-
-    if (error) {
-        alert("Error al guardar nueva compra");
-        console.error(error);
-        return;
-    }
-
-    alert("Producto creado");
-    const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevaCompra"));
-    if (modal) modal.hide();
-    cargarDatosCompras();
 }
 
 /* ============================
