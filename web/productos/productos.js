@@ -18,14 +18,9 @@ const columnMap = {
 };
 
 async function cargarProductosVentas() {
-    try {
-        const res = await fetch("/api/productos");
-        productosData = await res.json();
-        renderVentas(productosData);
-    } catch (e) {
-        document.getElementById("tbodyVentas").innerHTML =
-            `<tr><td colspan="12" class="text-danger">Error al cargar datos: ${e}</td></tr>`;
-    }
+    const res = await fetch("/api/productos");
+    productosData = await res.json();
+    renderVentas(productosData);
 }
 
 function obtenerPagina(data) {
@@ -108,64 +103,34 @@ function attachSortEvents() {
     });
 }
 
-function editarProducto(codigo) {
-    alert("Editar producto: " + codigo);
-}
-
-function eliminarProducto(codigo) {
-    if (!confirm("¿Eliminar producto con código " + codigo + "?")) return;
-
-    fetch(`/api/productos/${codigo}`, { method: "DELETE" })
-        .then(r => r.json())
-        .then(() => cargarProductosVentas());
-}
-
-function buscarNombre() {
-    const texto = document.getElementById("buscarNombre").value.toLowerCase();
-    const filtrados = productosData.filter(p =>
-        (p.descripcion ?? "").toLowerCase().includes(texto)
-    );
-    renderVentas(filtrados);
-}
-
-function buscarMarca() {
-    const texto = document.getElementById("buscarMarca").value.toLowerCase();
-    const filtrados = productosData.filter(p =>
-        (p.marca ?? "").toLowerCase().includes(texto)
-    );
-    renderVentas(filtrados);
-}
-
-function buscarCodigo() {
-    const texto = document.getElementById("buscarCodigo").value.toLowerCase();
-    const filtrados = productosData.filter(p =>
-        (p.codigo ?? "").toLowerCase().includes(texto)
-    );
-    renderVentas(filtrados);
-}
-
-function buscarTodos() {
-    const texto = document.getElementById("buscarTodos").value.toLowerCase();
-    const filtrados = productosData.filter(p =>
-        (p.codigo ?? "").toLowerCase().includes(texto) ||
-        (p.descripcion ?? "").toLowerCase().includes(texto) ||
-        (p.marca ?? "").toLowerCase().includes(texto) ||
-        (p.unidad ?? "").toLowerCase().includes(texto)
-    );
-    renderVentas(filtrados);
+async function buscarSupabase(campo, valor) {
+    const res = await fetch(`/api/productos?campo=${campo}&valor=${valor}`);
+    const data = await res.json();
+    renderVentas(data);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarProductosVentas();
     attachSortEvents();
 
-    document.getElementById("buscarNombre").addEventListener("keyup", buscarNombre);
-    document.getElementById("buscarMarca").addEventListener("keyup", buscarMarca);
-    document.getElementById("buscarCodigo").addEventListener("keyup", buscarCodigo);
-    document.getElementById("btnBuscarTodos").addEventListener("click", buscarTodos);
+    document.getElementById("buscarNombre").addEventListener("keyup", e => {
+        buscarSupabase("descripcion", e.target.value);
+    });
+
+    document.getElementById("buscarMarca").addEventListener("keyup", e => {
+        buscarSupabase("marca", e.target.value);
+    });
+
+    document.getElementById("buscarCodigo").addEventListener("keyup", e => {
+        buscarSupabase("codigo", e.target.value);
+    });
+
+    document.getElementById("btnBuscarTodos").addEventListener("click", () => {
+        buscarSupabase("todos", document.getElementById("buscarTodos").value);
+    });
 
     document.getElementById("btnMostrarTodos").addEventListener("click", () => {
-        renderVentas(productosData);
+        cargarProductosVentas();
     });
 
     document.getElementById("btnAnterior").addEventListener("click", () => {
@@ -186,5 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
             paginaActual = p;
             renderVentas(productosData);
         }
+    });
+
+    document.getElementById("btnToggleMenu").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("d-none");
     });
 });

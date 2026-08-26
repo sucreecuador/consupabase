@@ -2,243 +2,106 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP SUCRE</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome Íconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --sidebar-bg: #1e293b;
-            --sidebar-text: #94a3b8;
-            --sidebar-active: #ffffff;
-            --theme-green: #00a67d;
-            --theme-green-hover: #008f6b;
-            --excel-header-bg: #e2e8f0;
-            --excel-header-border: #cbd5e1;
-            --excel-header-text: #1e293b;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-            background-color: #f8fafc;
-            overflow-x: hidden;
-        }
-
-        /* Sidebar Styling */
-        #sidebar {
-            width: 240px;
-            min-height: 100vh;
-            background-color: var(--sidebar-bg);
-            transition: all 0.3s ease;
-        }
-
-        #sidebar .brand {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #ffffff;
-            padding: 1.5rem 1.25rem;
-            letter-spacing: 0.5px;
-        }
-
-        #sidebar .nav-link {
-            color: var(--sidebar-text);
-            padding: 0.75rem 1.25rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        #sidebar .nav-link:hover, #sidebar .nav-link.active {
-            color: var(--sidebar-active);
-        }
-
-        /* Layout Content */
-        #content {
-            flex: 1;
-            padding: 2rem;
-            min-width: 0;
-        }
-
-        /* Custom Buttons & Theme */
-        .btn-green {
-            background-color: var(--theme-green);
-            color: white;
-            border: none;
-            font-weight: 500;
-        }
-        .btn-green:hover {
-            background-color: var(--theme-green-hover);
-            color: white;
-        }
-
-        .btn-toggle-sidebar {
-            background-color: #475569;
-            color: white;
-            border: none;
-            font-size: 0.85rem;
-        }
-
-        /* Estilo Excel para Encabezado de Tabla */
-        .table-excel {
-            border-collapse: separate;
-            border-spacing: 0;
-            border: 1px solid var(--excel-header-border);
-        }
-
-        .table-excel thead th {
-            background-color: var(--excel-header-bg) !important;
-            color: var(--excel-header-text) !important;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            border-bottom: 2px solid var(--excel-header-border) !important;
-            border-right: 1px solid var(--excel-header-border) !important;
-            padding: 0.65rem 0.5rem;
-            vertical-align: middle;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .table-excel thead th:hover {
-            background-color: #cbd5e1 !important;
-        }
-
-        .table-excel tbody td {
-            font-size: 0.85rem;
-            vertical-align: middle;
-            color: #334155;
-            padding: 0.55rem 0.5rem;
-            border-right: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table-excel tbody tr:nth-of-type(odd) td {
-            background-color: #ffffff;
-        }
-
-        .table-excel tbody tr:nth-of-type(even) td {
-            background-color: #f8fafc;
-        }
-
-        .table-excel tbody tr:hover td {
-            background-color: #e0f2fe !important;
-        }
-
-        .action-btn {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.8rem;
-            border: 1px solid #cbd5e1;
-            background: #ffffff;
-            color: #64748b;
-            border-radius: 4px;
-        }
-        .action-btn:hover {
-            background: #e2e8f0;
-        }
-
-        .sort-icon {
-            font-size: 0.75rem;
-            margin-left: 3px;
-            color: #64748b;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/erp.css">
+    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="productos.js" defer></script>
 </head>
+
 <body>
 
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div id="sidebar">
-        <div class="brand">ERP SUCRE</div>
+<div class="d-flex" id="wrapper">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="bg-dark text-white p-3">
+        <h4 class="mb-4">ERP SUCRE</h4>
         <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Indicadores</a></li>
-            <li class="nav-item"><a class="nav-link active" href="#">Productos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Contactos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Reportes</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Facturación</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Configuración</a></li>
+            <li class="nav-item"><a href="../index.html" class="nav-link text-white">Inicio</a></li>
+            <li class="nav-item"><a href="../indicadores/index.html" class="nav-link text-white">Indicadores</a></li>
+            <li class="nav-item"><a href="productos.html" class="nav-link text-white active">Productos</a></li>
+            <li class="nav-item"><a href="../inventario/index.html" class="nav-link text-white">Inventario</a></li>
+            <li class="nav-item"><a href="../contactos/index.html" class="nav-link text-white">Contactos</a></li>
+            <li class="nav-item"><a href="../reportes/index.html" class="nav-link text-white">Reportes</a></li>
+            <li class="nav-item"><a href="../facturacion/index.html" class="nav-link text-white">Facturación</a></li>
+            <li class="nav-item"><a href="../configuracion/index.html" class="nav-link text-white">Configuración</a></li>
         </ul>
     </div>
 
-    <!-- Main Content -->
-    <div id="content">
-        <h2 class="fw-bold text-dark mb-1">Productos</h2>
-        <p class="text-muted small mb-3">Gestión de catálogo, precios y stock</p>
+    <!-- CONTENIDO -->
+    <div id="page-content" class="p-4 w-100">
 
-        <!-- Sidebar Toggle Button -->
-        <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
+        <button class="btn btn-outline-secondary mb-3" id="btnToggleMenu">☰</button>
 
-        <!-- Filters Section -->
+        <h3 class="mb-3">Productos</h3>
+
         <div class="row g-2 mb-3">
             <div class="col-md-3">
-                <input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
+                <input type="text" id="buscarNombre" class="form-control" placeholder="Buscar por NOMBRE...">
             </div>
-            <div class="col-md-2">
-                <input type="text" id="buscarMarca" class="form-control form-control-sm" placeholder="Buscar por MARCA...">
+            <div class="col-md-3">
+                <input type="text" id="buscarMarca" class="form-control" placeholder="Buscar por MARCA...">
             </div>
-            <div class="col-md-2">
-                <input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
+            <div class="col-md-3">
+                <input type="text" id="buscarCodigo" class="form-control" placeholder="Buscar por CÓDIGO...">
             </div>
-            <div class="col-md-2">
-                <input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos...">
-            </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">Mostrar todos</button>
-                <button class="btn btn-green btn-sm w-100" id="btnNuevo">+ Nuevo Producto</button>
+            <div class="col-md-3 d-flex">
+                <input type="text" id="buscarTodos" class="form-control me-2" placeholder="Buscar todos...">
+                <button class="btn btn-outline-primary" id="btnBuscarTodos">Buscar</button>
             </div>
         </div>
 
-        <!-- View Switcher (Pills Style) -->
-        <div class="mb-3">
-            <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaVentas">Vista 1</button>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaCompras">Vista 2</button>
+        <div class="mb-3 d-flex justify-content-between">
+            <button class="btn btn-secondary" id="btnMostrarTodos">Mostrar todos</button>
+            <button class="btn btn-primary" id="btnNuevo">+ Nuevo Producto</button>
         </div>
 
-        <!-- Dynamic Data Table con Estilo Excel -->
-        <div class="table-responsive bg-white shadow-sm rounded">
-            <table class="table table-excel mb-0" id="tablaProductosVentas">
-                <thead>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Vista Ventas</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="compras.html">Vista Compras</a>
+            </li>
+        </ul>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-striped table-hover" id="tablaProductosVentas">
+                <thead class="table-dark">
                     <tr>
-                        <th data-column="codigo">CÓDIGO <span class="sort-icon">↕</span></th>
-                        <th data-column="naci">ORI <span class="sort-icon">↕</span></th>
-                        <th data-column="marca">MARCA <span class="sort-icon">↕</span></th>
-                        <th data-column="descripcion">NOMBRE <span class="sort-icon">↕</span></th>
-                        <th data-column="unidad">UNI <span class="sort-icon">↕</span></th>
-                        <th data-column="precio_venta">PVP <span class="sort-icon">↕</span></th>
-                        <th data-column="saldo_temp">S.TEM <span class="sort-icon">↕</span></th>
-                        <th data-column="saldo">S UIO <span class="sort-icon">↕</span></th>
-                        <th data-column="saldo_bext">S GYE <span class="sort-icon">↕</span></th>
-                        <th data-column="peso">PESO <span class="sort-icon">↕</span></th>
-                        <th data-column="medidas">MEDIDAS <span class="sort-icon">↕</span></th>
-                        <th class="text-center" style="cursor: default;">ACCIONES</th>
+                        <th data-column="codigo">CÓDIGO</th>
+                        <th data-column="naci">ORI</th>
+                        <th data-column="marca">MARCA</th>
+                        <th data-column="descripcion">NOMBRE</th>
+                        <th data-column="unidad">UNI</th>
+                        <th data-column="precio_venta">PVP</th>
+                        <th data-column="saldo_temp">S.TEM</th>
+                        <th data-column="saldo">S UIO</th>
+                        <th data-column="saldobext">S GYE</th>
+                        <th data-column="peso">PESO</th>
+                        <th data-column="medidas">MEDIDAS</th>
+                        <th>ACCIONES</th>
                     </tr>
                 </thead>
-                <tbody id="tbodyVentas">
-                    <!-- Filas inyectadas por JS -->
-                </tbody>
+                <tbody id="tbodyVentas"></tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="d-flex justify-content-between mt-3">
             <div>
-                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">Anterior</button>
-                <button class="btn btn-outline-secondary btn-sm" id="btnSiguiente">Siguiente</button>
+                <button class="btn btn-secondary" id="btnAnterior">Anterior</button>
+                <button class="btn btn-secondary" id="btnSiguiente">Siguiente</button>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted">Ir a página:</span>
-                <input type="number" id="inputPagina" class="form-control form-control-sm w-auto" min="1" value="1" style="width: 70px;">
-                <button class="btn btn-sm btn-outline-primary" id="btnIrPagina">Ir</button>
+
+            <div class="d-flex align-items-center">
+                <span class="me-2">Ir a página:</span>
+                <input type="number" id="inputPagina" class="form-control w-auto me-2" min="1">
+                <button class="btn btn-info" id="btnIrPagina">Ir</button>
             </div>
         </div>
+
     </div>
 </div>
 
-<script src="productos.js"></script>
 </body>
 </html>
