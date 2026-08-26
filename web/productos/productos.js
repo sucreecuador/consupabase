@@ -1,182 +1,158 @@
-// Manejo de Supabase
+// ===============================
+//  CONEXIÓN REAL A SUPABASE (PRO)
+// ===============================
 let clientSupabase = null;
+
 if (typeof supabase !== 'undefined' && supabase.createClient) {
-    const SUPABASE_URL = "https://tu-proyecto.supabase.co"; 
-    const SUPABASE_KEY = "tu-anon-key";
+    const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
+
     clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-let productosVentas = [];
+// ===============================
+//  VARIABLES GLOBALES
+// ===============================
 let productosFiltrados = [];
 let paginaActual = 1;
 const registrosPorPagina = 15;
-let ordenColumna = 'codigo';
+let ordenColumna = "codigo";
 let ordenAscendente = true;
 
+// ===============================
+//  INICIO
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
     inicializarEventos();
-    cargarDatosVentas();
+    cargarPagina();
 });
 
+// ===============================
+//  EVENTOS
+// ===============================
 function inicializarEventos() {
-    // Alternar visibilidad de Sidebar
+
     const btnToggle = document.getElementById("btnToggleSidebar");
     if (btnToggle) {
         btnToggle.addEventListener("click", () => {
             const sidebar = document.getElementById("sidebar");
             sidebar.classList.toggle("d-none");
-            btnToggle.textContent = sidebar.classList.contains("d-none") ? "Mostrar menú" : "Ocultar menú";
+            btnToggle.textContent = sidebar.classList.contains("d-none")
+                ? "Mostrar menú"
+                : "Ocultar menú";
         });
     }
 
-    // Eventos de entrada de filtros
-    document.getElementById("buscarNombre").addEventListener("input", aplicarFiltros);
-    document.getElementById("buscarMarca").addEventListener("input", aplicarFiltros);
-    document.getElementById("buscarCodigo").addEventListener("input", aplicarFiltros);
-    document.getElementById("buscarGeneral").addEventListener("input", aplicarFiltros);
-
-    // Botón Mostrar Todos / Limpiar
-    document.getElementById("btnMostrarTodos").addEventListener("click", () => {
-        document.getElementById("buscarNombre").value = "";
-        document.getElementById("buscarMarca").value = "";
-        document.getElementById("buscarCodigo").value = "";
-        document.getElementById("buscarGeneral").value = "";
-        aplicarFiltros();
+    const filtros = ["buscarNombre", "buscarMarca", "buscarCodigo", "buscarGeneral"];
+    filtros.forEach(id => {
+        document.getElementById(id).addEventListener("input", () => {
+            paginaActual = 1;
+            cargarPagina();
+        });
     });
 
-    // Paginación
+    document.getElementById("btnMostrarTodos").addEventListener("click", () => {
+        filtros.forEach(id => document.getElementById(id).value = "");
+        paginaActual = 1;
+        cargarPagina();
+    });
+
     document.getElementById("btnAnterior").addEventListener("click", () => {
         if (paginaActual > 1) {
             paginaActual--;
-            renderizarTabla();
+            cargarPagina();
         }
     });
 
     document.getElementById("btnSiguiente").addEventListener("click", () => {
-        const totalPaginas = Math.ceil(productosFiltrados.length / registrosPorPagina);
-        if (paginaActual < totalPaginas) {
-            paginaActual++;
-            renderizarTabla();
-        }
+        paginaActual++;
+        cargarPagina();
     });
 
     document.getElementById("btnIrPagina").addEventListener("click", () => {
-        const inputPag = parseInt(document.getElementById("inputPagina").value);
-        const totalPaginas = Math.ceil(productosFiltrados.length / registrosPorPagina);
-        if (inputPag >= 1 && inputPag <= totalPaginas) {
-            paginaActual = inputPag;
-            renderizarTabla();
+        const pag = parseInt(document.getElementById("inputPagina").value);
+        if (pag >= 1) {
+            paginaActual = pag;
+            cargarPagina();
         }
     });
 
-    // Headers con ordenamiento
     const headers = document.querySelectorAll("#tablaProductosVentas thead th[data-column]");
     headers.forEach(header => {
         header.addEventListener("click", () => {
             const columna = header.getAttribute("data-column");
+
             if (ordenColumna === columna) {
                 ordenAscendente = !ordenAscendente;
             } else {
                 ordenColumna = columna;
                 ordenAscendente = true;
             }
-            ordenarDatos();
-            renderizarTabla();
+
+            paginaActual = 1;
+            cargarPagina();
         });
     });
 }
 
-async function cargarDatosVentas() {
-    let datosCargados = false;
+// ===============================
+//  CONSULTA PRO A SUPABASE
+// ===============================
+async function cargarPagina() {
 
-    if (clientSupabase) {
-        try {
-            const { data, error } = await clientSupabase.from('productos').select('*');
-            if (!error && data && data.length > 0) {
-                productosVentas = data;
-                datosCargados = true;
-            }
-        } catch (e) {
-            console.warn("Fallo al consultar Supabase, utilizando dataset de respaldo", e);
-        }
-    }
+    const nom = document.getElementById("buscarNombre").value.trim();
+    const mar = document.getElementById("buscarMarca").value.trim();
+    const cod = document.getElementById("buscarCodigo").value.trim();
+    const gen = document.getElementById("buscarGeneral").value.trim();
 
-    if (!datosCargados) {
-        productosVentas = obtenerDatosPrueba();
-    }
-
-    productosFiltrados = [...productosVentas];
-    ordenarDatos();
-    renderizarTabla();
-}
-
-function aplicarFiltros() {
-    const nom = document.getElementById("buscarNombre").value.toLowerCase().trim();
-    const mar = document.getElementById("buscarMarca").value.toLowerCase().trim();
-    const cod = document.getElementById("buscarCodigo").value.toLowerCase().trim();
-    const gen = document.getElementById("buscarGeneral").value.toLowerCase().trim();
-
-    productosFiltrados = productosVentas.filter(item => {
-        const desc = (item.descripcion || item.nombre || "").toLowerCase();
-        const marca = (item.marca || "").toLowerCase();
-        const codigo = (item.codigo || "").toLowerCase();
-        const naci = (item.naci || "").toLowerCase();
-
-        const cumpleNom = !nom || desc.includes(nom);
-        const cumpleMar = !mar || marca.includes(mar);
-        const cumpleCod = !cod || codigo.includes(cod);
-        
-        const cumpleGen = !gen || (
-            codigo.includes(gen) ||
-            desc.includes(gen) ||
-            marca.includes(gen) ||
-            naci.includes(gen)
+    let query = clientSupabase
+        .from("productos")
+        .select("*", { count: "exact" })
+        .order(ordenColumna, { ascending: ordenAscendente })
+        .range(
+            (paginaActual - 1) * registrosPorPagina,
+            paginaActual * registrosPorPagina - 1
         );
 
-        return cumpleNom && cumpleMar && cumpleCod && cumpleGen;
-    });
+    if (nom !== "") query = query.ilike("descripcion", `%${nom}%`);
+    if (mar !== "") query = query.ilike("marca", `%${mar}%`);
+    if (cod !== "") query = query.ilike("codigo", `%${cod}%`);
 
-    paginaActual = 1;
-    ordenarDatos();
+    if (gen !== "") {
+        query = query.or(
+            `codigo.ilike.%${gen}%,descripcion.ilike.%${gen}%,marca.ilike.%${gen}%,naci.ilike.%${gen}%`
+        );
+    }
+
+    const { data, count, error } = await query;
+
+    if (error) {
+        console.error("Error cargando productos:", error);
+        return;
+    }
+
+    productosFiltrados = data;
     renderizarTabla();
+
+    document.getElementById("inputPagina").value = paginaActual;
 }
 
-function ordenarDatos() {
-    productosFiltrados.sort((a, b) => {
-        let valA = a[ordenColumna] ?? '';
-        let valB = b[ordenColumna] ?? '';
-
-        if (typeof valA === 'number' && typeof valB === 'number') {
-            return ordenAscendente ? valA - valB : valB - valA;
-        }
-
-        valA = valA.toString().toLowerCase();
-        valB = valB.toString().toLowerCase();
-
-        if (valA < valB) return ordenAscendente ? -1 : 1;
-        if (valA > valB) return ordenAscendente ? 1 : -1;
-        return 0;
-    });
-}
-
+// ===============================
+//  TABLA
+// ===============================
 function renderizarTabla() {
     const tbody = document.getElementById("tbodyVentas");
     tbody.innerHTML = "";
 
-    const inicio = (paginaActual - 1) * registrosPorPagina;
-    const fin = inicio + registrosPorPagina;
-    const paginaData = productosFiltrados.slice(inicio, fin);
-
-    if (paginaData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-4">No se encontraron productos registrados.</td></tr>`;
+    if (!productosFiltrados || productosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-4">No se encontraron productos.</td></tr>`;
         return;
     }
 
-    paginaData.forEach(p => {
-        // En Ventas tomamos precio_venta o pvp
+    productosFiltrados.forEach(p => {
         const precioVal = p.precio_venta ?? p.pvp ?? 0;
         const pvpFormateado = parseFloat(precioVal).toFixed(2);
-        
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td><strong>${p.codigo || ''}</strong></td>
@@ -191,33 +167,21 @@ function renderizarTabla() {
             <td>${p.peso || 0}</td>
             <td>${p.medidas || '0'}</td>
             <td class="text-center">
-                <button class="action-btn me-1" onclick="editarProducto('${p.codigo}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                <button class="action-btn" onclick="eliminarProducto('${p.codigo}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                <button class="action-btn me-1" onclick="editarProducto('${p.codigo}')"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" onclick="eliminarProducto('${p.codigo}')"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
     });
-
-    document.getElementById("inputPagina").value = paginaActual;
 }
 
+// ===============================
+//  EDITAR / ELIMINAR
+// ===============================
 function editarProducto(codigo) {
     console.log("Editar ítem ventas:", codigo);
 }
 
 function eliminarProducto(codigo) {
     console.log("Eliminar ítem ventas:", codigo);
-}
-
-function obtenerDatosPrueba() {
-    return [
-        { codigo: "ABR013", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "0", precio_venta: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR015", naci: "TWN", marca: "SHIMANO", descripcion: "ABRAZADERA P/REDUCIR PASACAT.34.9 A 31.8", unidad: "0", precio_venta: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR019", naci: "TWN", marca: "ZOOMN", descripcion: "ABRAZADERA CUADRO BMX ALUMINIO 25.4 MM", unidad: "UNI", precio_venta: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR022", naci: "TWN", marca: "EPOCH MAK", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM ALUMINIO", unidad: "UNI", precio_venta: 4.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR024", naci: "TWN", marca: "ZOOM", descripcion: "ABRAZADERA CUADRO MTB 31.8 MM ALUMINIO", unidad: "0", precio_venta: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR029", naci: "TWN", marca: "ZOOM", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "0", precio_venta: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR030", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CABLE UNIV.PLAST.150mm", unidad: "UNI", precio_venta: 0.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR032", naci: "TWN", marca: "CYCLERS", descripcion: "ABRAZADERA VELCRO MANGUERA CAMELBAG", unidad: "0", precio_venta: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" }
-    ];
 }
