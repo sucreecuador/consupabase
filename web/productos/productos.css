@@ -1,4 +1,4 @@
-/* web/productos/productos.css */
+/* Modificaciones e integración de Menú Colapsable y Ordenamiento */
 body.erp-body {
     background-color: #2a2f36;
     color: #ffffff;
@@ -8,15 +8,25 @@ body.erp-body {
 #wrapper {
     display: flex;
     min-height: 100vh;
+    transition: all 0.3s ease;
 }
 
-/* SIDEBAR */
+/* SIDEBAR & TOGGLE */
 .erp-sidebar {
     width: 250px;
     background-color: #1a1a1a;
     padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
+    transition: margin-left 0.3s ease, width 0.3s ease, opacity 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.erp-sidebar.collapsed {
+    margin-left: -250px;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .erp-logo {
@@ -40,11 +50,7 @@ body.erp-body {
     font-size: 0.95rem;
 }
 
-.erp-menu-item:hover {
-    background-color: #4a6fa5;
-    color: #ffffff;
-}
-
+.erp-menu-item:hover,
 .erp-menu-item.active {
     background-color: #4a6fa5;
     color: #ffffff;
@@ -55,6 +61,8 @@ body.erp-body {
     flex: 1;
     padding: 1.5rem 2rem;
     background-color: #2a2f36;
+    width: 100%;
+    transition: all 0.3s ease;
 }
 
 /* HEADER */
@@ -156,14 +164,13 @@ body.erp-body {
     margin-top: -1px;
 }
 
-/* TABLE WRAPPER */
+/* TABLE WRAPPER & SORTABLE HEADERS */
 .erp-table-wrapper {
     border-radius: 0.35rem;
     overflow: hidden;
     border: 1px solid #4a4f57;
 }
 
-/* TABLE */
 .table-dark {
     background-color: #1f2329;
 }
@@ -177,6 +184,29 @@ body.erp-body {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+}
+
+.table-dark thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.table-dark thead th.sortable:hover {
+    background-color: #343a40;
+    color: #4a6fa5;
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+
+.table-dark thead th.sortable.active .sort-icon {
+    opacity: 1;
+    color: #4a6fa5;
 }
 
 .table-dark tbody tr:hover {
@@ -211,47 +241,6 @@ body.erp-body {
     color: #ffffff;
 }
 
-/* COMPRAS */
-.compras-search {
-    border-color: #e67e22;
-}
-
-.erp-compras-header {
-    margin-top: 0.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.erp-subtitle {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #e67e22;
-}
-
-.compras-table-wrapper thead tr {
-    background-color: #1f2329;
-}
-
-.stock-critical-row {
-    background-color: rgba(231, 76, 60, 0.2);
-}
-
-.ultima-venta-badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-}
-
-.ultima-venta-none {
-    background-color: #7f8c8d;
-    color: #ffffff;
-}
-
-.ultima-venta-recent {
-    background-color: #2ecc71;
-    color: #ffffff;
-}
-
 /* ACCIONES */
 .erp-actions .btn {
     margin-right: 0.25rem;
@@ -266,19 +255,9 @@ body.erp-body {
     }
     .erp-sidebar {
         width: 100%;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
+        margin-left: 0 !important;
     }
-    .erp-menu {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 768px) {
-    .erp-search-bar {
-        flex-direction: column;
-        align-items: stretch;
+    .erp-sidebar.collapsed {
+        display: none;
     }
 }

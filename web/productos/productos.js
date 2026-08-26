@@ -1,4 +1,3 @@
-// web/productos/productos.js
 const ejemploProductos = [
   {
     codigo: "BDO001",
@@ -59,9 +58,43 @@ const ejemploProductos = [
 ];
 
 let productosVentas = [];
+let sortState = { key: null, direction: 'asc' };
+let filtroStockActual = "todos";
 
 function calcularStockTotal(p) {
     return (p.stock_tem || 0) + (p.stock_uio || 0) + (p.stock_gye || 0);
+}
+
+// Carga de datos unificada (Local + Fallback API Supabase)
+async function cargarProductos() {
+    try {
+        const res = await fetch('/api/productos');
+        if (res.ok) {
+            const dataApi = await res.json();
+            if (Array.isArray(dataApi) && dataApi.length > 0) {
+                // Mapeo del schema de la base de datos al schema de la interfaz
+                productosVentas = dataApi.map(item => ({
+                    codigo: item.codigo,
+                    marca: item.marca || "",
+                    nombre: item.descripcion || "",
+                    pvp: item.pventa || 0,
+                    stock_tem: item.stem || 0,
+                    stock_uio: 0,
+                    stock_gye: 0,
+                    peso: 0,
+                    medidas: "",
+                    creado_en: null
+                }));
+            } else {
+                productosVentas = [...ejemploProductos];
+            }
+        } else {
+            productosVentas = [...ejemploProductos];
+        }
+    } catch (err) {
+        productosVentas = [...ejemploProductos];
+    }
+    procesarYRenderizar();
 }
 
 function renderTablaVentas(data) {
@@ -101,10 +134,41 @@ function renderTablaVentas(data) {
     });
 }
 
-function filtrarVentas(texto, filtroStock) {
-    texto = (texto || "").toLowerCase();
+// Función de ordenamiento
+function ordenarColeccion(arr, key, direction) {
+    return [...arr].sort((a, b) => {
+        let valA = key === 'stock_total' ? calcularStockTotal(a) : a[key];
+        let valB = key === 'stock_total' ? calcularStockTotal(b) : b[key];
 
-    let filtrados = productosVentas.filter(p => {
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return direction === 'asc' ? -1 : 1;
+        if (valA > valB) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+function actualizarIndicadoresOrdenamiento() {
+    document.querySelectorAll('#tablaVentas th.sortable').forEach(th => {
+        const colKey = th.getAttribute('data-sort');
+        const iconSpan = th.querySelector('.sort-icon');
+        
+        if (colKey === sortState.key) {
+            th.classList.add('active');
+            iconSpan.textContent = sortState.direction === 'asc' ? '↑' : '↓';
+        } else {
+            th.classList.remove('active');
+            iconSpan.textContent = '↕';
+        }
+    });
+}
+
+function procesarYRenderizar() {
+    const texto = (document.getElementById("buscarGlobal")?.value || "").toLowerCase();
+
+    // 1. Filtrar
+    let resultado = productosVentas.filter(p => {
         const matchTexto =
             p.codigo.toLowerCase().includes(texto) ||
             p.marca.toLowerCase().includes(texto) ||
@@ -112,30 +176,49 @@ function filtrarVentas(texto, filtroStock) {
 
         const stockTotal = calcularStockTotal(p);
 
-        if (filtroStock === "con-stock") {
-            return matchTexto && stockTotal > 0;
-        }
-        if (filtroStock === "sin-stock") {
-            return matchTexto && stockTotal === 0;
-        }
+        if (filtroStockActual === "con-stock") return matchTexto && stockTotal > 0;
+        if (filtroStockActual === "sin-stock") return matchTexto && stockTotal === 0;
         return matchTexto;
     });
 
-    renderTablaVentas(filtrados);
+    // 2. Ordenar
+    if (sortState.key) {
+        resultado = ordenarColeccion(resultado, sortState.key, sortState.direction);
+    }
+
+    // 3. Renderizar y actualizar iconos
+    renderTablaVentas(resultado);
+    actualizarIndicadoresOrdenamiento();
 }
 
+// Gestión del menú lateral y LocalStorage
+function initSidebarToggle() {
+    const btnToggleMenu = document.getElementById("btnToggleMenu");
+    const sidebar = document.getElementById("sidebar");
+
+    // Aplicar estado guardado
+    const savedState = localStorage.getItem("sidebarState");
+    if (savedState === "collapsed") {
+        sidebar.classList.add("collapsed");
+    }
+
+    btnToggleMenu.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+        const isCollapsed = sidebar.classList.contains("collapsed");
+        localStorage.setItem("sidebarState", isCollapsed ? "collapsed" : "expanded");
+    });
+}
+
+// Event Listeners
 document.addEventListener("DOMContentLoaded", () => {
-    productosVentas = [...ejemploProductos];
-    renderTablaVentas(productosVentas);
+    initSidebarToggle();
+    cargarProductos();
 
     const buscarGlobal = document.getElementById("buscarGlobal");
     const filtroButtons = document.querySelectorAll(".erp-search-filters button");
-    const btnToggleMenu = document.getElementById("btnToggleMenu");
 
-    let filtroStockActual = "todos";
-
-    buscarGlobal.addEventListener("input", e => {
-        filtrarVentas(e.target.value, filtroStockActual);
+    buscarGlobal.addEventListener("input", () => {
+        procesarYRenderizar();
     });
 
     filtroButtons.forEach(btn => {
@@ -143,11 +226,21 @@ document.addEventListener("DOMContentLoaded", () => {
             filtroButtons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             filtroStockActual = btn.getAttribute("data-filter");
-            filtrarVentas(buscarGlobal.value, filtroStockActual);
+            procesarYRenderizar();
         });
     });
 
-    btnToggleMenu.addEventListener("click", () => {
-        document.getElementById("sidebar").classList.toggle("d-none");
+    // Evento delegatorio para ordenamiento
+    document.querySelectorAll('#tablaVentas th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const columnKey = th.getAttribute('data-sort');
+            if (sortState.key === columnKey) {
+                sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortState.key = columnKey;
+                sortState.direction = 'asc';
+            }
+            procesarYRenderizar();
+        });
     });
 });
