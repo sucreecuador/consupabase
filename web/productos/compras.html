@@ -166,7 +166,7 @@
         <ul class="nav flex-column">
             <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="../indicadores/index.html">Indicadores</a></li>
-            <li class="nav-item"><a class="nav-link active" href="productos.html">Productos</a></li>
+            <li class="nav-item"><a class="nav-link active" href="compras.html">Productos</a></li>
             <li class="nav-item"><a class="nav-link" href="../inventario/index.html">Inventario</a></li>
             <li class="nav-item"><a class="nav-link" href="../contactos/index.html">Contactos</a></li>
             <li class="nav-item"><a class="nav-link" href="../reportes/index.html">Reportes</a></li>
@@ -217,7 +217,7 @@
             </div>
         </div>
 
-        <!-- VISTAS -->
+        <!-- VISTAS / EXPORT -->
         <div class="mb-3 d-flex justify-content-between align-items-center">
             <div>
                 <a href="productos.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaVentas">
@@ -227,7 +227,7 @@
                     Vista Compras PRO
                 </button>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 align-items-center">
                 <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
                     <i class="fa-solid fa-file-excel me-1 text-success"></i>Exportar Excel
                 </button>
@@ -278,7 +278,7 @@
     </div>
 </div>
 
-<!-- MODAL NUEVA COMPRA (estructura básica, lógica luego si quieres) -->
+<!-- MODAL NUEVA COMPRA -->
 <div class="modal fade" id="modalNuevaCompra" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -287,7 +287,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <p class="small text-muted mb-2">Aquí puedes integrar luego el flujo completo de compras (proveedor, factura, etc.).</p>
+        <p class="small text-muted mb-2">Flujo básico de alta de producto de compras.</p>
         <div class="row g-2">
           <div class="col-md-4">
             <label class="form-label form-label-sm">Código</label>
@@ -319,23 +319,88 @@
   </div>
 </div>
 
+<!-- MODAL EDICIÓN -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar producto</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label">Código</label>
+            <input id="editCodigo" class="form-control form-control-sm" readonly>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Marca</label>
+            <input id="editMarca" class="form-control form-control-sm">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Origen</label>
+            <input id="editNaci" class="form-control form-control-sm">
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label">Descripción</label>
+            <input id="editDescripcion" class="form-control form-control-sm">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Costo</label>
+            <input id="editCosto" type="number" step="0.01" class="form-control form-control-sm">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-green btn-sm" id="btnGuardarEdicion">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINACIÓN -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Eliminar producto</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body text-center">
+        <p>¿Seguro que deseas eliminar el producto?</p>
+        <strong id="elimCodigo"></strong>
+      </div>
+
+      <div class="modal-footer d-flex justify-content-between">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-danger btn-sm" id="btnConfirmarEliminar">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="compras.js"></script>
 
 <script>
-    // Hook mínimo para el botón "Nueva compra" abrir modal
     document.addEventListener("DOMContentLoaded", () => {
-        const btnNuevo = document.getElementById("btnNuevo");
-        if (btnNuevo) {
-            btnNuevo.addEventListener("click", () => {
-                const modal = new bootstrap.Modal(document.getElementById("modalNuevaCompra"));
-                modal.show();
+        const btnToggle = document.getElementById("btnToggleSidebar");
+        if (btnToggle) {
+            btnToggle.addEventListener("click", () => {
+                const sidebar = document.getElementById("sidebar");
+                sidebar.classList.toggle("d-none");
+                btnToggle.textContent = sidebar.classList.contains("d-none") ? "Mostrar menú" : "Ocultar menú";
             });
         }
 
-        // Resumen de registros (se actualiza desde compras.js si quieres)
         window.actualizarResumenRegistros = function(total, filtrados) {
             const el = document.getElementById("resumenRegistros");
             if (!el) return;

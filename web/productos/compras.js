@@ -1,20 +1,20 @@
 /* ============================================================
    ERP SUCRE – Módulo de Compras (Versión PRO)
-   Optimizado para rendimiento, ordenamiento global, filtros
-   avanzados y paginación inteligente.
+   - Conexión real a Supabase (tabla: productos)
+   - Exportación a Excel (CSV)
+   - Modal de edición
+   - Modal de eliminación
    ============================================================ */
 
 let clientSupabase = null;
+
 if (typeof supabase !== "undefined" && supabase.createClient) {
     clientSupabase = supabase.createClient(
-        "https://tu-proyecto.supabase.co",
-        "tu-anon-key"
+        "https://utcqgkeiyqvfxfhjupfc.supabase.co",   // ← TU URL REAL
+        "TU_ANON_KEY_REAL"                           // ← TU ANON KEY REAL
     );
 }
 
-/* ============================
-   ESTADO GLOBAL
-   ============================ */
 let productosData = [];
 let productosFiltrados = [];
 let paginaActual = 1;
@@ -24,10 +24,8 @@ let ordenColumna = "codigo";
 let ordenAscendente = true;
 
 let debounceTimer = null;
+let codigoAEliminar = null;
 
-/* ============================
-   INICIO
-   ============================ */
 document.addEventListener("DOMContentLoaded", () => {
     inicializarEventos();
     cargarDatosCompras();
@@ -75,7 +73,6 @@ function inicializarEventos() {
         }
     });
 
-    // Ordenamiento por columnas
     const headers = document.querySelectorAll("#tablaProductosCompras thead th[data-column]");
     headers.forEach(header => {
         header.addEventListener("click", () => {
@@ -100,42 +97,72 @@ function inicializarEventos() {
             aplicarFiltros();
         });
     });
+
+    const btnExport = document.getElementById("btnExportExcel");
+    if (btnExport) {
+        btnExport.addEventListener("click", exportarExcel);
+    }
+
+    const btnNuevo = document.getElementById("btnNuevo");
+    if (btnNuevo) {
+        btnNuevo.addEventListener("click", () => {
+            const modal = new bootstrap.Modal(document.getElementById("modalNuevaCompra"));
+            modal.show();
+        });
+    }
+
+    const btnGuardarNueva = document.getElementById("btnGuardarNuevaCompra");
+    if (btnGuardarNueva) {
+        btnGuardarNueva.addEventListener("click", guardarNuevaCompra);
+    }
+
+    const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
+    if (btnGuardarEdicion) {
+        btnGuardarEdicion.addEventListener("click", guardarEdicionProducto);
+    }
+
+    const btnConfirmarEliminar = document.getElementById("btnConfirmarEliminar");
+    if (btnConfirmarEliminar) {
+        btnConfirmarEliminar.addEventListener("click", confirmarEliminarProducto);
+    }
 }
 
 /* ============================
-   CARGA DE DATOS
+   CARGA REAL DESDE SUPABASE
    ============================ */
 async function cargarDatosCompras() {
-    let datosCargados = false;
+    try {
+        const { data, error } = await clientSupabase
+            .from("productos")
+            .select("*")
+            .order("codigo", { ascending: true })
+            .limit(50000);
 
-    if (clientSupabase) {
-        try {
-            const { data, error } = await clientSupabase
-                .from("productos")
-                .select("*")
-                .range(0, 99999);
-
-            if (!error && data && data.length > 0) {
-                productosData = data;
-                datosCargados = true;
-                localStorage.setItem("cacheCompras", JSON.stringify(data));
-            }
-        } catch (e) {
-            console.warn("Supabase falló, usando cache local si existe.");
+        if (error) {
+            console.error("❌ Error Supabase:", error);
+            alert("Supabase no permitió leer la tabla productos. Revisa RLS.");
+            return;
         }
-    }
 
-    if (!datosCargados) {
-        const cache = localStorage.getItem("cacheCompras");
-        productosData = cache ? JSON.parse(cache) : obtenerDatosPrueba();
-    }
+        if (!data || data.length === 0) {
+            alert("La tabla 'productos' está vacía o RLS bloquea la lectura.");
+            return;
+        }
 
-    ordenarDatosGlobales();
-    aplicarFiltros();
+        console.log(`✔ Supabase cargó ${data.length} registros.`);
+        productosData = data;
+
+        ordenarDatosGlobales();
+        aplicarFiltros();
+
+    } catch (e) {
+        console.error("❌ Error inesperado:", e);
+        alert("No se pudo conectar a Supabase.");
+    }
 }
 
 /* ============================
-   OBTENER VALOR DE CAMPO
+   ORDENAMIENTO GLOBAL
    ============================ */
 function obtenerValorCampo(obj, col) {
     const map = {
@@ -155,9 +182,6 @@ function obtenerValorCampo(obj, col) {
     return map[col] ?? "";
 }
 
-/* ============================
-   ORDENAMIENTO GLOBAL PRO
-   ============================ */
 function ordenarDatosGlobales() {
     productosData.sort((a, b) => {
         let valA = obtenerValorCampo(a, ordenColumna);
@@ -182,7 +206,7 @@ function ordenarDatosGlobales() {
 }
 
 /* ============================
-   FILTROS AVANZADOS PRO
+   FILTROS
    ============================ */
 function aplicarFiltros() {
     const nom = document.getElementById("buscarNombre").value.toLowerCase().trim();
@@ -212,10 +236,14 @@ function aplicarFiltros() {
 
     paginaActual = 1;
     renderizarTabla();
+
+    if (window.actualizarResumenRegistros) {
+        window.actualizarResumenRegistros(productosData.length, productosFiltrados.length);
+    }
 }
 
 /* ============================
-   RENDERIZADO PRO
+   RENDERIZADO
    ============================ */
 function renderizarTabla() {
     const tbody = document.getElementById("tbodyCompras");
@@ -248,8 +276,8 @@ function renderizarTabla() {
             <td>${p.peso || 0}</td>
             <td>${p.medidas || "0"}</td>
             <td class="text-center">
-                <button class="action-btn me-1" onclick="editarProducto('${p.codigo}')"><i class="fa-solid fa-pen"></i></button>
-                <button class="action-btn" onclick="eliminarProducto('${p.codigo}')"><i class="fa-solid fa-trash"></i></button>
+                <button class="action-btn me-1" onclick="editarProducto('${p.codigo}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" onclick="eliminarProducto('${p.codigo}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
 
@@ -261,24 +289,155 @@ function renderizarTabla() {
 }
 
 /* ============================
-   ACCIONES
+   EXPORTAR A EXCEL (CSV)
    ============================ */
-function editarProducto(codigo) {
-    console.log("Editar:", codigo);
-}
+function exportarExcel() {
+    const filas = productosFiltrados.map(p => ({
+        codigo: p.codigo || "",
+        origen: p.naci || "",
+        marca: p.marca || "",
+        descripcion: p.descripcion || p.nombre || "",
+        unidad: p.unidad || "",
+        costo: p.precio_compra ?? p.costo ?? 0,
+        saldo_temp: p.saldo_temp ?? 0,
+        saldo_uio: p.saldo ?? 0,
+        saldo_gye: p.saldobext ?? p.saldo_bext ?? 0,
+        peso: p.peso ?? 0,
+        medidas: p.medidas || "0"
+    }));
 
-function eliminarProducto(codigo) {
-    console.log("Eliminar:", codigo);
+    let csv = "CÓDIGO,ORI,MARCA,NOMBRE,UNI,COSTO,S.TEM,S.UIO,S.GYE,PESO,MEDIDAS\n";
+
+    filas.forEach(f => {
+        csv += `${f.codigo},${f.origen},${f.marca},${f.descripcion},${f.unidad},${f.costo},${f.saldo_temp},${f.saldo_uio},${f.saldo_gye},${f.peso},${f.medidas}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "compras_sucre.csv";
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 /* ============================
-   DATOS DE PRUEBA
+   NUEVA COMPRA (BÁSICO)
    ============================ */
-function obtenerDatosPrueba() {
-    return [
-        { codigo: "ABR013", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "UNI", precio_compra: 3.00, precio_venta: 5.00, saldo_temp: 0, saldo: 0, saldobext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR015", naci: "TWN", marca: "SHIMANO", descripcion: "ABRAZADERA P/REDUCIR PASACAT.34.9 A 31.8", unidad: "UNI", precio_compra: 1.00, precio_venta: 2.00, saldo_temp: 0, saldo: 0, saldobext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR019", naci: "TWN", marca: "ZOOMN", descripcion: "ABRAZADERA CUADRO BMX ALUMINIO 25.4 MM", unidad: "UNI", precio_compra: 1.00, precio_venta: 2.50, saldo_temp: 0, saldo: 0, saldobext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR022", naci: "TWN", marca: "EPOCH MAK", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM ALUMINIO", unidad: "UNI", precio_compra: 4.00, precio_venta: 7.00, saldo_temp: 0, saldo: 0, saldobext: 0, peso: 0, medidas: "0" }
-    ];
+async function guardarNuevaCompra() {
+    const codigo = document.getElementById("nuevoCodigo").value.trim();
+    const marca = document.getElementById("nuevoMarca").value.trim();
+    const naci = document.getElementById("nuevoNaci").value.trim();
+    const descripcion = document.getElementById("nuevoDescripcion").value.trim();
+    const costo = parseFloat(document.getElementById("nuevoCosto").value);
+
+    if (!codigo || !descripcion || isNaN(costo)) {
+        alert("Completa al menos código, descripción y costo.");
+        return;
+    }
+
+    const nuevo = {
+        codigo,
+        marca,
+        naci,
+        descripcion,
+        precio_compra: costo,
+        unidad: "UNI",
+        saldo_temp: 0,
+        saldo: 0,
+        saldobext: 0,
+        peso: 0,
+        medidas: "0"
+    };
+
+    const { error } = await clientSupabase
+        .from("productos")
+        .insert(nuevo);
+
+    if (error) {
+        alert("Error al guardar nueva compra");
+        console.error(error);
+        return;
+    }
+
+    alert("Producto creado");
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevaCompra"));
+    if (modal) modal.hide();
+    cargarDatosCompras();
+}
+
+/* ============================
+   EDICIÓN
+   ============================ */
+function editarProducto(codigo) {
+    const p = productosData.find(x => x.codigo === codigo);
+    if (!p) return;
+
+    document.getElementById("editCodigo").value = p.codigo || "";
+    document.getElementById("editMarca").value = p.marca || "";
+    document.getElementById("editNaci").value = p.naci || "";
+    document.getElementById("editDescripcion").value = p.descripcion || p.nombre || "";
+    document.getElementById("editCosto").value = p.precio_compra ?? p.costo ?? 0;
+
+    const modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+    modal.show();
+}
+
+async function guardarEdicionProducto() {
+    const codigo = document.getElementById("editCodigo").value.trim();
+
+    const cambios = {
+        marca: document.getElementById("editMarca").value.trim(),
+        naci: document.getElementById("editNaci").value.trim(),
+        descripcion: document.getElementById("editDescripcion").value.trim(),
+        precio_compra: parseFloat(document.getElementById("editCosto").value)
+    };
+
+    const { error } = await clientSupabase
+        .from("productos")
+        .update(cambios)
+        .eq("codigo", codigo);
+
+    if (error) {
+        alert("Error al guardar cambios");
+        console.error(error);
+        return;
+    }
+
+    alert("Producto actualizado");
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modalEditar"));
+    if (modal) modal.hide();
+    cargarDatosCompras();
+}
+
+/* ============================
+   ELIMINACIÓN
+   ============================ */
+function eliminarProducto(codigo) {
+    codigoAEliminar = codigo;
+    document.getElementById("elimCodigo").textContent = codigo;
+    const modal = new bootstrap.Modal(document.getElementById("modalEliminar"));
+    modal.show();
+}
+
+async function confirmarEliminarProducto() {
+    if (!codigoAEliminar) return;
+
+    const { error } = await clientSupabase
+        .from("productos")
+        .delete()
+        .eq("codigo", codigoAEliminar);
+
+    if (error) {
+        alert("Error al eliminar");
+        console.error(error);
+        return;
+    }
+
+    alert("Producto eliminado");
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modalEliminar"));
+    if (modal) modal.hide();
+    codigoAEliminar = null;
+    cargarDatosCompras();
 }
