@@ -10,7 +10,7 @@ let clientSupabase = null;
 
 if (typeof supabase !== "undefined" && supabase.createClient) {
     clientSupabase = supabase.createClient(
-        "https://utcqgkeiyqvfxfhjupfc.supabase.co",   // URL REAL
+        "https://utcqgkeiyqvfxfhjupfc.supabase.co",
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts"
     );
 }
@@ -115,7 +115,7 @@ async function cargarDatosCompras() {
             .limit(50000);
 
         if (error) {
-            alert("Supabase bloqueó la lectura. Revisa RLS.");
+            alert("Supabase no permitió leer la tabla productos. Revisa RLS.");
             console.error(error);
             return;
         }

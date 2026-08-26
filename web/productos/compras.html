@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos - Compras (PRO) - ERP SUCRE</title>
+    <title>Compras PRO - ERP SUCRE</title>
 
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -40,14 +38,12 @@
             font-weight: 700;
             color: #ffffff;
             padding: 1.5rem 1.25rem;
-            letter-spacing: 0.5px;
         }
 
         #sidebar .nav-link {
             color: var(--sidebar-text);
             padding: 0.75rem 1.25rem;
             font-weight: 500;
-            font-size: 0.95rem;
         }
 
         #sidebar .nav-link:hover,
@@ -58,25 +54,15 @@
         #content {
             flex: 1;
             padding: 2rem;
-            min-width: 0;
         }
 
         .btn-green {
             background-color: var(--theme-green);
             color: white;
             border: none;
-            font-weight: 500;
         }
         .btn-green:hover {
             background-color: var(--theme-green-hover);
-            color: white;
-        }
-
-        .btn-toggle-sidebar {
-            background-color: #475569;
-            color: white;
-            border: none;
-            font-size: 0.85rem;
         }
 
         .table-excel {
@@ -90,39 +76,16 @@
             color: var(--excel-header-text) !important;
             font-weight: 700;
             font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
             border-bottom: 2px solid var(--excel-header-border) !important;
             border-right: 1px solid var(--excel-header-border) !important;
             padding: 0.65rem 0.5rem;
-            vertical-align: middle;
             cursor: pointer;
-            user-select: none;
-        }
-
-        .table-excel thead th:hover {
-            background-color: #cbd5e1 !important;
         }
 
         .table-excel tbody td {
             font-size: 0.85rem;
-            vertical-align: middle;
-            color: #334155;
-            padding: 0.55rem 0.5rem;
             border-right: 1px solid #e2e8f0;
             border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table-excel tbody tr:nth-of-type(odd) td {
-            background-color: #ffffff;
-        }
-
-        .table-excel tbody tr:nth-of-type(even) td {
-            background-color: #f8fafc;
-        }
-
-        .table-excel tbody tr:hover td {
-            background-color: #e0f2fe !important;
         }
 
         .action-btn {
@@ -140,17 +103,6 @@
         .sort-icon {
             font-size: 0.75rem;
             margin-left: 3px;
-            color: #64748b;
-        }
-
-        .badge-pro {
-            font-size: 0.7rem;
-            background-color: #0ea5e9;
-        }
-
-        .filter-label {
-            font-size: 0.75rem;
-            color: #64748b;
         }
     </style>
 </head>
@@ -159,80 +111,40 @@
 <div class="d-flex">
     <!-- SIDEBAR -->
     <div id="sidebar">
-        <div class="brand d-flex align-items-center justify-content-between">
-            <span>ERP SUCRE</span>
-            <span class="badge badge-pro text-dark">Compras PRO</span>
-        </div>
+        <div class="brand">ERP SUCRE</div>
         <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="../indicadores/index.html">Indicadores</a></li>
-            <li class="nav-item"><a class="nav-link active" href="compras.html">Productos</a></li>
+            <li class="nav-item"><a class="nav-link active" href="compras.html">Compras</a></li>
             <li class="nav-item"><a class="nav-link" href="../inventario/index.html">Inventario</a></li>
             <li class="nav-item"><a class="nav-link" href="../contactos/index.html">Contactos</a></li>
             <li class="nav-item"><a class="nav-link" href="../reportes/index.html">Reportes</a></li>
-            <li class="nav-item"><a class="nav-link" href="../facturacion/index.html">Facturación</a></li>
-            <li class="nav-item"><a class="nav-link" href="../configuracion/index.html">Configuración</a></li>
         </ul>
     </div>
 
     <!-- CONTENT -->
     <div id="content">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-                <h2 class="fw-bold text-dark mb-0">Compras</h2>
-                <p class="text-muted small mb-0">Gestión de costos, proveedores y reabastecimiento de stock (Vista PRO)</p>
-            </div>
-            <button class="btn btn-toggle-sidebar btn-sm" id="btnToggleSidebar">Ocultar menú</button>
-        </div>
+        <h2 class="fw-bold text-dark mb-1">Compras PRO</h2>
+        <p class="text-muted small mb-3">Gestión de costos, proveedores y reabastecimiento</p>
+
+        <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
 
         <!-- FILTROS -->
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body py-2">
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-3">
-                        <label class="filter-label">Nombre / descripción</label>
-                        <input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="filter-label">Marca</label>
-                        <input type="text" id="buscarMarca" class="form-control form-control-sm" placeholder="Buscar por MARCA...">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="filter-label">Código</label>
-                        <input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="filter-label">Búsqueda general</label>
-                        <input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos...">
-                    </div>
-                    <div class="col-md-3 d-flex gap-2">
-                        <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">
-                            <i class="fa-solid fa-rotate-left me-1"></i>Limpiar filtros
-                        </button>
-                        <button class="btn btn-outline-success btn-sm w-100" id="btnNuevo">
-                            <i class="fa-solid fa-plus me-1"></i>Nueva compra
-                        </button>
-                    </div>
-                </div>
+        <div class="row g-2 mb-3">
+            <div class="col-md-3"><input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE..."></div>
+            <div class="col-md-2"><input type="text" id="buscarMarca" class="form-control form-control-sm" placeholder="Buscar por MARCA..."></div>
+            <div class="col-md-2"><input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO..."></div>
+            <div class="col-md-2"><input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos..."></div>
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">Mostrar todos</button>
+                <button class="btn btn-green btn-sm w-100" id="btnNuevo">+ Nueva Compra</button>
             </div>
         </div>
 
-        <!-- VISTAS / EXPORT -->
-        <div class="mb-3 d-flex justify-content-between align-items-center">
-            <div>
-                <a href="productos.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaVentas">
-                    Vista Ventas
-                </a>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaCompras">
-                    Vista Compras PRO
-                </button>
-            </div>
-            <div class="d-flex gap-2 align-items-center">
-                <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
-                    <i class="fa-solid fa-file-excel me-1 text-success"></i>Exportar Excel
-                </button>
-                <span class="small text-muted" id="resumenRegistros"></span>
-            </div>
+        <!-- EXPORT -->
+        <div class="mb-3 d-flex justify-content-between">
+            <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
+                <i class="fa-solid fa-file-excel me-1 text-success"></i>Exportar Excel
+            </button>
+            <span class="small text-muted" id="resumenRegistros"></span>
         </div>
 
         <!-- TABLA -->
@@ -251,23 +163,18 @@
                         <th data-column="saldobext">S GYE <span class="sort-icon">↕</span></th>
                         <th data-column="peso">PESO <span class="sort-icon">↕</span></th>
                         <th data-column="medidas">MEDIDAS <span class="sort-icon">↕</span></th>
-                        <th class="text-center" style="cursor: default;">ACCIONES</th>
+                        <th class="text-center">ACCIONES</th>
                     </tr>
                 </thead>
-                <tbody id="tbodyCompras">
-                </tbody>
+                <tbody id="tbodyCompras"></tbody>
             </table>
         </div>
 
         <!-- PAGINACIÓN -->
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
-                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">
-                    <i class="fa-solid fa-chevron-left me-1"></i>Anterior
-                </button>
-                <button class="btn btn-outline-secondary btn-sm" id="btnSiguiente">
-                    Siguiente<i class="fa-solid fa-chevron-right ms-1"></i>
-                </button>
+                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">Anterior</button>
+                <button class="btn btn-outline-secondary btn-sm" id="btnSiguiente">Siguiente</button>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted">Ir a página:</span>
@@ -279,36 +186,17 @@
 </div>
 
 <!-- MODAL NUEVA COMPRA -->
-<div class="modal fade" id="modalNuevaCompra" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalNuevaCompra" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Registrar nueva compra</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
+      <div class="modal-header"><h5 class="modal-title">Nueva Compra</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-        <p class="small text-muted mb-2">Flujo básico de alta de producto de compras.</p>
         <div class="row g-2">
-          <div class="col-md-4">
-            <label class="form-label form-label-sm">Código</label>
-            <input type="text" class="form-control form-control-sm" id="nuevoCodigo">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label form-label-sm">Marca</label>
-            <input type="text" class="form-control form-control-sm" id="nuevoMarca">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label form-label-sm">Origen</label>
-            <input type="text" class="form-control form-control-sm" id="nuevoNaci" value="TWN">
-          </div>
-          <div class="col-md-8">
-            <label class="form-label form-label-sm">Descripción / Nombre</label>
-            <input type="text" class="form-control form-control-sm" id="nuevoDescripcion">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label form-label-sm">Costo</label>
-            <input type="number" step="0.01" class="form-control form-control-sm" id="nuevoCosto">
-          </div>
+          <div class="col-md-4"><label>Código</label><input id="nuevoCodigo" class="form-control form-control-sm"></div>
+          <div class="col-md-4"><label>Marca</label><input id="nuevoMarca" class="form-control form-control-sm"></div>
+          <div class="col-md-4"><label>Origen</label><input id="nuevoNaci" class="form-control form-control-sm" value="TWN"></div>
+          <div class="col-md-8"><label>Descripción</label><input id="nuevoDescripcion" class="form-control form-control-sm"></div>
+          <div class="col-md-4"><label>Costo</label><input id="nuevoCosto" type="number" step="0.01" class="form-control form-control-sm"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -323,38 +211,16 @@
 <div class="modal fade" id="modalEditar" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Editar producto</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
+      <div class="modal-header"><h5 class="modal-title">Editar Producto</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <div class="row g-2">
-          <div class="col-md-4">
-            <label class="form-label">Código</label>
-            <input id="editCodigo" class="form-control form-control-sm" readonly>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Marca</label>
-            <input id="editMarca" class="form-control form-control-sm">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Origen</label>
-            <input id="editNaci" class="form-control form-control-sm">
-          </div>
-
-          <div class="col-md-8">
-            <label class="form-label">Descripción</label>
-            <input id="editDescripcion" class="form-control form-control-sm">
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Costo</label>
-            <input id="editCosto" type="number" step="0.01" class="form-control form-control-sm">
-          </div>
+          <div class="col-md-4"><label>Código</label><input id="editCodigo" class="form-control form-control-sm" readonly></div>
+          <div class="col-md-4"><label>Marca</label><input id="editMarca" class="form-control form-control-sm"></div>
+          <div class="col-md-4"><label>Origen</label><input id="editNaci" class="form-control form-control-sm"></div>
+          <div class="col-md-8"><label>Descripción</label><input id="editDescripcion" class="form-control form-control-sm"></div>
+          <div class="col-md-4"><label>Costo</label><input id="editCosto" type="number" step="0.01" class="form-control form-control-sm"></div>
         </div>
       </div>
-
       <div class="modal-footer">
         <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
         <button class="btn btn-green btn-sm" id="btnGuardarEdicion">Guardar cambios</button>
@@ -367,16 +233,11 @@
 <div class="modal fade" id="modalEliminar" tabindex="-1">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Eliminar producto</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-
+      <div class="modal-header bg-danger text-white"><h5 class="modal-title">Eliminar</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
       <div class="modal-body text-center">
-        <p>¿Seguro que deseas eliminar el producto?</p>
+        <p>¿Eliminar el producto?</p>
         <strong id="elimCodigo"></strong>
       </div>
-
       <div class="modal-footer d-flex justify-content-between">
         <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
         <button class="btn btn-danger btn-sm" id="btnConfirmarEliminar">Eliminar</button>
@@ -385,28 +246,24 @@
   </div>
 </div>
 
-<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="compras.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const btnToggle = document.getElementById("btnToggleSidebar");
-        if (btnToggle) {
-            btnToggle.addEventListener("click", () => {
-                const sidebar = document.getElementById("sidebar");
-                sidebar.classList.toggle("d-none");
-                btnToggle.textContent = sidebar.classList.contains("d-none") ? "Mostrar menú" : "Ocultar menú";
-            });
-        }
-
-        window.actualizarResumenRegistros = function(total, filtrados) {
-            const el = document.getElementById("resumenRegistros");
-            if (!el) return;
-            el.textContent = `Registros: ${filtrados} filtrados de ${total} totales`;
-        };
+document.addEventListener("DOMContentLoaded", () => {
+    const btnToggle = document.getElementById("btnToggleSidebar");
+    btnToggle.addEventListener("click", () => {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("d-none");
+        btnToggle.textContent = sidebar.classList.contains("d-none") ? "Mostrar menú" : "Ocultar menú";
     });
+
+    window.actualizarResumenRegistros = function(total, filtrados) {
+        document.getElementById("resumenRegistros").textContent =
+            `Registros: ${filtrados} filtrados de ${total} totales`;
+    };
+});
 </script>
 
 </body>
