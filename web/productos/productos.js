@@ -107,12 +107,16 @@ function actualizarInputPagina() {
 function actualizarIconosOrdenamiento(headers, selectedHeader) {
     headers.forEach(h => {
         const icon = h.querySelector('.sort-icon');
-        if (icon) icon.textContent = '↕';
+        if (icon) {
+            icon.textContent = '↕';
+            icon.style.color = '#64748b';
+        }
     });
 
     const activeIcon = selectedHeader.querySelector('.sort-icon');
     if (activeIcon) {
         activeIcon.textContent = currentSortAscending ? '▲' : '▼';
+        activeIcon.style.color = '#00a67d';
     }
 }
 
