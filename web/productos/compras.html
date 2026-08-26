@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compras - ERP SUCRE</title>
+    <title>Productos - Compras - ERP SUCRE</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -28,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar Styling */
         #sidebar {
             width: 240px;
             min-height: 100vh;
@@ -55,14 +54,12 @@
             color: var(--sidebar-active);
         }
 
-        /* Layout Content */
         #content {
             flex: 1;
             padding: 2rem;
             min-width: 0;
         }
 
-        /* Custom Buttons & Theme */
         .btn-green {
             background-color: var(--theme-green);
             color: white;
@@ -81,7 +78,6 @@
             font-size: 0.85rem;
         }
 
-        /* Estilo Excel para Encabezado de Tabla */
         .table-excel {
             border-collapse: separate;
             border-spacing: 0;
@@ -150,7 +146,6 @@
 <body>
 
 <div class="d-flex">
-    <!-- Sidebar -->
     <div id="sidebar">
         <div class="brand">ERP SUCRE</div>
         <ul class="nav flex-column">
@@ -165,15 +160,12 @@
         </ul>
     </div>
 
-    <!-- Main Content -->
     <div id="content">
         <h2 class="fw-bold text-dark mb-1">Compras</h2>
         <p class="text-muted small mb-3">Gestión de costos, proveedores y reabastecimiento de stock</p>
 
-        <!-- Sidebar Toggle Button -->
         <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
 
-        <!-- Filters Section -->
         <div class="row g-2 mb-3">
             <div class="col-md-3">
                 <input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
@@ -193,13 +185,11 @@
             </div>
         </div>
 
-        <!-- View Switcher (Pills Style) -->
         <div class="mb-3">
-            <a href="productos.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Vista Ventas</a>
+            <a href="productos.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaVentas">Vista Ventas</a>
             <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaCompras">Vista Compras</button>
         </div>
 
-        <!-- Dynamic Data Table con Estilo Excel -->
         <div class="table-responsive bg-white shadow-sm rounded">
             <table class="table table-excel mb-0" id="tablaProductosCompras">
                 <thead>
@@ -209,22 +199,20 @@
                         <th data-column="marca">MARCA <span class="sort-icon">↕</span></th>
                         <th data-column="descripcion">NOMBRE <span class="sort-icon">↕</span></th>
                         <th data-column="unidad">UNI <span class="sort-icon">↕</span></th>
-                        <th data-column="costo_compra">COSTO <span class="sort-icon">↕</span></th>
+                        <th data-column="precio_compra">COSTO <span class="sort-icon">↕</span></th>
                         <th data-column="saldo_temp">S.TEM <span class="sort-icon">↕</span></th>
                         <th data-column="saldo">S UIO <span class="sort-icon">↕</span></th>
-                        <th data-column="saldo_bext">S GYE <span class="sort-icon">↕</span></th>
+                        <th data-column="saldobext">S GYE <span class="sort-icon">↕</span></th>
                         <th data-column="peso">PESO <span class="sort-icon">↕</span></th>
                         <th data-column="medidas">MEDIDAS <span class="sort-icon">↕</span></th>
                         <th class="text-center" style="cursor: default;">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyCompras">
-                    <!-- Filas inyectadas por JS -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
                 <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">Anterior</button>
