@@ -1,4 +1,4 @@
-// Manejo resiliente de Supabase
+// Manejo de Supabase
 let clientSupabase = null;
 if (typeof supabase !== 'undefined' && supabase.createClient) {
     const SUPABASE_URL = "https://tu-proyecto.supabase.co"; 
@@ -6,7 +6,7 @@ if (typeof supabase !== 'undefined' && supabase.createClient) {
     clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-let productosCompras = [];
+let productosVentas = [];
 let productosFiltrados = [];
 let paginaActual = 1;
 const registrosPorPagina = 15;
@@ -15,7 +15,7 @@ let ordenAscendente = true;
 
 document.addEventListener("DOMContentLoaded", () => {
     inicializarEventos();
-    cargarDatosCompras();
+    cargarDatosVentas();
 });
 
 function inicializarEventos() {
@@ -70,7 +70,7 @@ function inicializarEventos() {
     });
 
     // Headers con ordenamiento
-    const headers = document.querySelectorAll("#tablaProductosCompras thead th[data-column]");
+    const headers = document.querySelectorAll("#tablaProductosVentas thead th[data-column]");
     headers.forEach(header => {
         header.addEventListener("click", () => {
             const columna = header.getAttribute("data-column");
@@ -86,14 +86,14 @@ function inicializarEventos() {
     });
 }
 
-async function cargarDatosCompras() {
+async function cargarDatosVentas() {
     let datosCargados = false;
 
     if (clientSupabase) {
         try {
             const { data, error } = await clientSupabase.from('productos').select('*');
             if (!error && data && data.length > 0) {
-                productosCompras = data;
+                productosVentas = data;
                 datosCargados = true;
             }
         } catch (e) {
@@ -102,10 +102,10 @@ async function cargarDatosCompras() {
     }
 
     if (!datosCargados) {
-        productosCompras = obtenerDatosPrueba();
+        productosVentas = obtenerDatosPrueba();
     }
 
-    productosFiltrados = [...productosCompras];
+    productosFiltrados = [...productosVentas];
     ordenarDatos();
     renderizarTabla();
 }
@@ -116,7 +116,7 @@ function aplicarFiltros() {
     const cod = document.getElementById("buscarCodigo").value.toLowerCase().trim();
     const gen = document.getElementById("buscarGeneral").value.toLowerCase().trim();
 
-    productosFiltrados = productosCompras.filter(item => {
+    productosFiltrados = productosVentas.filter(item => {
         const desc = (item.descripcion || item.nombre || "").toLowerCase();
         const marca = (item.marca || "").toLowerCase();
         const codigo = (item.codigo || "").toLowerCase();
@@ -160,7 +160,7 @@ function ordenarDatos() {
 }
 
 function renderizarTabla() {
-    const tbody = document.getElementById("tbodyCompras");
+    const tbody = document.getElementById("tbodyVentas");
     tbody.innerHTML = "";
 
     const inicio = (paginaActual - 1) * registrosPorPagina;
@@ -173,8 +173,9 @@ function renderizarTabla() {
     }
 
     paginaData.forEach(p => {
-        const costoVal = p.costo_compra ?? p.costo ?? p.precio_venta ?? 0;
-        const costoFormateado = parseFloat(costoVal).toFixed(2);
+        // En Ventas tomamos precio_venta o pvp
+        const precioVal = p.precio_venta ?? p.pvp ?? 0;
+        const pvpFormateado = parseFloat(precioVal).toFixed(2);
         
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -183,7 +184,7 @@ function renderizarTabla() {
             <td>${p.marca || ''}</td>
             <td>${p.descripcion || p.nombre || ''}</td>
             <td>${p.unidad || 'UNI'}</td>
-            <td>${costoFormateado}</td>
+            <td>${pvpFormateado}</td>
             <td>${p.saldo_temp || 0}</td>
             <td>${p.saldo || 0}</td>
             <td>${p.saldo_bext || 0}</td>
@@ -201,22 +202,22 @@ function renderizarTabla() {
 }
 
 function editarProducto(codigo) {
-    console.log("Editar ítem compras:", codigo);
+    console.log("Editar ítem ventas:", codigo);
 }
 
 function eliminarProducto(codigo) {
-    console.log("Eliminar ítem compras:", codigo);
+    console.log("Eliminar ítem ventas:", codigo);
 }
 
 function obtenerDatosPrueba() {
     return [
-        { codigo: "ABR013", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "UNI", costo_compra: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR015", naci: "TWN", marca: "SHIMANO", descripcion: "ABRAZADERA P/REDUCIR PASACAT.34.9 A 31.8", unidad: "UNI", costo_compra: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR019", naci: "TWN", marca: "ZOOMN", descripcion: "ABRAZADERA CUADRO BMX ALUMINIO 25.4 MM", unidad: "UNI", costo_compra: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR022", naci: "TWN", marca: "EPOCH MAK", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM ALUMINIO", unidad: "UNI", costo_compra: 4.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR024", naci: "TWN", marca: "ZOOM", descripcion: "ABRAZADERA CUADRO MTB 31.8 MM ALUMINIO", unidad: "UNI", costo_compra: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR029", naci: "TWN", marca: "ZOOM", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "UNI", costo_compra: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR030", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CABLE UNIV.PLAST.150mm", unidad: "UNI", costo_compra: 0.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
-        { codigo: "ABR032", naci: "TWN", marca: "CYCLERS", descripcion: "ABRAZADERA VELCRO MANGUERA CAMELBAG", unidad: "UNI", costo_compra: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" }
+        { codigo: "ABR013", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "0", precio_venta: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR015", naci: "TWN", marca: "SHIMANO", descripcion: "ABRAZADERA P/REDUCIR PASACAT.34.9 A 31.8", unidad: "0", precio_venta: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR019", naci: "TWN", marca: "ZOOMN", descripcion: "ABRAZADERA CUADRO BMX ALUMINIO 25.4 MM", unidad: "UNI", precio_venta: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR022", naci: "TWN", marca: "EPOCH MAK", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM ALUMINIO", unidad: "UNI", precio_venta: 4.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR024", naci: "TWN", marca: "ZOOM", descripcion: "ABRAZADERA CUADRO MTB 31.8 MM ALUMINIO", unidad: "0", precio_venta: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR029", naci: "TWN", marca: "ZOOM", descripcion: "ABRAZADERA CUADRO MTB 34.9 MM C/BLOQ.", unidad: "0", precio_venta: 3.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR030", naci: "TWN", marca: "SH.MC", descripcion: "ABRAZADERA CABLE UNIV.PLAST.150mm", unidad: "UNI", precio_venta: 0.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" },
+        { codigo: "ABR032", naci: "TWN", marca: "CYCLERS", descripcion: "ABRAZADERA VELCRO MANGUERA CAMELBAG", unidad: "0", precio_venta: 1.00, saldo_temp: 0, saldo: 0, saldo_bext: 0, peso: 0, medidas: "0" }
     ];
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos - ERP SUCRE</title>
+    <title>Productos - Ventas - ERP SUCRE</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -154,21 +154,21 @@
     <div id="sidebar">
         <div class="brand">ERP SUCRE</div>
         <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Indicadores</a></li>
-            <li class="nav-item"><a class="nav-link active" href="#">Productos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Contactos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Reportes</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Facturación</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Configuración</a></li>
+            <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="../indicadores/index.html">Indicadores</a></li>
+            <li class="nav-item"><a class="nav-link active" href="productos.html">Productos</a></li>
+            <li class="nav-item"><a class="nav-link" href="../inventario/index.html">Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" href="../contactos/index.html">Contactos</a></li>
+            <li class="nav-item"><a class="nav-link" href="../reportes/index.html">Reportes</a></li>
+            <li class="nav-item"><a class="nav-link" href="../facturacion/index.html">Facturación</a></li>
+            <li class="nav-item"><a class="nav-link" href="../configuracion/index.html">Configuración</a></li>
         </ul>
     </div>
 
     <!-- Main Content -->
     <div id="content">
         <h2 class="fw-bold text-dark mb-1">Productos</h2>
-        <p class="text-muted small mb-3">Gestión de catálogo, precios y stock</p>
+        <p class="text-muted small mb-3">Gestión de catálogo, precios PVP y disponibilidad de stock</p>
 
         <!-- Sidebar Toggle Button -->
         <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
@@ -195,8 +195,8 @@
 
         <!-- View Switcher (Pills Style) -->
         <div class="mb-3">
-            <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaVentas">Vista 1</button>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaCompras">Vista 2</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaVentas">Vista 1 (Ventas)</button>
+            <a href="compras.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaCompras">Vista 2 (Compras)</a>
         </div>
 
         <!-- Dynamic Data Table con Estilo Excel -->
@@ -239,6 +239,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="productos.js"></script>
 </body>
 </html>
