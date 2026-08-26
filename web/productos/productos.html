@@ -4,14 +4,18 @@
     <meta charset="UTF-8">
     <title>Productos - ERP SUCRE</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/erp.css">
+    <style>
+        #wrapper { display: flex; }
+        #sidebar { width: 250px; min-height: 100vh; }
+        #page-content { flex-grow: 1; }
+    </style>
     <script src="../js/bootstrap.bundle.min.js"></script>
     <script src="productos.js" defer></script>
 </head>
 
 <body>
 
-<div class="d-flex" id="wrapper">
+<div id="wrapper">
 
     <!-- SIDEBAR -->
     <div id="sidebar" class="bg-dark text-white p-3">
@@ -29,7 +33,7 @@
     </div>
 
     <!-- CONTENIDO -->
-    <div id="page-content" class="p-4 w-100">
+    <div id="page-content" class="p-4">
 
         <button class="btn btn-outline-secondary mb-3" id="btnToggleMenu">☰</button>
 

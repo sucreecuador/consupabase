@@ -3,20 +3,6 @@ let paginaActual = 1;
 let itemsPorPagina = 20;
 let currentSort = { column: null, direction: 'asc' };
 
-const columnMap = {
-    codigo: "CÓDIGO",
-    naci: "ORI",
-    marca: "MARCA",
-    descripcion: "NOMBRE",
-    unidad: "UNI",
-    precio_venta: "PVP",
-    saldo_temp: "S.TEM",
-    saldo: "S UIO",
-    saldobext: "S GYE",
-    peso: "PESO",
-    medidas: "MEDIDAS"
-};
-
 async function cargarProductosVentas() {
     const res = await fetch("/api/productos");
     productosData = await res.json();
@@ -57,52 +43,6 @@ function renderVentas(data) {
     });
 }
 
-function sortData(columnKey) {
-    if (currentSort.column === columnKey) {
-        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-    } else {
-        currentSort.column = columnKey;
-        currentSort.direction = 'asc';
-    }
-
-    productosData.sort((a, b) => {
-        let valA = a[columnKey] ?? "";
-        let valB = b[columnKey] ?? "";
-
-        if (typeof valA === "string") valA = valA.toUpperCase();
-        if (typeof valB === "string") valB = valB.toUpperCase();
-
-        if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
-        if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    actualizarIconos(columnKey);
-    renderVentas(productosData);
-}
-
-function actualizarIconos(columnKey) {
-    document.querySelectorAll("#tablaProductosVentas th").forEach(th => {
-        const key = th.dataset.column;
-        if (key) th.innerHTML = columnMap[key];
-    });
-
-    const th = document.querySelector(`#tablaProductosVentas th[data-column="${columnKey}"]`);
-    if (!th) return;
-
-    const icon = currentSort.direction === 'asc' ? " ▲" : " ▼";
-    th.innerHTML = columnMap[columnKey] + icon;
-}
-
-function attachSortEvents() {
-    document.querySelectorAll("#tablaProductosVentas th[data-column]").forEach(th => {
-        th.style.cursor = "pointer";
-        th.addEventListener("click", () => {
-            sortData(th.dataset.column);
-        });
-    });
-}
-
 async function buscarSupabase(campo, valor) {
     const res = await fetch(`/api/productos?campo=${campo}&valor=${valor}`);
     const data = await res.json();
@@ -111,7 +51,6 @@ async function buscarSupabase(campo, valor) {
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarProductosVentas();
-    attachSortEvents();
 
     document.getElementById("buscarNombre").addEventListener("keyup", e => {
         buscarSupabase("descripcion", e.target.value);
