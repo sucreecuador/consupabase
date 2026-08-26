@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - ERP SUCRE</title>
 
-    <!-- Bootstrap 5 CSS (CDN para asegurar carga) -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome (Íconos) -->
+    <!-- FontAwesome Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -79,12 +79,12 @@
         }
 
         /* Table Customization */
-        .table-custom thead {
+        .table-custom thead tr {
             background-color: var(--theme-green) !important;
-            color: white !important;
         }
 
         .table-custom th {
+            color: #ffffff !important;
             font-weight: 600;
             font-size: 0.85rem;
             letter-spacing: 0.5px;
@@ -96,7 +96,7 @@
         }
 
         .table-custom th:hover {
-            background-color: var(--theme-green-hover);
+            background-color: var(--theme-green-hover) !important;
         }
 
         .table-custom td {
@@ -175,10 +175,10 @@
             </div>
         </div>
 
-        <!-- View Switcher -->
+        <!-- View Switcher (Pills Style) -->
         <div class="mb-3">
-            <button class="btn btn-outline-secondary btn-sm active" id="btnVistaVentas">Vista Ventas</button>
-            <button class="btn btn-outline-secondary btn-sm" id="btnVistaCompras">Vista Compras</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaVentas">Vista 1</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaCompras">Vista 2</button>
         </div>
 
         <!-- Dynamic Data Table -->
@@ -221,8 +221,6 @@
     </div>
 </div>
 
-<!-- Supabase Client & Logic -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="productos.js"></script>
 </body>
 </html>

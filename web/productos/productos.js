@@ -1,4 +1,4 @@
-// Estado local de la vista
+// Estado global de la aplicación
 let productosData = [];
 let currentSortColumn = 'codigo';
 let currentSortAscending = true;
@@ -6,7 +6,7 @@ let paginaActual = 1;
 const registrosPorPagina = 15;
 
 // Endpoint de la API
-const API_URL = '/api/productos'; // Ajusta a tu ruta real (ej: 'https://consupabase-apiv2.onrender.com/api/productos')
+const API_URL = '/api/productos';
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarEventos();
@@ -25,7 +25,7 @@ function inicializarEventos() {
         });
     }
 
-    // Eventos de click para Ordenamiento (Sort)
+    // Ordenamiento por clic en encabezados (Sort)
     const headers = document.querySelectorAll('#tablaProductosVentas thead th[data-column]');
     headers.forEach(header => {
         header.addEventListener('click', () => {
@@ -43,11 +43,11 @@ function inicializarEventos() {
         });
     });
 
-    // Filtros de búsqueda en tiempo real
+    // Escuchar eventos de entrada en campos de búsqueda
     const inputsBusqueda = ['buscarNombre', 'buscarMarca', 'buscarCodigo', 'buscarGeneral'];
     inputsBusqueda.forEach(id => {
         document.getElementById(id)?.addEventListener('input', () => {
-            paginaActual = 1;
+            resetearPaginacion();
             ordenarYRenderizar();
         });
     });
@@ -58,7 +58,7 @@ function inicializarEventos() {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
-        paginaActual = 1;
+        resetearPaginacion();
         ordenarYRenderizar();
     });
 
@@ -66,7 +66,7 @@ function inicializarEventos() {
     document.getElementById('btnAnterior')?.addEventListener('click', () => {
         if (paginaActual > 1) {
             paginaActual--;
-            document.getElementById('inputPagina').value = paginaActual;
+            actualizarInputPagina();
             ordenarYRenderizar();
         }
     });
@@ -75,7 +75,7 @@ function inicializarEventos() {
         const totalPaginas = Math.ceil(obtenerProductosFiltrados().length / registrosPorPagina);
         if (paginaActual < totalPaginas) {
             paginaActual++;
-            document.getElementById('inputPagina').value = paginaActual;
+            actualizarInputPagina();
             ordenarYRenderizar();
         }
     });
@@ -83,11 +83,25 @@ function inicializarEventos() {
     document.getElementById('btnIrPagina')?.addEventListener('click', () => {
         const input = document.getElementById('inputPagina');
         const pageVal = parseInt(input.value);
-        if (pageVal && pageVal > 0) {
+        const totalPaginas = Math.ceil(obtenerProductosFiltrados().length / registrosPorPagina) || 1;
+        
+        if (pageVal && pageVal >= 1 && pageVal <= totalPaginas) {
             paginaActual = pageVal;
             ordenarYRenderizar();
+        } else {
+            actualizarInputPagina();
         }
     });
+}
+
+function resetearPaginacion() {
+    paginaActual = 1;
+    actualizarInputPagina();
+}
+
+function actualizarInputPagina() {
+    const input = document.getElementById('inputPagina');
+    if (input) input.value = paginaActual;
 }
 
 function actualizarIconosOrdenamiento(headers, selectedHeader) {
@@ -110,19 +124,18 @@ async function cargarProductos() {
         const response = await fetch(API_URL);
         
         if (!response.ok) {
-            throw new Error(`HTTP Error Status: ${response.status}`);
+            throw new Error(`HTTP ${response.status}: No se pudo obtener la información.`);
         }
 
         const data = await response.json();
-        
-        // Asignar los datos recibidos (acepta array directo o { data: [...] })
         productosData = Array.isArray(data) ? data : (data.data || []);
         
+        resetearPaginacion();
         ordenarYRenderizar();
 
     } catch (err) {
         console.error('Error al cargar productos:', err);
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-danger py-4">Error al cargar datos: ${err.message || 'No se pudo conectar con el servidor'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-danger py-4">Error al cargar datos: ${err.message}</td></tr>`;
     }
 }
 
@@ -133,14 +146,18 @@ function obtenerProductosFiltrados() {
     const valGeneral = document.getElementById('buscarGeneral')?.value.toLowerCase().trim() || '';
 
     return productosData.filter(p => {
-        const matchNombre = !valNombre || (p.descripcion && p.descripcion.toLowerCase().includes(valNombre));
-        const matchMarca = !valMarca || (p.marca && p.marca.toLowerCase().includes(valMarca));
-        const matchCodigo = !valCodigo || (p.codigo && p.codigo.toLowerCase().includes(valCodigo));
+        const descripcion = (p.descripcion || '').toLowerCase();
+        const marca = (p.marca || '').toLowerCase();
+        const codigo = (p.codigo || '').toLowerCase();
+
+        const matchNombre = !valNombre || descripcion.includes(valNombre);
+        const matchMarca = !valMarca || marca.includes(valMarca);
+        const matchCodigo = !valCodigo || codigo.includes(valCodigo);
         
         const matchGeneral = !valGeneral || 
-            (p.codigo && p.codigo.toLowerCase().includes(valGeneral)) ||
-            (p.descripcion && p.descripcion.toLowerCase().includes(valGeneral)) ||
-            (p.marca && p.marca.toLowerCase().includes(valGeneral));
+            codigo.includes(valGeneral) ||
+            descripcion.includes(valGeneral) ||
+            marca.includes(valGeneral);
 
         return matchNombre && matchMarca && matchCodigo && matchGeneral;
     });
@@ -149,7 +166,7 @@ function obtenerProductosFiltrados() {
 function ordenarYRenderizar() {
     let filtrados = obtenerProductosFiltrados();
 
-    // Lógica de ordenamiento dinámico por columna seleccionada
+    // Ordenamiento dinámico
     filtrados.sort((a, b) => {
         let valA = a[currentSortColumn] ?? '';
         let valB = b[currentSortColumn] ?? '';
@@ -162,19 +179,19 @@ function ordenarYRenderizar() {
         return 0;
     });
 
-    // Paginación local
+    // Paginación local garantizada
     const desde = (paginaActual - 1) * registrosPorPagina;
     const paginados = filtrados.slice(desde, desde + registrosPorPagina);
 
-    renderizarTabla(paginados, filtrados.length);
+    renderizarTabla(paginados);
 }
 
-function renderizarTabla(productos, totalRegistros) {
+function renderizarTabla(productos) {
     const tbody = document.getElementById('tbodyVentas');
     tbody.innerHTML = '';
 
     if (!productos || productos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4 text-muted">No se encontraron productos registered.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4 text-muted">No se encontraron productos registrados.</td></tr>';
         return;
     }
 
