@@ -1,108 +1,111 @@
+<!-- web/productos/productos.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Productos - ERP SUCRE</title>
+    <title>Gestión de Productos - ERP SUCRE</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <style>
-        #wrapper { display: flex; }
-        #sidebar { width: 250px; min-height: 100vh; }
-        #page-content { flex-grow: 1; }
-    </style>
+    <link rel="stylesheet" href="productos.css">
     <script src="../js/bootstrap.bundle.min.js"></script>
     <script src="productos.js" defer></script>
 </head>
-
-<body>
+<body class="erp-body">
 
 <div id="wrapper">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="erp-sidebar">
+        <div class="erp-logo">ERP SUCRE</div>
+        <nav class="erp-menu">
+            <a href="../index.html" class="erp-menu-item">Inicio</a>
+            <a href="../indicadores/index.html" class="erp-menu-item">Indicadores</a>
+            <a href="productos.html" class="erp-menu-item active">Productos</a>
+            <a href="../inventario/index.html" class="erp-menu-item">Inventario</a>
+            <a href="../contactos/index.html" class="erp-menu-item">Contactos</a>
+            <a href="../reportes/index.html" class="erp-menu-item">Reportes</a>
+            <a href="../facturacion/index.html" class="erp-menu-item">Facturación</a>
+            <a href="../configuracion/index.html" class="erp-menu-item">Configuración</a>
+        </nav>
+    </aside>
 
-    <div id="sidebar" class="bg-dark text-white p-3">
-        <h4 class="mb-4">ERP SUCRE</h4>
-        <ul class="nav flex-column">
-            <li class="nav-item"><a href="../index.html" class="nav-link text-white">Inicio</a></li>
-            <li class="nav-item"><a href="../indicadores/index.html" class="nav-link text-white">Indicadores</a></li>
-            <li class="nav-item"><a href="productos.html" class="nav-link text-white active">Productos</a></li>
-            <li class="nav-item"><a href="../inventario/index.html" class="nav-link text-white">Inventario</a></li>
-            <li class="nav-item"><a href="../contactos/index.html" class="nav-link text-white">Contactos</a></li>
-            <li class="nav-item"><a href="../reportes/index.html" class="nav-link text-white">Reportes</a></li>
-            <li class="nav-item"><a href="../facturacion/index.html" class="nav-link text-white">Facturación</a></li>
-            <li class="nav-item"><a href="../configuracion/index.html" class="nav-link text-white">Configuración</a></li>
-        </ul>
-    </div>
-
-    <div id="page-content" class="p-4">
-
-        <button class="btn btn-outline-secondary mb-3" id="btnToggleMenu">☰</button>
-
-        <h3 class="mb-3">Productos - Vista Ventas</h3>
-
-        <div class="row g-2 mb-3">
-            <div class="col-md-3">
-                <input type="text" id="buscarNombre" class="form-control" placeholder="Buscar por NOMBRE...">
+    <!-- CONTENIDO -->
+    <main id="page-content" class="erp-content">
+        <header class="erp-header">
+            <div class="erp-header-left">
+                <button id="btnToggleMenu" class="btn btn-outline-light btn-sm me-3">☰</button>
+                <h1 class="erp-title">Gestión de Productos</h1>
             </div>
-            <div class="col-md-3">
-                <input type="text" id="buscarMarca" class="form-control" placeholder="Buscar por MARCA...">
+            <div class="erp-header-right">
+                <button class="btn btn-success" id="btnNuevoProducto">+ Nuevo Producto</button>
             </div>
-            <div class="col-md-3">
-                <input type="text" id="buscarCodigo" class="form-control" placeholder="Buscar por CÓDIGO...">
-            </div>
-            <div class="col-md-3 d-flex">
-                <input type="text" id="buscarTodos" class="form-control me-2" placeholder="Buscar todos...">
-                <button class="btn btn-outline-primary" id="btnBuscarTodos">Buscar</button>
-            </div>
-        </div>
+        </header>
 
-        <div class="mb-3 d-flex justify-content-between">
-            <button class="btn btn-secondary" id="btnMostrarTodos">Mostrar todos</button>
-            <button class="btn btn-primary" id="btnNuevo">+ Nuevo Producto</button>
-        </div>
+        <!-- BARRA DE BÚSQUEDA -->
+        <section class="erp-search-bar">
+            <div class="erp-search-main">
+                <span class="erp-search-icon">🔍</span>
+                <input
+                    type="text"
+                    id="buscarGlobal"
+                    class="erp-search-input"
+                    placeholder="Buscar por nombre, código o marca..."
+                >
+            </div>
+            <div class="erp-search-filters">
+                <button class="btn btn-sm btn-outline-light" data-filter="todos">Todos</button>
+                <button class="btn btn-sm btn-outline-light" data-filter="con-stock">Con Stock</button>
+                <button class="btn btn-sm btn-outline-light" data-filter="sin-stock">Sin Stock</button>
+            </div>
+        </section>
 
-        <ul class="nav nav-tabs">
+        <!-- PESTAÑAS -->
+        <ul class="nav nav-tabs erp-tabs" id="productosTabs">
             <li class="nav-item">
-                <a class="nav-link active" href="#">Vista Ventas</a>
+                <button class="nav-link active" id="tabVentas" data-bs-toggle="tab" data-bs-target="#vistaVentas">
+                    📦 Ventas
+                </button>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="compras.html">Vista Compras</a>
+                <button class="nav-link compras-tab" id="tabCompras" data-bs-toggle="tab" data-bs-target="#vistaCompras">
+                    ⚠️ Compras
+                </button>
             </li>
         </ul>
 
-        <div class="table-responsive mt-3">
-            <table class="table table-striped table-hover" id="tablaProductosVentas">
-                <thead class="table-dark">
-                    <tr>
-                        <th data-column="codigo">CÓDIGO</th>
-                        <th data-column="naci">ORI</th>
-                        <th data-column="marca">MARCA</th>
-                        <th data-column="descripcion">NOMBRE</th>
-                        <th data-column="unidad">UNI</th>
-                        <th data-column="precio_venta">PVP</th>
-                        <th data-column="saldo_temp">S.TEM</th>
-                        <th data-column="saldo">S UIO</th>
-                        <th data-column="saldobext">S GYE</th>
-                        <th data-column="peso">PESO</th>
-                        <th data-column="medidas">MEDIDAS</th>
-                        <th>ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyVentas"></tbody>
-            </table>
-        </div>
-
-        <div class="d-flex justify-content-between mt-3">
-            <div>
-                <button class="btn btn-secondary" id="btnAnterior">Anterior</button>
-                <button class="btn btn-secondary" id="btnSiguiente">Siguiente</button>
+        <div class="tab-content erp-tab-content">
+            <!-- VISTA VENTAS -->
+            <div class="tab-pane fade show active" id="vistaVentas">
+                <div class="table-responsive erp-table-wrapper">
+                    <table class="table table-striped table-hover table-dark align-middle" id="tablaVentas">
+                        <thead>
+                            <tr>
+                                <th>CÓDIGO</th>
+                                <th>MARCA</th>
+                                <th>NOMBRE</th>
+                                <th>PVP ($)</th>
+                                <th>STOCK TOTAL</th>
+                                <th>STOCK UIO</th>
+                                <th>STOCK GYE</th>
+                                <th>PESO (kg)</th>
+                                <th>MEDIDAS</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyVentas"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="d-flex align-items-center">
-                <span class="me-2">Ir a página:</span>
-                <input type="number" id="inputPagina" class="form-control w-auto me-2" min="1">
-                <button class="btn btn-info" id="btnIrPagina">Ir</button>
+            <!-- VISTA COMPRAS (solo contenedor, contenido real en compras.html) -->
+            <div class="tab-pane fade" id="vistaCompras">
+                <div class="erp-compras-placeholder">
+                    <p class="text-muted mb-3">
+                        Para ver la vista completa de Compras, use <strong>compras.html</strong>.
+                    </p>
+                    <a href="compras.html" class="btn btn-outline-warning">Ir a Vista Compras</a>
+                </div>
             </div>
         </div>
-
-    </div>
+    </main>
 </div>
 
 </body>

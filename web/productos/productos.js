@@ -1,98 +1,153 @@
-let productosData = [];
-let paginaActual = 1;
-let itemsPorPagina = 20;
-let currentSort = { column: null, direction: 'asc' };
+// web/productos/productos.js
+const ejemploProductos = [
+  {
+    codigo: "BDO001",
+    ori: "COL",
+    marca: "HABY",
+    nombre: "BABY DOLL COPA TRIANGULAR, SIN ARO CARGA",
+    uni: "UNI",
+    pvp: 26.0,
+    stock_tem: 0,
+    stock_uio: 0,
+    stock_gye: 0,
+    peso: 0,
+    medidas: "www.haby.com.co",
+    creado_en: null
+  },
+  {
+    codigo: "AUD001",
+    ori: "CHP",
+    marca: "SH.MC",
+    nombre: "AUDIFONO GOTA BLUETOOTH",
+    uni: "UNI",
+    pvp: 6.0,
+    stock_tem: 4,
+    stock_uio: 2,
+    stock_gye: 2,
+    peso: 0.01,
+    medidas: "importadorasucre",
+    creado_en: null
+  },
+  {
+    codigo: "ASC001",
+    ori: "CHP",
+    marca: "XINDA",
+    nombre: "ASCENDEDOR PARA ESCALADA",
+    uni: "UNI",
+    pvp: 76.0,
+    stock_tem: 0,
+    stock_uio: 1,
+    stock_gye: 0,
+    peso: 0.19,
+    medidas: "20 X 9 X 2 cm",
+    creado_en: null
+  },
+  {
+    codigo: "ARO149",
+    ori: "CHP",
+    marca: "ALEX RIM",
+    nombre: "ARO SOLO 26 X 1.75 ALUM 36H.D/C NEGRO",
+    uni: "UNI",
+    pvp: 20.0,
+    stock_tem: 0,
+    stock_uio: 0,
+    stock_gye: 0,
+    peso: 0,
+    medidas: "0",
+    creado_en: null
+  }
+];
 
-async function cargarProductosVentas() {
-    const res = await fetch("/api/productos");
-    productosData = await res.json();
-    renderVentas(productosData);
+let productosVentas = [];
+
+function calcularStockTotal(p) {
+    return (p.stock_tem || 0) + (p.stock_uio || 0) + (p.stock_gye || 0);
 }
 
-function obtenerPagina(data) {
-    const inicio = (paginaActual - 1) * itemsPorPagina;
-    return data.slice(inicio, inicio + itemsPorPagina);
-}
-
-function renderVentas(data) {
+function renderTablaVentas(data) {
     const tbody = document.getElementById("tbodyVentas");
     tbody.innerHTML = "";
 
-    const pagina = obtenerPagina(data);
+    data.forEach(p => {
+        const stockTotal = calcularStockTotal(p);
+        const stockClass = stockTotal > 0 ? "stock-total-ok" : "stock-total-zero";
 
-    pagina.forEach(prod => {
         tbody.innerHTML += `
             <tr>
-                <td>${prod.codigo ?? "-"}</td>
-                <td>${prod.naci ?? "-"}</td>
-                <td>${prod.marca ?? "-"}</td>
-                <td>${prod.descripcion ?? "-"}</td>
-                <td>${prod.unidad ?? "-"}</td>
-                <td>${prod.precio_venta ?? "-"}</td>
-                <td>${prod.saldo_temp ?? "-"}</td>
-                <td>${prod.saldo ?? "-"}</td>
-                <td>${prod.saldobext ?? "-"}</td>
-                <td>${prod.peso ?? "-"}</td>
-                <td>${prod.medidas ?? "-"}</td>
+                <td>${p.codigo}</td>
+                <td>${p.marca}</td>
+                <td>${p.nombre}</td>
+                <td><span class="text-success fw-semibold">$${p.pvp.toFixed(2)}</span></td>
                 <td>
-                    <button class="btn btn-sm btn-primary" onclick="editarProducto('${prod.codigo}')">✏️</button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${prod.codigo}')">🗑️</button>
+                    <span class="stock-total-badge ${stockClass}">
+                        ${stockTotal}
+                    </span>
+                </td>
+                <td>
+                    <span class="stock-location-badge">UIO: ${p.stock_uio}</span>
+                </td>
+                <td>
+                    <span class="stock-location-badge">GYE: ${p.stock_gye}</span>
+                </td>
+                <td>${p.peso}</td>
+                <td>${p.medidas}</td>
+                <td class="erp-actions">
+                    <button class="btn btn-sm btn-outline-info">👁️</button>
+                    <button class="btn btn-sm btn-outline-warning">✏️</button>
+                    <button class="btn btn-sm btn-outline-danger">🗑️</button>
                 </td>
             </tr>
         `;
     });
 }
 
-async function buscarSupabase(campo, valor) {
-    const res = await fetch(`/api/productos?campo=${campo}&valor=${valor}`);
-    const data = await res.json();
-    renderVentas(data);
+function filtrarVentas(texto, filtroStock) {
+    texto = (texto || "").toLowerCase();
+
+    let filtrados = productosVentas.filter(p => {
+        const matchTexto =
+            p.codigo.toLowerCase().includes(texto) ||
+            p.marca.toLowerCase().includes(texto) ||
+            p.nombre.toLowerCase().includes(texto);
+
+        const stockTotal = calcularStockTotal(p);
+
+        if (filtroStock === "con-stock") {
+            return matchTexto && stockTotal > 0;
+        }
+        if (filtroStock === "sin-stock") {
+            return matchTexto && stockTotal === 0;
+        }
+        return matchTexto;
+    });
+
+    renderTablaVentas(filtrados);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    cargarProductosVentas();
+    productosVentas = [...ejemploProductos];
+    renderTablaVentas(productosVentas);
 
-    document.getElementById("buscarNombre").addEventListener("keyup", e => {
-        buscarSupabase("descripcion", e.target.value);
+    const buscarGlobal = document.getElementById("buscarGlobal");
+    const filtroButtons = document.querySelectorAll(".erp-search-filters button");
+    const btnToggleMenu = document.getElementById("btnToggleMenu");
+
+    let filtroStockActual = "todos";
+
+    buscarGlobal.addEventListener("input", e => {
+        filtrarVentas(e.target.value, filtroStockActual);
     });
 
-    document.getElementById("buscarMarca").addEventListener("keyup", e => {
-        buscarSupabase("marca", e.target.value);
+    filtroButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            filtroButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            filtroStockActual = btn.getAttribute("data-filter");
+            filtrarVentas(buscarGlobal.value, filtroStockActual);
+        });
     });
 
-    document.getElementById("buscarCodigo").addEventListener("keyup", e => {
-        buscarSupabase("codigo", e.target.value);
-    });
-
-    document.getElementById("btnBuscarTodos").addEventListener("click", () => {
-        buscarSupabase("todos", document.getElementById("buscarTodos").value);
-    });
-
-    document.getElementById("btnMostrarTodos").addEventListener("click", () => {
-        cargarProductosVentas();
-    });
-
-    document.getElementById("btnAnterior").addEventListener("click", () => {
-        if (paginaActual > 1) {
-            paginaActual--;
-            renderVentas(productosData);
-        }
-    });
-
-    document.getElementById("btnSiguiente").addEventListener("click", () => {
-        paginaActual++;
-        renderVentas(productosData);
-    });
-
-    document.getElementById("btnIrPagina").addEventListener("click", () => {
-        const p = parseInt(document.getElementById("inputPagina").value);
-        if (p > 0) {
-            paginaActual = p;
-            renderVentas(productosData);
-        }
-    });
-
-    document.getElementById("btnToggleMenu").addEventListener("click", () => {
+    btnToggleMenu.addEventListener("click", () => {
         document.getElementById("sidebar").classList.toggle("d-none");
     });
 });
