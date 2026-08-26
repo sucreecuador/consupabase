@@ -2,168 +2,105 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compras PRO - ERP SUCRE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root {
-            --sidebar-bg: #0f172a;
-            --sidebar-text: #94a3b8;
-            --sidebar-active: #ffffff;
-            --theme-green: #00a67d;
-            --theme-green-hover: #008f6b;
-            --excel-header-bg: #e2e8f0;
-            --excel-header-border: #cbd5e1;
-            --excel-header-text: #1e293b;
-        }
-
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-            background-color: #f8fafc;
-            overflow-x: hidden;
+            background: #f5f6fa;
         }
-
         #sidebar {
             width: 240px;
-            min-height: 100vh;
-            background-color: var(--sidebar-bg);
-            transition: all 0.3s ease;
-        }
-
-        #sidebar .brand {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #ffffff;
-            padding: 1.5rem 1.25rem;
-        }
-
-        #sidebar .nav-link {
-            color: var(--sidebar-text);
-            padding: 0.75rem 1.25rem;
-            font-weight: 500;
-        }
-
-        #sidebar .nav-link:hover,
-        #sidebar .nav-link.active {
-            color: var(--sidebar-active);
-        }
-
-        #content {
-            flex: 1;
-            padding: 2rem;
-        }
-
-        .btn-green {
-            background-color: var(--theme-green);
+            background: #1f2937;
             color: white;
-            border: none;
+            min-height: 100vh;
         }
-        .btn-green:hover {
-            background-color: var(--theme-green-hover);
+        #sidebar a {
+            color: #d1d5db;
+            padding: 12px;
+            display: block;
+            text-decoration: none;
         }
-
-        .table-excel {
-            border-collapse: separate;
-            border-spacing: 0;
-            border: 1px solid var(--excel-header-border);
+        #sidebar a:hover {
+            background: #374151;
+            color: #fff;
         }
-
-        .table-excel thead th {
-            background-color: var(--excel-header-bg) !important;
-            color: var(--excel-header-text) !important;
-            font-weight: 700;
-            font-size: 0.8rem;
-            border-bottom: 2px solid var(--excel-header-border) !important;
-            border-right: 1px solid var(--excel-header-border) !important;
-            padding: 0.65rem 0.5rem;
-            cursor: pointer;
-        }
-
-        .table-excel tbody td {
-            font-size: 0.85rem;
-            border-right: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
         .action-btn {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.8rem;
-            border: 1px solid #cbd5e1;
-            background: #ffffff;
-            color: #64748b;
-            border-radius: 4px;
+            border: none;
+            background: #e5e7eb;
+            padding: 6px 10px;
+            border-radius: 6px;
         }
         .action-btn:hover {
-            background: #e2e8f0;
+            background: #d1d5db;
         }
-
-        .sort-icon {
-            font-size: 0.75rem;
-            margin-left: 3px;
+        th {
+            cursor: pointer;
         }
     </style>
 </head>
+
 <body>
 
 <div class="d-flex">
+
     <!-- SIDEBAR -->
-    <div id="sidebar">
-        <div class="brand">ERP SUCRE</div>
-        <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link active" href="compras.html">Compras</a></li>
-            <li class="nav-item"><a class="nav-link" href="../inventario/index.html">Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="../contactos/index.html">Contactos</a></li>
-            <li class="nav-item"><a class="nav-link" href="../reportes/index.html">Reportes</a></li>
-        </ul>
+    <div id="sidebar" class="p-3">
+        <h4 class="mb-4">ERP SUCRE</h4>
+        <a href="../productos/compras.html">Compras</a>
+        <a href="../productos/productos.html">Productos / Ventas</a>
+        <a href="../contactos/index.html">Contactos</a>
+        <a href="../reportes/index.html">Reportes</a>
     </div>
 
-    <!-- CONTENT -->
-    <div id="content">
+    <!-- CONTENIDO -->
+    <div class="flex-grow-1 p-4">
+
+        <button id="btnToggleSidebar" class="btn btn-secondary mb-3">Ocultar menú</button>
+
         <h2 class="fw-bold text-dark mb-1">Compras PRO</h2>
         <p class="text-muted small mb-3">Gestión de costos, proveedores y reabastecimiento</p>
 
-        <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
-
         <!-- FILTROS -->
         <div class="row g-2 mb-3">
-            <div class="col-md-3"><input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE..."></div>
-            <div class="col-md-2"><input type="text" id="buscarMarca" class="form-control form-control-sm" placeholder="Buscar por MARCA..."></div>
-            <div class="col-md-2"><input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO..."></div>
-            <div class="col-md-2"><input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos..."></div>
-            <div class="col-md-3 d-flex gap-2">
-                <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">Mostrar todos</button>
-                <button class="btn btn-green btn-sm w-100" id="btnNuevo">+ Nueva Compra</button>
+            <div class="col-md-3">
+                <input id="buscarNombre" type="text" class="form-control" placeholder="Buscar por DESCRIPCIÓN...">
+            </div>
+            <div class="col-md-3">
+                <input id="buscarMarca" type="text" class="form-control" placeholder="Buscar por PRO1...">
+            </div>
+            <div class="col-md-2">
+                <input id="buscarCodigo" type="text" class="form-control" placeholder="Buscar por CÓDIGO...">
+            </div>
+            <div class="col-md-2">
+                <input id="buscarGeneral" type="text" class="form-control" placeholder="Buscar general...">
+            </div>
+            <div class="col-md-2">
+                <button id="btnMostrarTodos" class="btn btn-success w-100">Mostrar todos</button>
             </div>
         </div>
 
-        <!-- EXPORT -->
-        <div class="mb-3 d-flex justify-content-between">
-            <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
-                <i class="fa-solid fa-file-excel me-1 text-success"></i>Exportar Excel
-            </button>
-            <span class="small text-muted" id="resumenRegistros"></span>
-        </div>
-
         <!-- TABLA -->
-        <div class="table-responsive bg-white shadow-sm rounded">
-            <table class="table table-excel mb-0" id="tablaProductosCompras">
-                <thead>
+        <div class="table-responsive">
+            <table id="tablaComprasPRO" class="table table-striped table-hover">
+                <thead class="table-dark">
                     <tr>
-                        <th data-column="codigo">CÓDIGO <span class="sort-icon">↕</span></th>
-                        <th data-column="naci">ORI <span class="sort-icon">↕</span></th>
-                        <th data-column="marca">MARCA <span class="sort-icon">↕</span></th>
-                        <th data-column="descripcion">NOMBRE <span class="sort-icon">↕</span></th>
-                        <th data-column="unidad">UNI <span class="sort-icon">↕</span></th>
-                        <th data-column="precio_compra">COSTO <span class="sort-icon">↕</span></th>
-                        <th data-column="saldo_temp">S.TEM <span class="sort-icon">↕</span></th>
-                        <th data-column="saldo">S UIO <span class="sort-icon">↕</span></th>
-                        <th data-column="saldobext">S GYE <span class="sort-icon">↕</span></th>
-                        <th data-column="peso">PESO <span class="sort-icon">↕</span></th>
-                        <th data-column="medidas">MEDIDAS <span class="sort-icon">↕</span></th>
-                        <th class="text-center">ACCIONES</th>
+                        <th data-column="pro1">PRO1</th>
+                        <th data-column="pro2">PRO2</th>
+                        <th data-column="pro3">PRO3</th>
+                        <th data-column="codigo">Código</th>
+                        <th data-column="codigo_proveedor">Código Prov.</th>
+                        <th data-column="descripcion">Descripción</th>
+                        <th data-column="saldo_temp">Saldo Temp</th>
+                        <th data-column="costo_prom">Costo Prom</th>
+                        <th data-column="precio_venta">Precio Venta</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyCompras"></tbody>
@@ -171,100 +108,21 @@
         </div>
 
         <!-- PAGINACIÓN -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <div>
-                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">Anterior</button>
-                <button class="btn btn-outline-secondary btn-sm" id="btnSiguiente">Siguiente</button>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted">Ir a página:</span>
-                <input type="number" id="inputPagina" class="form-control form-control-sm w-auto" min="1" value="1" style="width: 70px;">
-                <button class="btn btn-sm btn-outline-primary" id="btnIrPagina">Ir</button>
-            </div>
+        <div class="d-flex align-items-center mt-3">
+            <button id="btnAnterior" class="btn btn-outline-primary me-2">Anterior</button>
+            <button id="btnSiguiente" class="btn btn-outline-primary me-3">Siguiente</button>
+
+            <span class="me-2">Ir a página:</span>
+            <input id="inputPagina" type="number" class="form-control w-auto" value="1" min="1" style="width: 80px;">
+            <button id="btnIrPagina" class="btn btn-primary ms-2">Ir</button>
         </div>
+
     </div>
 </div>
 
-<!-- MODAL NUEVA COMPRA -->
-<div class="modal fade" id="modalNuevaCompra" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Nueva Compra</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <div class="row g-2">
-          <div class="col-md-4"><label>Código</label><input id="nuevoCodigo" class="form-control form-control-sm"></div>
-          <div class="col-md-4"><label>Marca</label><input id="nuevoMarca" class="form-control form-control-sm"></div>
-          <div class="col-md-4"><label>Origen</label><input id="nuevoNaci" class="form-control form-control-sm" value="TWN"></div>
-          <div class="col-md-8"><label>Descripción</label><input id="nuevoDescripcion" class="form-control form-control-sm"></div>
-          <div class="col-md-4"><label>Costo</label><input id="nuevoCosto" type="number" step="0.01" class="form-control form-control-sm"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-green btn-sm" id="btnGuardarNuevaCompra">Guardar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL EDICIÓN -->
-<div class="modal fade" id="modalEditar" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Editar Producto</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <div class="row g-2">
-          <div class="col-md-4"><label>Código</label><input id="editCodigo" class="form-control form-control-sm" readonly></div>
-          <div class="col-md-4"><label>Marca</label><input id="editMarca" class="form-control form-control-sm"></div>
-          <div class="col-md-4"><label>Origen</label><input id="editNaci" class="form-control form-control-sm"></div>
-          <div class="col-md-8"><label>Descripción</label><input id="editDescripcion" class="form-control form-control-sm"></div>
-          <div class="col-md-4"><label>Costo</label><input id="editCosto" type="number" step="0.01" class="form-control form-control-sm"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-green btn-sm" id="btnGuardarEdicion">Guardar cambios</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ELIMINACIÓN -->
-<div class="modal fade" id="modalEliminar" tabindex="-1">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white"><h5 class="modal-title">Eliminar</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body text-center">
-        <p>¿Eliminar el producto?</p>
-        <strong id="elimCodigo"></strong>
-      </div>
-      <div class="modal-footer d-flex justify-content-between">
-        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-danger btn-sm" id="btnConfirmarEliminar">Eliminar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="compras.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const btnToggle = document.getElementById("btnToggleSidebar");
-    btnToggle.addEventListener("click", () => {
-        const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("d-none");
-        btnToggle.textContent = sidebar.classList.contains("d-none") ? "Mostrar menú" : "Ocultar menú";
-    });
-
-    window.actualizarResumenRegistros = function(total, filtrados) {
-        document.getElementById("resumenRegistros").textContent =
-            `Registros: ${filtrados} filtrados de ${total} totales`;
-    };
-});
-</script>
 
 </body>
 </html>
