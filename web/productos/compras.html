@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos - Compras - ERP SUCRE</title>
+    <title>Productos - Compras (PRO) - ERP SUCRE</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
-            --sidebar-bg: #1e293b;
+            --sidebar-bg: #0f172a;
             --sidebar-text: #94a3b8;
             --sidebar-active: #ffffff;
             --theme-green: #00a67d;
@@ -50,7 +50,8 @@
             font-size: 0.95rem;
         }
 
-        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+        #sidebar .nav-link:hover,
+        #sidebar .nav-link.active {
             color: var(--sidebar-active);
         }
 
@@ -141,13 +142,27 @@
             margin-left: 3px;
             color: #64748b;
         }
+
+        .badge-pro {
+            font-size: 0.7rem;
+            background-color: #0ea5e9;
+        }
+
+        .filter-label {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
     </style>
 </head>
 <body>
 
 <div class="d-flex">
+    <!-- SIDEBAR -->
     <div id="sidebar">
-        <div class="brand">ERP SUCRE</div>
+        <div class="brand d-flex align-items-center justify-content-between">
+            <span>ERP SUCRE</span>
+            <span class="badge badge-pro text-dark">Compras PRO</span>
+        </div>
         <ul class="nav flex-column">
             <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="../indicadores/index.html">Indicadores</a></li>
@@ -160,36 +175,67 @@
         </ul>
     </div>
 
+    <!-- CONTENT -->
     <div id="content">
-        <h2 class="fw-bold text-dark mb-1">Compras</h2>
-        <p class="text-muted small mb-3">Gestión de costos, proveedores y reabastecimiento de stock</p>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-0">Compras</h2>
+                <p class="text-muted small mb-0">Gestión de costos, proveedores y reabastecimiento de stock (Vista PRO)</p>
+            </div>
+            <button class="btn btn-toggle-sidebar btn-sm" id="btnToggleSidebar">Ocultar menú</button>
+        </div>
 
-        <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
-
-        <div class="row g-2 mb-3">
-            <div class="col-md-3">
-                <input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
-            </div>
-            <div class="col-md-2">
-                <input type="text" id="buscarMarca" class="form-control form-control-sm" placeholder="Buscar por MARCA...">
-            </div>
-            <div class="col-md-2">
-                <input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
-            </div>
-            <div class="col-md-2">
-                <input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos...">
-            </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">Mostrar todos</button>
-                <button class="btn btn-green btn-sm w-100" id="btnNuevo">+ Nueva Compra</button>
+        <!-- FILTROS -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body py-2">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="filter-label">Nombre / descripción</label>
+                        <input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="filter-label">Marca</label>
+                        <input type="text" id="buscarMarca" class="form-control form-control-sm" placeholder="Buscar por MARCA...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="filter-label">Código</label>
+                        <input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="filter-label">Búsqueda general</label>
+                        <input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos...">
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">
+                            <i class="fa-solid fa-rotate-left me-1"></i>Limpiar filtros
+                        </button>
+                        <button class="btn btn-outline-success btn-sm w-100" id="btnNuevo">
+                            <i class="fa-solid fa-plus me-1"></i>Nueva compra
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="mb-3">
-            <a href="productos.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaVentas">Vista Ventas</a>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaCompras">Vista Compras</button>
+        <!-- VISTAS -->
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <div>
+                <a href="productos.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaVentas">
+                    Vista Ventas
+                </a>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill active px-3" id="btnVistaCompras">
+                    Vista Compras PRO
+                </button>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
+                    <i class="fa-solid fa-file-excel me-1 text-success"></i>Exportar Excel
+                </button>
+                <span class="small text-muted" id="resumenRegistros"></span>
+            </div>
         </div>
 
+        <!-- TABLA -->
         <div class="table-responsive bg-white shadow-sm rounded">
             <table class="table table-excel mb-0" id="tablaProductosCompras">
                 <thead>
@@ -213,10 +259,15 @@
             </table>
         </div>
 
+        <!-- PAGINACIÓN -->
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
-                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">Anterior</button>
-                <button class="btn btn-outline-secondary btn-sm" id="btnSiguiente">Siguiente</button>
+                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">
+                    <i class="fa-solid fa-chevron-left me-1"></i>Anterior
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" id="btnSiguiente">
+                    Siguiente<i class="fa-solid fa-chevron-right ms-1"></i>
+                </button>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted">Ir a página:</span>
@@ -227,7 +278,71 @@
     </div>
 </div>
 
+<!-- MODAL NUEVA COMPRA (estructura básica, lógica luego si quieres) -->
+<div class="modal fade" id="modalNuevaCompra" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Registrar nueva compra</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-2">Aquí puedes integrar luego el flujo completo de compras (proveedor, factura, etc.).</p>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Código</label>
+            <input type="text" class="form-control form-control-sm" id="nuevoCodigo">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Marca</label>
+            <input type="text" class="form-control form-control-sm" id="nuevoMarca">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Origen</label>
+            <input type="text" class="form-control form-control-sm" id="nuevoNaci" value="TWN">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label form-label-sm">Descripción / Nombre</label>
+            <input type="text" class="form-control form-control-sm" id="nuevoDescripcion">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Costo</label>
+            <input type="number" step="0.01" class="form-control form-control-sm" id="nuevoCosto">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-green btn-sm" id="btnGuardarNuevaCompra">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="compras.js"></script>
+
+<script>
+    // Hook mínimo para el botón "Nueva compra" abrir modal
+    document.addEventListener("DOMContentLoaded", () => {
+        const btnNuevo = document.getElementById("btnNuevo");
+        if (btnNuevo) {
+            btnNuevo.addEventListener("click", () => {
+                const modal = new bootstrap.Modal(document.getElementById("modalNuevaCompra"));
+                modal.show();
+            });
+        }
+
+        // Resumen de registros (se actualiza desde compras.js si quieres)
+        window.actualizarResumenRegistros = function(total, filtrados) {
+            const el = document.getElementById("resumenRegistros");
+            if (!el) return;
+            el.textContent = `Registros: ${filtrados} filtrados de ${total} totales`;
+        };
+    });
+</script>
+
 </body>
 </html>
