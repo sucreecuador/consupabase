@@ -5,7 +5,7 @@ let clientSupabase = null;
 
 if (typeof supabase !== 'undefined' && supabase.createClient) {
     const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
-    const SUPABASE_KEY = "TU_ANON_KEY_AQUI";   // <-- PÉGALA AQUÍ
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
 
     clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
