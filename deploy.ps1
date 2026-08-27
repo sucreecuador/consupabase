@@ -12,6 +12,10 @@ $comprasHtml = Join-Path $basePath "web\productos\compras.html"
 $productosJs = Join-Path $basePath "web\productos\productos.js"
 $comprasJs = Join-Path $basePath "web\productos\compras.js"
 
+# Facturación (nuevo módulo)
+$facturacionHtml = Join-Path $basePath "web\facturacion\index.html"
+$facturacionJs = Join-Path $basePath "web\facturacion\facturacion_v2.js"
+
 # Verificaciones
 if (Test-Path $mainPy) {
     Write-Host "✔ OK: main.py encontrado"
@@ -21,30 +25,44 @@ if (Test-Path $mainPy) {
 }
 
 if (Test-Path $productosHtml) {
-    Write-Host "✔ OK: productos.html encontrado en ($productosHtml)"
+    Write-Host "✔ OK: productos.html encontrado"
 } else {
     Write-Host "❌ ERROR: productos.html no encontrado"
     exit
 }
 
 if (Test-Path $comprasHtml) {
-    Write-Host "✔ OK: compras.html encontrado en ($comprasHtml)"
+    Write-Host "✔ OK: compras.html encontrado"
 } else {
     Write-Host "❌ ERROR: compras.html no encontrado"
     exit
 }
 
 if (Test-Path $productosJs) {
-    Write-Host "✔ OK: productos.js encontrado en ($productosJs)"
+    Write-Host "✔ OK: productos.js encontrado"
 } else {
     Write-Host "❌ ERROR: productos.js no encontrado"
     exit
 }
 
 if (Test-Path $comprasJs) {
-    Write-Host "✔ OK: compras.js encontrado en ($comprasJs)"
+    Write-Host "✔ OK: compras.js encontrado"
 } else {
     Write-Host "❌ ERROR: compras.js no encontrado"
+    exit
+}
+
+if (Test-Path $facturacionHtml) {
+    Write-Host "✔ OK: facturacion/index.html encontrado"
+} else {
+    Write-Host "❌ ERROR: facturacion/index.html no encontrado"
+    exit
+}
+
+if (Test-Path $facturacionJs) {
+    Write-Host "✔ OK: facturacion_v2.js encontrado"
+} else {
+    Write-Host "❌ ERROR: facturacion_v2.js no encontrado"
     exit
 }
 
@@ -63,7 +81,7 @@ git add .
 
 # Crear commit
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Deploy ERP Sucre (Ventas & Compras) - $fecha"
+git commit -m "Deploy ERP Sucre (Full Modules + Facturación v2) - $fecha"
 
 Write-Host "⬆ Subiendo cambios a GitHub..."
 git push origin main
