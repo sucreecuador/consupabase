@@ -110,7 +110,7 @@
                     </div>
                     <div class="col-md-2">
                         <div class="fact-header-label">CÓDIGO CLIENTE</div>
-                        <input id="cliCodigo" type="text" class="form-control" placeholder="CODCLI">
+                        <input id="cliCodigo" type="text" class="form-control" placeholder="CODCLI" readonly>
                     </div>
                 </div>
 
@@ -129,12 +129,14 @@
                     </div>
                 </div>
 
+                <!-- BOTONES CLIENTE -->
                 <div class="row g-2 mt-3">
                     <div class="col-md-2">
-                        <button id="btnBuscarCliente" class="btn btn-primary w-100">
-                            <i class="fa-solid fa-user-check"></i> Buscar Cliente
+                        <button id="btnActualizarCliente" class="btn btn-warning w-100" style="display:none;">
+                            <i class="fa-solid fa-user-pen"></i> Actualizar Cliente
                         </button>
                     </div>
+
                     <div class="col-md-2">
                         <button id="btnCrearCliente" class="btn btn-success w-100">
                             <i class="fa-solid fa-user-plus"></i> Crear Cliente
