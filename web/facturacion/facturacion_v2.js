@@ -1,4 +1,4 @@
-// facturacion.js FINAL - ERP SUCRE PRO
+console.log("FACTURACION V2 CARGADO ✔");
 
 const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
 const SUPABASE_KEY =
@@ -173,7 +173,6 @@ async function buscarClienteAuto() {
   let query = client.from("clientes").select("*").limit(1);
 
   if (cedula.length >= 4) {
-    // RUC que EMPIECE con lo que escribes
     query = query.ilike("ruc", `${cedula}%`);
   } else if (nombre.length >= 3) {
     query = query.ilike("nombre", `%${nombre}%`);
@@ -480,4 +479,10 @@ async function guardarFactura() {
 
   const cliCodigo = document.getElementById("cliCodigo").value.trim();
   const cliRuc = document.getElementById("cliRuc").value.trim();
-  const cliNombre = document
+  const cliNombre = document.getElementById("cliNombre").value.trim();
+  const cliDireccion = document.getElementById("cliDireccion").value.trim();
+  const cliTelefono = document.getElementById("cliTelefono").value.trim();
+  const cliCorreo = document.getElementById("cliCorreo").value.trim();
+
+  const items = detalle.length;
+  const subtotal = Number(document.getElementById("
