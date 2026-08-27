@@ -126,7 +126,9 @@
           <input type="text" id="buscarGeneralProd" class="form-control" placeholder="Texto libre...">
         </div>
         <div class="col-md-2">
-          <button id="btnBuscarProducto" class="btn btn-primary w-100"><i class="fa-solid fa-magnifying-glass me-1"></i> Buscar</button>
+          <button id="btnBuscarProducto" class="btn btn-primary w-100">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Buscar
+          </button>
         </div>
       </div>
     </div>
@@ -239,12 +241,12 @@
   </div>
 </div>
 
-<!-- MODAL DE BÚSQUEDA DE PRODUCTOS -->
+<!-- MODAL BÚSQUEDA DE PRODUCTOS -->
 <div class="modal fade" id="modalBuscarProductos" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title"><i class="fa-solid fa-boxes-stacked me-2"></i>Resultados de Búsqueda de Productos</h5>
+        <h5 class="modal-title"><i class="fa-solid fa-boxes-stacked me-2"></i>Resultados de Búsqueda</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0">
@@ -253,7 +255,7 @@
             <thead class="table-dark">
               <tr>
                 <th>CÓDIGO</th>
-                <th>ORIGEN</th>
+                <th>ORI</th>
                 <th>MARCA</th>
                 <th>DESCRIPCIÓN</th>
                 <th>UNI</th>
@@ -263,7 +265,9 @@
               </tr>
             </thead>
             <tbody id="tbodyResultadosProductos">
-              <!-- Se llena dinámicamente -->
+              <tr>
+                <td colspan="8" class="text-center py-3">Cargando productos...</td>
+              </tr>
             </tbody>
           </table>
         </div>
