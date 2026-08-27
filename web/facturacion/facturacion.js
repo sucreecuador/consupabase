@@ -308,12 +308,12 @@ async function buscarProductos() {
 
   let query = client.from("productos").select("*").limit(50);
 
-  if (nom) query = query.or(`descripcion.ilike.%${nom}%,nombre.ilike.%${nom}%`);
+  if (nom) query = query.ilike("descripcion", `%${nom}%`);
   if (mar) query = query.ilike("marca", `%${mar}%`);
   if (cod) query = query.ilike("codigo", `%${cod}%`);
   if (gen) {
     query = query.or(
-      `codigo.ilike.%${gen}%,descripcion.ilike.%${gen}%,nombre.ilike.%${gen}%,marca.ilike.%${gen}%`
+      `codigo.ilike.%${gen}%,descripcion.ilike.%${gen}%,marca.ilike.%${gen}%`
     );
   }
 
@@ -344,7 +344,7 @@ async function buscarProductos() {
       <td>${desc}</td>
       <td>${p.unidad || p.uni || ""}</td>
       <td><span class="badge ${(p.saldo_temp ?? p.saldo ?? 0) > 0 ? "bg-success" : "bg-danger"}">${p.saldo_temp ?? p.saldo ?? 0}</span></td>
-      <td><strong>$${Number(p.pvp || 0).toFixed(2)}</strong></td>
+      <td><strong>$${Number(p.precio_venta || 0).toFixed(2)}</strong></td>
       <td class="text-center">
         <button class="btn btn-sm btn-primary" onclick='seleccionarProductoModal(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
           <i class="fa-solid fa-plus me-1"></i> Seleccionar
@@ -372,9 +372,9 @@ function agregarProductoAlDetalle(p) {
     nombre: p.descripcion || p.nombre || "",
     uni: p.unidad || p.uni || "",
     saldo: p.saldo_temp ?? p.saldo ?? 0,
-    pvp: Number(p.pvp || 0),
+    pvp: Number(p.precio_venta || 0),
     cant: 1,
-    subpvp: Number(p.pvp || 0),
+    subpvp: Number(p.precio_venta || 0),
   };
 
   detalle.push(item);
