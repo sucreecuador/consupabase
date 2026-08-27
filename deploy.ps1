@@ -7,13 +7,15 @@ $basePath = "C:\Users\Supervisor\consupabase"
 
 # Archivos obligatorios
 $mainPy = Join-Path $basePath "main.py"
+
+# Módulo Productos
 $productosHtml = Join-Path $basePath "web\productos\productos.html"
 $comprasHtml = Join-Path $basePath "web\productos\compras.html"
 $productosJs = Join-Path $basePath "web\productos\productos.js"
 $comprasJs = Join-Path $basePath "web\productos\compras.js"
 
-# Facturación (nuevo módulo)
-$facturacionHtml = Join-Path $basePath "web\facturacion\index.html"
+# Módulo Facturación (nuevo)
+$facturacionHtml = Join-Path $basePath "web\facturacion\index_v2.html"
 $facturacionJs = Join-Path $basePath "web\facturacion\facturacion_v2.js"
 
 # Verificaciones
@@ -53,9 +55,9 @@ if (Test-Path $comprasJs) {
 }
 
 if (Test-Path $facturacionHtml) {
-    Write-Host "✔ OK: facturacion/index.html encontrado"
+    Write-Host "✔ OK: index_v2.html encontrado (Facturación)"
 } else {
-    Write-Host "❌ ERROR: facturacion/index.html no encontrado"
+    Write-Host "❌ ERROR: index_v2.html no encontrado"
     exit
 }
 
