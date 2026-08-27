@@ -62,16 +62,28 @@ function inicializarEventosFactura() {
       recalcularTotales();
     });
 
-  // BÚSQUEDA AUTOMÁTICA POR RUC
-  document.getElementById("cliRuc").addEventListener("input", buscarClienteAuto);
-  document.getElementById("cliRuc").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") buscarClienteAuto();
+  // BÚSQUEDA DE CLIENTE POR RUC / CÉDULA (Solo al presionar Enter o perder foco)
+  const cliRucInput = document.getElementById("cliRuc");
+  cliRucInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      buscarClienteAuto(true);
+    }
+  });
+  cliRucInput.addEventListener("blur", () => {
+    buscarClienteAuto(false);
   });
 
-  // BÚSQUEDA AUTOMÁTICA POR NOMBRE
-  document.getElementById("cliNombre").addEventListener("input", buscarClienteAuto);
-  document.getElementById("cliNombre").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") buscarClienteAuto();
+  // BÚSQUEDA DE CLIENTE POR NOMBRE (Solo al presionar Enter o perder foco)
+  const cliNombreInput = document.getElementById("cliNombre");
+  cliNombreInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      buscarClienteAuto(true);
+    }
+  });
+  cliNombreInput.addEventListener("blur", () => {
+    buscarClienteAuto(false);
   });
 
   // CREAR CLIENTE
@@ -93,7 +105,7 @@ function inicializarEventosFactura() {
     .getElementById("btnActualizarCliente")
     .addEventListener("click", actualizarClienteManual);
 
-  // DETECTAR CAMBIOS
+  // DETECTAR CAMBIOS EN FORMULARIO
   ["cliRuc", "cliNombre", "cliDireccion", "cliTelefono", "cliCorreo"].forEach(id => {
     document.getElementById(id).addEventListener("input", detectarCambiosCliente);
   });
@@ -162,9 +174,9 @@ function limpiarFactura() {
 }
 
 // ------------------------------------------------------
-// BÚSQUEDA AUTOMÁTICA DE CLIENTE
+// BÚSQUEDA AUTOMÁTICA DE CLIENTE (CORREGIDA)
 // ------------------------------------------------------
-async function buscarClienteAuto() {
+async function buscarClienteAuto(esEnter = false) {
   const cedula = document.getElementById("cliRuc").value.trim();
   const nombre = document.getElementById("cliNombre").value.trim();
 
@@ -172,9 +184,12 @@ async function buscarClienteAuto() {
 
   let query = client.from("clientes").select("*").limit(1);
 
-  if (cedula.length >= 4) {
+  // Validación estricta: Busca por RUC/Cédula exacta o 13 dígitos
+  if (cedula.length === 10 || cedula.length === 13) {
+    query = query.eq("ruc", cedula);
+  } else if (esEnter && cedula.length > 0) {
     query = query.ilike("ruc", `${cedula}%`);
-  } else if (nombre.length >= 3) {
+  } else if (esEnter && nombre.length >= 3) {
     query = query.ilike("nombre", `%${nombre}%`);
   } else {
     return;
