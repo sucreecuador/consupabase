@@ -1,4 +1,4 @@
-console.log("FACTURACION V2 CARGADO ✔");
+console.log("FACTURACION CARGADO ✔");
 
 const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
 const SUPABASE_KEY =
@@ -162,7 +162,7 @@ function limpiarFactura() {
 }
 
 // ------------------------------------------------------
-// BÚSQUEDA AUTOMÁTICA DE CLIENTE (CORREGIDA)
+// BÚSQUEDA AUTOMÁTICA DE CLIENTE
 // ------------------------------------------------------
 async function buscarClienteAuto() {
   const cedula = document.getElementById("cliRuc").value.trim();
@@ -200,7 +200,7 @@ async function buscarClienteAuto() {
 }
 
 // ------------------------------------------------------
-// DETECTAR CAMBIOS
+// DETECTAR CAMBIOS EN EL CLIENTE
 // ------------------------------------------------------
 function detectarCambiosCliente() {
   const codigo = document.getElementById("cliCodigo").value.trim();
@@ -478,11 +478,50 @@ async function guardarFactura() {
   const formaPago = document.getElementById("facFormaPago").value;
 
   const cliCodigo = document.getElementById("cliCodigo").value.trim();
-  const cliRuc = document.getElementById("cliRuc").value.trim();
-  const cliNombre = document.getElementById("cliNombre").value.trim();
-  const cliDireccion = document.getElementById("cliDireccion").value.trim();
-  const cliTelefono = document.getElementById("cliTelefono").value.trim();
-  const cliCorreo = document.getElementById("cliCorreo").value.trim();
+  const subtotal = Number(document.getElementById("facSubtotal").value || 0);
+  const valDcto = Number(document.getElementById("facValDescuento").value || 0);
+  const iva = Number(document.getElementById("facIva").value || 0);
+  const total = Number(document.getElementById("facTotal").value || 0);
 
-  const items = detalle.length;
-  const subtotal = Number(document.getElementById("
+  const { data: facData, error: facErr } = await client
+    .from("facturas")
+    .insert({
+      numero,
+      fecha,
+      responsable,
+      forma_pago: formaPago,
+      codigo_cliente: cliCodigo,
+      subtotal,
+      descuento: valDcto,
+      iva,
+      total,
+    })
+    .select()
+    .single();
+
+  if (facErr) {
+    alert("Error al guardar la cabecera de la factura.");
+    return;
+  }
+
+  const detallesInsert = detalle.map((d) => ({
+    factura_id: facData.id,
+    codigo_producto: d.codigo,
+    cantidad: d.cant,
+    pvp: d.pvp,
+    subtotal: d.subpvp,
+  }));
+
+  const { error: detErr } = await client
+    .from("factura_detalle")
+    .insert(detallesInsert);
+
+  if (detErr) {
+    alert("Error al guardar el detalle de la factura.");
+    return;
+  }
+
+  alert("Factura guardada correctamente.");
+  limpiarFactura();
+  await generarNumeroFactura();
+}

@@ -14,9 +14,9 @@ $comprasHtml = Join-Path $basePath "web\productos\compras.html"
 $productosJs = Join-Path $basePath "web\productos\productos.js"
 $comprasJs = Join-Path $basePath "web\productos\compras.js"
 
-# Módulo Facturación (nuevo)
-$facturacionHtml = Join-Path $basePath "web\facturacion\index_v2.html"
-$facturacionJs = Join-Path $basePath "web\facturacion\facturacion_v2.js"
+# Módulo Facturación
+$facturacionHtml = Join-Path $basePath "web\facturacion\index.html"
+$facturacionJs = Join-Path $basePath "web\facturacion\facturacion.js"
 
 # Verificaciones
 if (Test-Path $mainPy) {
@@ -55,16 +55,16 @@ if (Test-Path $comprasJs) {
 }
 
 if (Test-Path $facturacionHtml) {
-    Write-Host "✔ OK: index_v2.html encontrado (Facturación)"
+    Write-Host "✔ OK: index.html encontrado (Facturación)"
 } else {
-    Write-Host "❌ ERROR: index_v2.html no encontrado"
+    Write-Host "❌ ERROR: index.html no encontrado"
     exit
 }
 
 if (Test-Path $facturacionJs) {
-    Write-Host "✔ OK: facturacion_v2.js encontrado"
+    Write-Host "✔ OK: facturacion.js encontrado"
 } else {
-    Write-Host "❌ ERROR: facturacion_v2.js no encontrado"
+    Write-Host "❌ ERROR: facturacion.js no encontrado"
     exit
 }
 
@@ -83,7 +83,7 @@ git add .
 
 # Crear commit
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Deploy ERP Sucre (Full Modules + Facturación v2) - $fecha"
+git commit -m "Deploy ERP Sucre (Consolidación index.html y facturacion.js) - $fecha"
 
 Write-Host "⬆ Subiendo cambios a GitHub..."
 git push origin main
