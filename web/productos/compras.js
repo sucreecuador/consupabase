@@ -32,40 +32,80 @@ document.addEventListener("DOMContentLoaded", () => {
 // ===============================
 function inicializarEventos() {
 
+    // Toggle Sidebar (Ocultar / Mostrar menú)
+    const btnToggleSidebar = document.getElementById("btnToggleSidebar");
+    const sidebar = document.getElementById("sidebar");
+
+    if (btnToggleSidebar && sidebar) {
+        btnToggleSidebar.addEventListener("click", () => {
+            sidebar.classList.toggle("d-none");
+            if (sidebar.classList.contains("d-none")) {
+                btnToggleSidebar.textContent = "Mostrar menú";
+            } else {
+                btnToggleSidebar.textContent = "Ocultar menú";
+            }
+        });
+    }
+
+    // Filtros de búsqueda
     const filtros = ["buscarNombre", "buscarMarca", "buscarCodigo", "buscarGeneral"];
     filtros.forEach(id => {
-        document.getElementById(id).addEventListener("input", () => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener("input", () => {
+                paginaActual = 1;
+                cargarPagina();
+            });
+        }
+    });
+
+    // Botón Mostrar Todos
+    const btnMostrarTodos = document.getElementById("btnMostrarTodos");
+    if (btnMostrarTodos) {
+        btnMostrarTodos.addEventListener("click", () => {
+            filtros.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
             paginaActual = 1;
             cargarPagina();
         });
-    });
+    }
 
-    document.getElementById("btnMostrarTodos").addEventListener("click", () => {
-        filtros.forEach(id => document.getElementById(id).value = "");
-        paginaActual = 1;
-        cargarPagina();
-    });
+    // Paginación
+    const btnAnterior = document.getElementById("btnAnterior");
+    if (btnAnterior) {
+        btnAnterior.addEventListener("click", () => {
+            if (paginaActual > 1) {
+                paginaActual--;
+                cargarPagina();
+            }
+        });
+    }
 
-    document.getElementById("btnAnterior").addEventListener("click", () => {
-        if (paginaActual > 1) {
-            paginaActual--;
+    const btnSiguiente = document.getElementById("btnSiguiente");
+    if (btnSiguiente) {
+        btnSiguiente.addEventListener("click", () => {
+            paginaActual++;
             cargarPagina();
-        }
-    });
+        });
+    }
 
-    document.getElementById("btnSiguiente").addEventListener("click", () => {
-        paginaActual++;
-        cargarPagina();
-    });
+    const btnIrPagina = document.getElementById("btnIrPagina");
+    if (btnIrPagina) {
+        btnIrPagina.addEventListener("click", () => {
+            const inputPagina = document.getElementById("inputPagina");
+            if (inputPagina) {
+                const pag = parseInt(inputPagina.value);
+                if (pag >= 1) {
+                    paginaActual = pag;
+                    cargarPagina();
+                }
+            }
+        });
+    }
 
-    document.getElementById("btnIrPagina").addEventListener("click", () => {
-        const pag = parseInt(document.getElementById("inputPagina").value);
-        if (pag >= 1) {
-            paginaActual = pag;
-            cargarPagina();
-        }
-    });
-
+    // Ordenamiento de columnas
     const headers = document.querySelectorAll("#tablaComprasPRO thead th[data-column]");
     headers.forEach(header => {
         header.addEventListener("click", () => {
@@ -88,11 +128,20 @@ function inicializarEventos() {
 //  CONSULTA PRO A SUPABASE
 // ===============================
 async function cargarPagina() {
+    if (!clientSupabase) {
+        console.error("Cliente de Supabase no inicializado.");
+        return;
+    }
 
-    const nom = document.getElementById("buscarNombre").value.trim();
-    const mar = document.getElementById("buscarMarca").value.trim();
-    const cod = document.getElementById("buscarCodigo").value.trim();
-    const gen = document.getElementById("buscarGeneral").value.trim();
+    const nomInput = document.getElementById("buscarNombre");
+    const marInput = document.getElementById("buscarMarca");
+    const codInput = document.getElementById("buscarCodigo");
+    const genInput = document.getElementById("buscarGeneral");
+
+    const nom = nomInput ? nomInput.value.trim() : "";
+    const mar = marInput ? marInput.value.trim() : "";
+    const cod = codInput ? codInput.value.trim() : "";
+    const gen = genInput ? genInput.value.trim() : "";
 
     let query = clientSupabase
         .from("productos")
@@ -130,10 +179,13 @@ async function cargarPagina() {
         return;
     }
 
-    productosFiltrados = data;
+    productosFiltrados = data || [];
     renderizarTabla();
 
-    document.getElementById("inputPagina").value = paginaActual;
+    const inputPagina = document.getElementById("inputPagina");
+    if (inputPagina) {
+        inputPagina.value = paginaActual;
+    }
 }
 
 // ===============================
@@ -141,10 +193,12 @@ async function cargarPagina() {
 // ===============================
 function renderizarTabla() {
     const tbody = document.getElementById("tbodyCompras");
+    if (!tbody) return;
+
     tbody.innerHTML = "";
 
     if (!productosFiltrados || productosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-4">No se encontraron productos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">No se encontraron productos.</td></tr>`;
         return;
     }
 
