@@ -2,82 +2,241 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Facturación - ERP Sucre</title>
-    <link rel="stylesheet" href="facturacion.css">
-    <script src="facturacion.js" defer></script>
+    <title>Facturación PRO - ERP SUCRE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body { background: #f5f6fa; }
+
+        #sidebar {
+            width: 240px;
+            background: #1f2937;
+            color: white;
+            min-height: 100vh;
+        }
+        #sidebar.d-none { display: none !important; }
+
+        #sidebar a {
+            color: #d1d5db;
+            padding: 12px;
+            display: block;
+            text-decoration: none;
+        }
+        #sidebar a:hover {
+            background: #374151;
+            color: #fff;
+        }
+
+        .action-btn {
+            border: none;
+            background: #e5e7eb;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        .action-btn:hover { background: #d1d5db; }
+
+        th { cursor: pointer; }
+        .fact-header-label { font-size: 0.8rem; color: #6b7280; }
+    </style>
 </head>
 
 <body>
 
-    <div class="header">
-        <h1>Facturación</h1>
-        <p>Emisión de facturas, cálculo automático y exportación.</p>
+<div class="d-flex w-100">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="p-3">
+        <h4 class="mb-4">ERP SUCRE</h4>
+        <a href="../productos/compras.html">Compras</a>
+        <a href="../productos/productos.html">Productos / Ventas</a>
+        <a href="../contactos/index.html">Contactos</a>
+        <a href="../reportes/index.html">Reportes</a>
+        <a href="./facturacion.html" class="mt-2">Facturación</a>
     </div>
 
-    <div class="actions">
-        <button id="btnNuevaFactura">➕ Nueva Factura</button>
-        <button id="btnExcel">📊 Exportar Excel</button>
-        <button id="btnPDF">📄 Exportar PDF</button>
-    </div>
+    <!-- CONTENIDO -->
+    <div class="flex-grow-1 p-4">
 
-    <!-- Tabla de facturas -->
-    <table class="erp-table">
-        <thead>
-            <tr>
-                <th>N° Factura</th>
-                <th>Cliente</th>
-                <th>Fecha</th>
-                <th>Subtotal</th>
-                <th>IVA</th>
-                <th>Total</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="tablaFacturas"></tbody>
-    </table>
+        <button id="btnToggleSidebar" class="btn btn-secondary mb-3">Ocultar menú</button>
 
-    <!-- Modal de factura -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
+        <h2 class="fw-bold text-dark mb-1">Facturación PRO</h2>
+        <p class="text-muted small mb-3">Emisión de facturas, clientes, formas de pago y detalle de productos</p>
 
-            <h2>Nueva Factura</h2>
+        <!-- ENCABEZADO FACTURA -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <div class="fact-header-label">NÚMERO FACTURA</div>
+                        <input id="facNumero" type="text" class="form-control" placeholder="Auto / Manual">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fact-header-label">FECHA</div>
+                        <input id="facFecha" type="date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fact-header-label">RESPONSABLE</div>
+                        <input id="facResponsable" type="text" class="form-control" placeholder="CO.RESP">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fact-header-label">FORMA DE PAGO</div>
+                        <select id="facFormaPago" class="form-select">
+                            <option value="EFECTIVO">EFECTIVO</option>
+                            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                            <option value="TARJETA">TARJETA</option>
+                            <option value="CHEQUE">CHEQUE</option>
+                            <option value="CREDITO">CRÉDITO</option>
+                        </select>
+                    </div>
+                </div>
 
-            <label>Cliente</label>
-            <input type="text" id="facCliente">
+                <hr>
 
-            <label>Fecha</label>
-            <input type="date" id="facFecha">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <div class="fact-header-label">RUC / CÉDULA</div>
+                        <input id="cliRuc" type="text" class="form-control" placeholder="RUC/CC">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fact-header-label">NOMBRE / RAZÓN SOCIAL</div>
+                        <input id="cliNombre" type="text" class="form-control" placeholder="NOM.APE.O R.SOC">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fact-header-label">TELÉFONO</div>
+                        <input id="cliTelefono" type="text" class="form-control" placeholder="TELEFON">
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">CÓDIGO CLIENTE</div>
+                        <input id="cliCodigo" type="text" class="form-control" placeholder="CODCLI">
+                    </div>
+                </div>
 
-            <h3>Items</h3>
+                <div class="row g-2 mt-2">
+                    <div class="col-md-6">
+                        <div class="fact-header-label">DIRECCIÓN</div>
+                        <input id="cliDireccion" type="text" class="form-control" placeholder="DIRECCI">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fact-header-label">CORREO ELECTRÓNICO</div>
+                        <input id="cliCorreo" type="email" class="form-control" placeholder="CORR.E.">
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">% DESCUENTO</div>
+                        <input id="facDescuentoPorc" type="number" class="form-control" min="0" max="100" value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <table class="items-table">
-                <thead>
+        <!-- BUSCADOR DE PRODUCTOS -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="fact-header-label">Buscar por NOMBRE</label>
+                        <input id="buscarNombreProd" type="text" class="form-control" placeholder="Nombre producto...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="fact-header-label">Buscar por MARCA</label>
+                        <input id="buscarMarcaProd" type="text" class="form-control" placeholder="Marca...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="fact-header-label">Buscar por CÓDIGO</label>
+                        <input id="buscarCodigoProd" type="text" class="form-control" placeholder="Código...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="fact-header-label">Buscar general</label>
+                        <input id="buscarGeneralProd" type="text" class="form-control" placeholder="Texto libre...">
+                    </div>
+                    <div class="col-md-2">
+                        <button id="btnBuscarProducto" class="btn btn-primary w-100">
+                            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DETALLE DE FACTURA -->
+        <div class="table-responsive mb-3">
+            <table id="tablaDetalleFactura" class="table table-striped table-hover">
+                <thead class="table-dark">
                     <tr>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Subtotal</th>
-                        <th></th>
+                        <th data-column="codigo">CODIGO</th>
+                        <th data-column="ori">ORI</th>
+                        <th data-column="marca">MARCA</th>
+                        <th data-column="nombre">NOMBRE</th>
+                        <th data-column="uni">UNI</th>
+                        <th data-column="saldo">SALDO</th>
+                        <th data-column="pvp">PVP</th>
+                        <th data-column="cant">CANT</th>
+                        <th data-column="subpvp">SUB-PVP</th>
+                        <th>ACCIONES</th>
                     </tr>
                 </thead>
-                <tbody id="itemsBody"></tbody>
+                <tbody id="tbodyDetalleFactura"></tbody>
             </table>
-
-            <button id="btnAgregarItem">➕ Agregar Item</button>
-
-            <div class="totales">
-                <p>Subtotal: <span id="tSubtotal">0.00</span></p>
-                <p>IVA (15%): <span id="tIVA">0.00</span></p>
-                <p>Total: <span id="tTotal">0.00</span></p>
-            </div>
-
-            <div class="modal-actions">
-                <button id="btnGuardarFactura">Guardar Factura</button>
-                <button id="btnCerrar">Cancelar</button>
-            </div>
-
         </div>
+
+        <!-- PIE DE FACTURA -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-2">
+                        <div class="fact-header-label">ITEMS</div>
+                        <input id="facItems" type="text" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">SUBTOTAL</div>
+                        <input id="facSubtotal" type="text" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">% DCTO</div>
+                        <input id="facPorcDescuento" type="text" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">VALOR DESCUENTO</div>
+                        <input id="facValDescuento" type="text" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">IVA</div>
+                        <input id="facIva" type="text" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="fact-header-label">TOTAL</div>
+                        <input id="facTotal" type="text" class="form-control fw-bold" readonly>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex justify-content-end gap-2">
+                    <button id="btnNuevaFactura" class="btn btn-success">
+                        <i class="fa-solid fa-file-circle-plus"></i> Nueva factura
+                    </button>
+                    <button id="btnGuardarFactura" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                    <button id="btnImprimirFactura" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-print"></i> Imprimir
+                    </button>
+                    <button id="btnSalirFactura" class="btn btn-outline-danger">
+                        <i class="fa-solid fa-door-open"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="facturacion.js"></script>
 
 </body>
 </html>
