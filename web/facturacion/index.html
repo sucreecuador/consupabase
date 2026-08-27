@@ -5,10 +5,7 @@
     <title>Facturación PRO - ERP SUCRE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
@@ -57,7 +54,7 @@
         <a href="../productos/productos.html">Productos / Ventas</a>
         <a href="../contactos/index.html">Contactos</a>
         <a href="../reportes/index.html">Reportes</a>
-        <a href="./facturacion.html" class="mt-2">Facturación</a>
+        <a href="./index.html">Facturación</a>
     </div>
 
     <!-- CONTENIDO -->
@@ -131,6 +128,20 @@
                         <input id="facDescuentoPorc" type="number" class="form-control" min="0" max="100" value="0">
                     </div>
                 </div>
+
+                <div class="row g-2 mt-3">
+                    <div class="col-md-2">
+                        <button id="btnBuscarCliente" class="btn btn-primary w-100">
+                            <i class="fa-solid fa-user-check"></i> Buscar Cliente
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="btnCrearCliente" class="btn btn-success w-100">
+                            <i class="fa-solid fa-user-plus"></i> Crear Cliente
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -168,15 +179,15 @@
             <table id="tablaDetalleFactura" class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>
-                        <th data-column="codigo">CODIGO</th>
-                        <th data-column="ori">ORI</th>
-                        <th data-column="marca">MARCA</th>
-                        <th data-column="nombre">NOMBRE</th>
-                        <th data-column="uni">UNI</th>
-                        <th data-column="saldo">SALDO</th>
-                        <th data-column="pvp">PVP</th>
-                        <th data-column="cant">CANT</th>
-                        <th data-column="subpvp">SUB-PVP</th>
+                        <th>CODIGO</th>
+                        <th>ORI</th>
+                        <th>MARCA</th>
+                        <th>NOMBRE</th>
+                        <th>UNI</th>
+                        <th>SALDO</th>
+                        <th>PVP</th>
+                        <th>CANT</th>
+                        <th>SUB-PVP</th>
                         <th>ACCIONES</th>
                     </tr>
                 </thead>
@@ -234,8 +245,66 @@
     </div>
 </div>
 
-<!-- JS -->
+<!-- MODAL CREAR CLIENTE -->
+<div class="modal fade" id="modalCrearCliente" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Crear Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label">Código Cliente</label>
+            <input id="newCliCodigo" type="text" class="form-control" placeholder="Ej: 0001">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">RUC / Cédula</label>
+            <input id="newCliRuc" type="text" class="form-control">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Nombre / Razón Social</label>
+            <input id="newCliNombre" type="text" class="form-control">
+          </div>
+        </div>
+
+        <div class="row g-2 mt-2">
+          <div class="col-md-6">
+            <label class="form-label">Dirección</label>
+            <input id="newCliDireccion" type="text" class="form-control">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Teléfono</label>
+            <input id="newCliTelefono" type="text" class="form-control">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Correo</label>
+            <input id="newCliCorreo" type="email" class="form-control">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnGuardarNuevoCliente" class="btn btn-primary">
+          <i class="fa-solid fa-save"></i> Guardar Cliente
+        </button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="facturacion.js"></script>
 
 </body>
