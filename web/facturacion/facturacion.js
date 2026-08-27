@@ -319,7 +319,14 @@ async function buscarProductos() {
 
   const { data, error } = await query;
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("Error Supabase al buscar productos:", error);
+    alert("Error al buscar productos: " + error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("Búsqueda sin resultados. Filtros usados:", { nom, mar, cod, gen });
     alert("No se encontraron productos con el criterio ingresado.");
     return;
   }
