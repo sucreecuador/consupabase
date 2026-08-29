@@ -1,81 +1,81 @@
 /* ================================
-   ESTILO EXCEL PROFESIONAL
+   ESTILO CORPORATIVO SUCRE (PRODUCTOS)
    ================================ */
 
-table {
-    border-collapse: collapse !important;
-    width: 100%;
+body {
+    background: #f8f9fa;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Tabla */
+.table {
     font-size: 14px;
-    background: #ffffff;
+    border-collapse: collapse !important;
 }
 
-/* Encabezados estilo Excel */
-table thead th {
-    background: #e6e6e6;
-    border: 1px solid #bfbfbf;
-    padding: 8px;
-    font-weight: bold;
-    text-align: left;
+.table thead th {
+    background: #f1f1f1;
     color: #333;
+    font-weight: 600;
+    border-bottom: 2px solid #dcdcdc;
+    padding: 10px;
 }
 
-/* Celdas */
-table tbody td {
-    border: 1px solid #d9d9d9;
-    padding: 6px 8px;
-    color: #333;
+.table tbody td {
+    padding: 8px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e5e5e5;
 }
 
-/* Filas alternadas */
-table tbody tr:nth-child(even) {
+/* Hover */
+.table tbody tr:hover {
     background: #f7f7f7;
 }
 
-/* Hover estilo Excel */
-table tbody tr:hover {
-    background: #e2f0ff;
-}
-
-/* Botones de acción */
-.btn-outline-secondary,
-.btn-outline-danger {
+/* Botones */
+.btn-sucre {
+    background: #0d6efd;
+    color: #fff;
     border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 12px;
+    padding: 6px 12px;
+    font-size: 14px;
 }
 
-/* Modal estilo Excel */
-.modal-content {
-    border: 1px solid #bfbfbf;
+.btn-sucre:hover {
+    background: #0b5ed7;
 }
 
+/* Botones outline */
+.btn-outline-sucre {
+    border: 1px solid #0d6efd;
+    color: #0d6efd;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+.btn-outline-sucre:hover {
+    background: #0d6efd;
+    color: #fff;
+}
+
+/* Modal */
 .modal-header {
-    background: #e6e6e6;
-    border-bottom: 1px solid #bfbfbf;
+    background: #f1f1f1;
+    border-bottom: 1px solid #dcdcdc;
 }
 
 .modal-body label {
-    font-weight: bold;
-    margin-top: 6px;
+    font-weight: 600;
+    margin-top: 8px;
 }
 
 .modal-body input {
-    border: 1px solid #bfbfbf;
-    border-radius: 3px;
-}
-
-/* Botón guardar */
-#btnGuardarCambiosContacto {
-    background: #2f75ff;
-    border-color: #2f75ff;
-}
-
-#btnGuardarCambiosContacto:hover {
-    background: #1f5ed6;
+    border-radius: 4px;
+    border: 1px solid #dcdcdc;
 }
 
 /* Paginación */
 #lblInfoPaginacion {
-    font-size: 13px;
+    font-size: 14px;
     color: #333;
 }
