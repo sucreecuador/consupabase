@@ -6,10 +6,14 @@ const SUPABASE_KEY =
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let tipoVistaActual = "VENTAS"; // "VENTAS" (categoria = 'C') o "COMPRAS" (categoria != 'C')
+let tipoVistaActual = "VENTAS"; // "VENTAS" o "COMPRAS"
 let paginaActual = 1;
 const registrosPorPagina = 10;
 let totalRegistros = 0;
+
+// Variables de ordenamiento
+let columnaOrden = "codigo_cliente";
+let ordenAscendente = true;
 
 document.addEventListener("DOMContentLoaded", () => {
   inicializarEventos();
@@ -23,6 +27,8 @@ function inicializarEventos() {
       e.currentTarget.classList.add("active");
       tipoVistaActual = e.currentTarget.getAttribute("data-tipo");
       paginaActual = 1;
+      columnaOrden = "codigo_cliente";
+      ordenAscendente = true;
       cargarContactos();
     });
   });
@@ -67,34 +73,53 @@ function inicializarEventos() {
   });
 }
 
+function cambiarOrden(columna) {
+  if (columnaOrden === columna) {
+    ordenAscendente = !ordenAscendente;
+  } else {
+    columnaOrden = columna;
+    ordenAscendente = true;
+  }
+  cargarContactos();
+}
+
+function obtenerIconoOrden(columna) {
+  if (columnaOrden !== columna) {
+    return `<i class="fa-solid fa-sort th-sort-icon"></i>`;
+  }
+  return ordenAscendente
+    ? `<i class="fa-solid fa-sort-up th-sort-icon active"></i>`
+    : `<i class="fa-solid fa-sort-down th-sort-icon active"></i>`;
+}
+
 function renderizarEncabezado() {
   const thead = document.getElementById("theadContactos");
   if (tipoVistaActual === "VENTAS") {
     thead.innerHTML = `
       <tr>
-        <th>CÓDIGO <i class="fa-solid fa-sort"></i></th>
-        <th>CÉDULA O RUC <i class="fa-solid fa-sort"></i></th>
-        <th>CAT <i class="fa-solid fa-sort"></i></th>
-        <th>NOMBRE / RAZÓN SOCIAL <i class="fa-solid fa-sort"></i></th>
-        <th>DIRECCIÓN <i class="fa-solid fa-sort"></i></th>
-        <th>TELÉFONO <i class="fa-solid fa-sort"></i></th>
-        <th>EMAIL <i class="fa-solid fa-sort"></i></th>
-        <th>CIUDAD <i class="fa-solid fa-sort"></i></th>
-        <th>TRANSPORTE <i class="fa-solid fa-sort"></i></th>
-        <th class="text-center">ACCIONES</th>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('direccion')">DIRECCIÓN ${obtenerIconoOrden('direccion')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('email')">EMAIL ${obtenerIconoOrden('email')}</th>
+        <th onclick="cambiarOrden('ciudad')">CIUDAD ${obtenerIconoOrden('ciudad')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
       </tr>
     `;
   } else {
     thead.innerHTML = `
       <tr>
-        <th>CÓDIGO <i class="fa-solid fa-sort"></i></th>
-        <th>CAT <i class="fa-solid fa-sort"></i></th>
-        <th>NOMBRE / RAZÓN SOCIAL <i class="fa-solid fa-sort"></i></th>
-        <th>TELÉFONO <i class="fa-solid fa-sort"></i></th>
-        <th>CÉDULA O RUC <i class="fa-solid fa-sort"></i></th>
-        <th>BANCO <i class="fa-solid fa-sort"></i></th>
-        <th>TRANSPORTE <i class="fa-solid fa-sort"></i></th>
-        <th class="text-center">ACCIONES</th>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('requiere')">BANCO ${obtenerIconoOrden('requiere')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
       </tr>
     `;
   }
@@ -116,11 +141,9 @@ async function cargarContactos() {
   try {
     let query = client.from("clientes").select("*", { count: "exact" });
 
-    // Filtrar por la columna 'categoria'
     if (tipoVistaActual === "VENTAS") {
       query = query.eq("categoria", "C");
     } else {
-      // Para COMPRAS trae todo lo que no sea 'C' o que sea nulo
       query = query.or("categoria.neq.C,categoria.is.null");
     }
 
@@ -142,7 +165,7 @@ async function cargarContactos() {
       }
     }
 
-    query = query.order("id", { ascending: true }).range(desde, hasta);
+    query = query.order(columnaOrden, { ascending: ordenAscendente }).range(desde, hasta);
 
     const { data, count, error } = await query;
 

@@ -14,9 +14,21 @@
     .card-custom { background: #ffffff; border-radius: 12px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 25px; }
     .nav-tabs .nav-link { font-weight: 600; color: #6c757d; border: none; border-bottom: 3px solid transparent; }
     .nav-tabs .nav-link.active { color: #fd7e14; border-bottom: 3px solid #fd7e14; background: transparent; }
-    .table-custom thead { background-color: #e9ecef; color: #495057; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-code { background-color: #f1f3f5; color: #495057; border: 1px solid #ced4da; padding: 4px 8px; border-radius: 4px; font-weight: 600; }
-    .badge-cat { background-color: #e7f5ff; color: #1971c2; border: 1px solid #a5d8ff; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; }
+    
+    /* ESTILO TABLA EXCEL CON FILAS INTERCALADAS (ZEBRA) */
+    .table-excel { border-collapse: separate; border-spacing: 0; border: 1px solid #dee2e6; width: 100%; }
+    .table-excel thead th { background-color: #f1f3f5; color: #343a40; font-size: 0.82rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #dee2e6; border-right: 1px solid #dee2e6; padding: 10px 12px; cursor: pointer; user-select: none; transition: background 0.2s; }
+    .table-excel thead th:hover { background-color: #e9ecef; }
+    .table-excel tbody tr:nth-of-type(odd) { background-color: #ffffff; }
+    .table-excel tbody tr:nth-of-type(even) { background-color: #f8f9fa; }
+    .table-excel tbody tr:hover { background-color: #e2e6ea !important; }
+    .table-excel tbody td { border-bottom: 1px solid #dee2e6; border-right: 1px solid #dee2e6; padding: 8px 12px; font-size: 0.9rem; }
+    .table-excel thead th:last-child, .table-excel tbody td:last-child { border-right: none; }
+    
+    .badge-code { background-color: #e9ecef; color: #343a40; border: 1px solid #ced4da; padding: 3px 7px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; }
+    .badge-cat { background-color: #e7f5ff; color: #1971c2; border: 1px solid #a5d8ff; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; }
+    .th-sort-icon { font-size: 0.75rem; margin-left: 4px; opacity: 0.6; }
+    .th-sort-icon.active { opacity: 1; color: #fd7e14; }
   </style>
 </head>
 <body>
@@ -64,11 +76,11 @@
       </li>
     </ul>
 
-    <!-- TABLA DE CONTACTOS -->
+    <!-- TABLA DE CONTACTOS ESTILO EXCEL -->
     <div class="table-responsive">
-      <table class="table table-hover align-middle table-custom mb-0">
+      <table class="table-excel align-middle mb-0">
         <thead id="theadContactos">
-          <!-- Se genera dinámicamente según la pestaña seleccionada -->
+          <!-- Encabezado dinámico con ordenamiento -->
         </thead>
         <tbody id="tbodyContactos">
           <tr>
