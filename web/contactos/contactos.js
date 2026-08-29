@@ -155,6 +155,9 @@ function renderizarEncabezado() {
         <th onclick="cambiarOrden('email')">EMAIL ${obtenerIconoOrden('email')}</th>
         <th onclick="cambiarOrden('ciudad')">CIUDAD ${obtenerIconoOrden('ciudad')}</th>
         <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th>COMENTARIO</th>
+        <th>FEC. NAC</th>
+        <th>NECESIDAD</th>
         <th class="text-center" style="cursor: default;">ACCIONES</th>
       </tr>
     `;
@@ -168,6 +171,9 @@ function renderizarEncabezado() {
         <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
         <th onclick="cambiarOrden('requiere')">BANCO ${obtenerIconoOrden('requiere')}</th>
         <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th>COMENTARIO</th>
+        <th>FEC. NAC</th>
+        <th>NECESIDAD</th>
         <th class="text-center" style="cursor: default;">ACCIONES</th>
       </tr>
     `;
@@ -178,7 +184,7 @@ async function cargarContactos() {
   renderizarEncabezado();
 
   const tbody = document.getElementById("tbodyContactos");
-  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
+  const numColumnas = tipoVistaActual === "VENTAS" ? 13 : 11;
   tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
 
   const nom = document.getElementById("buscarNombre")?.value.trim() || "";
@@ -230,7 +236,7 @@ async function cargarContactos() {
 function renderizarTabla(lista) {
   const tbody = document.getElementById("tbodyContactos");
   tbody.innerHTML = "";
-  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
+  const numColumnas = tipoVistaActual === "VENTAS" ? 13 : 11;
 
   if (!lista || lista.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
@@ -241,6 +247,11 @@ function renderizarTabla(lista) {
     const tr = document.createElement("tr");
     const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
     const nombreMostrado = item.razon_social || item.nombre || "-";
+
+    // Soporte para variantes de nombres de columnas COBOL en Supabase
+    const comentVal = item.coment_c || item.coment || item.comentario || "-";
+    const fecnacVal = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "-";
+    const necesiVal = item.necesi_c || item.necesi || item.necesidad || "-";
 
     if (tipoVistaActual === "VENTAS") {
       tr.innerHTML = `
@@ -253,6 +264,9 @@ function renderizarTabla(lista) {
         <td>${item.email || "-"}</td>
         <td>${item.ciudad || "-"}</td>
         <td>${item.transporte || "-"}</td>
+        <td>${comentVal}</td>
+        <td>${fecnacVal}</td>
+        <td>${necesiVal}</td>
         <td class="text-center">
           <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
             <i class="fa-solid fa-pen"></i>
@@ -271,6 +285,9 @@ function renderizarTabla(lista) {
         <td>${item.ruc || "-"}</td>
         <td>${item.requiere || "-"}</td>
         <td>${item.transporte || "-"}</td>
+        <td>${comentVal}</td>
+        <td>${fecnacVal}</td>
+        <td>${necesiVal}</td>
         <td class="text-center">
           <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
             <i class="fa-solid fa-pen"></i>
@@ -327,6 +344,11 @@ function abrirModalEdicion(item) {
   document.getElementById("editTransporte").value = item.transporte || "";
   document.getElementById("editRequiere").value = item.requiere || "";
 
+  // Asignar campos COBOL al modal
+  document.getElementById("editComentario").value = item.coment_c || item.coment || item.comentario || "";
+  document.getElementById("editFecnac").value = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "";
+  document.getElementById("editNecesidad").value = item.necesi_c || item.necesi || item.necesidad || "";
+
   if (modalEditar) modalEditar.show();
 }
 
@@ -345,7 +367,11 @@ async function guardarEdicionContacto() {
     telefono1: document.getElementById("editTelefono").value.trim(),
     email: document.getElementById("editEmail").value.trim(),
     transporte: document.getElementById("editTransporte").value.trim(),
-    requiere: document.getElementById("editRequiere").value.trim()
+    requiere: document.getElementById("editRequiere").value.trim(),
+    // Guardado en columnas COBOL
+    coment_c: document.getElementById("editComentario").value.trim(),
+    fecnac_c: document.getElementById("editFecnac").value.trim(),
+    necesi_c: document.getElementById("editNecesidad").value.trim()
   };
 
   const btnGuardar = document.getElementById("btnGuardarCambiosContacto");
