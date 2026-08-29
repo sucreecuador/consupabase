@@ -6,7 +6,7 @@ const SUPABASE_KEY =
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let tipoVistaActual = "VENTAS";
+let tipoVistaActual = "COMPRAS"; // "VENTAS" o "COMPRAS"
 let paginaActual = 1;
 const registrosPorPagina = 10;
 let totalRegistros = 0;
@@ -16,248 +16,386 @@ let ordenAscendente = true;
 let modalEditar = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    modalEditar = new bootstrap.Modal(document.getElementById("modalEditarContacto"));
-    inicializarEventos();
-    cargarContactos();
+  inicializarEventos();
+  cargarContactos();
 });
 
 function inicializarEventos() {
+  // Modal de Edición Bootstrap
+  const modalEl = document.getElementById("modalEditarContacto");
+  if (modalEl) {
+    modalEditar = new bootstrap.Modal(modalEl);
+  }
 
-    document.getElementById("btnGuardarCambiosContacto")
-        .addEventListener("click", guardarEdicionContacto);
+  // Evento Guardar en Modal
+  document.getElementById("btnGuardarCambiosContacto")?.addEventListener("click", guardarEdicionContacto);
 
-    document.getElementById("btnVistaVentas").addEventListener("click", () => {
-        tipoVistaActual = "VENTAS";
-        paginaActual = 1;
-        cargarContactos();
+  // Toggle Sidebar
+  const btnToggle = document.getElementById("btnToggleSidebar");
+  const sidebar = document.getElementById("sidebar");
+  if (btnToggle && sidebar) {
+    btnToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("d-none");
+      btnToggle.textContent = sidebar.classList.contains("d-none")
+        ? "Mostrar menú"
+        : "Ocultar menú";
+    });
+  }
+
+  // Cambio de Vista (Ventas / Compras)
+  const btnVentas = document.getElementById("btnVistaVentas");
+  const btnCompras = document.getElementById("btnVistaCompras");
+
+  if (btnVentas && btnCompras) {
+    btnVentas.addEventListener("click", () => {
+      tipoVistaActual = "VENTAS";
+      btnVentas.className = "btn btn-sm btn-secondary rounded-pill active px-3";
+      btnCompras.className = "btn btn-sm btn-outline-secondary rounded-pill px-3";
+      paginaActual = 1;
+      cargarContactos();
     });
 
-    document.getElementById("btnVistaCompras").addEventListener("click", () => {
-        tipoVistaActual = "COMPRAS";
-        paginaActual = 1;
-        cargarContactos();
+    btnCompras.addEventListener("click", () => {
+      tipoVistaActual = "COMPRAS";
+      btnCompras.className = "btn btn-sm btn-secondary rounded-pill active px-3";
+      btnVentas.className = "btn btn-sm btn-outline-secondary rounded-pill px-3";
+      paginaActual = 1;
+      cargarContactos();
     });
+  }
 
-    document.getElementById("btnAnterior").addEventListener("click", () => {
-        if (paginaActual > 1) {
-            paginaActual--;
-            cargarContactos();
-        }
+  // Inputs de búsqueda en tiempo real
+  const inputs = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
+  inputs.forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", () => {
+      paginaActual = 1;
+      cargarContactos();
     });
+  });
 
-    document.getElementById("btnSiguiente").addEventListener("click", () => {
-        const maxPag = Math.ceil(totalRegistros / registrosPorPagina);
-        if (paginaActual < maxPag) {
-            paginaActual++;
-            cargarContactos();
-        }
+  // Botón Mostrar Todos
+  document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
+    inputs.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
     });
+    paginaActual = 1;
+    cargarContactos();
+  });
+
+  // Botón Editar por Código
+  document.getElementById("btnEditarPorCodigo")?.addEventListener("click", async () => {
+    const cod = prompt("Ingrese el Código de Cliente a editar:");
+    if (cod) {
+      const { data, error } = await client.from("clientes").select("*").eq("codigo_cliente", cod.trim()).maybeSingle();
+      if (error || !data) {
+        alert("No se encontró ningún contacto con el código: " + cod);
+        return;
+      }
+      abrirModalEdicion(data);
+    }
+  });
+
+  // Paginación
+  document.getElementById("btnAnterior")?.addEventListener("click", () => {
+    if (paginaActual > 1) {
+      paginaActual--;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnSiguiente")?.addEventListener("click", () => {
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+    if (paginaActual < maxPaginas) {
+      paginaActual++;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnIrPagina")?.addEventListener("click", () => {
+    const pag = parseInt(document.getElementById("inputPagina").value, 10);
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+    if (pag >= 1 && pag <= maxPaginas) {
+      paginaActual = pag;
+      cargarContactos();
+    }
+  });
 }
 
-function cambiarOrden(col) {
-    if (columnaOrden === col) ordenAscendente = !ordenAscendente;
-    else {
-        columnaOrden = col;
-        ordenAscendente = true;
-    }
-    cargarContactos();
+function cambiarOrden(columna) {
+  if (columnaOrden === columna) {
+    ordenAscendente = !ordenAscendente;
+  } else {
+    columnaOrden = columna;
+    ordenAscendente = true;
+  }
+  cargarContactos();
+}
+
+function obtenerIconoOrden(columna) {
+  if (columnaOrden !== columna) {
+    return `<i class="fa-solid fa-sort th-sort-icon"></i>`;
+  }
+  return ordenAscendente
+    ? `<i class="fa-solid fa-sort-up th-sort-icon active"></i>`
+    : `<i class="fa-solid fa-sort-down th-sort-icon active"></i>`;
 }
 
 function renderizarEncabezado() {
-    const thead = document.getElementById("theadContactos");
-
-    if (tipoVistaActual === "VENTAS") {
-        thead.innerHTML = `
-        <tr>
-            <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO</th>
-            <th onclick="cambiarOrden('ruc')">RUC</th>
-            <th onclick="cambiarOrden('categoria')">CAT</th>
-            <th onclick="cambiarOrden('razon_social')">NOMBRE</th>
-            <th onclick="cambiarOrden('direccion')">DIRECCIÓN</th>
-            <th onclick="cambiarOrden('telefono1')">TELÉFONO</th>
-            <th onclick="cambiarOrden('email')">EMAIL</th>
-            <th onclick="cambiarOrden('ciudad')">CIUDAD</th>
-            <th onclick="cambiarOrden('transporte')">TRANSPORTE</th>
-            <th>FEC. NAC</th>
-            <th>COMENTARIO</th>
-            <th>NECESIDAD</th>
-            <th class="text-center">ACCIONES</th>
-        </tr>`;
-    } else {
-        thead.innerHTML = `
-        <tr>
-            <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO</th>
-            <th onclick="cambiarOrden('ruc')">RUC</th>
-            <th onclick="cambiarOrden('categoria')">CAT</th>
-            <th onclick="cambiarOrden('razon_social')">NOMBRE</th>
-            <th onclick="cambiarOrden('direccion')">DIRECCIÓN</th>
-            <th onclick="cambiarOrden('telefono1')">TELÉFONO</th>
-            <th onclick="cambiarOrden('transporte')">TRANSPORTE</th>
-            <th>BANCO</th>
-            <th>DATOS BANCARIOS</th>
-            <th>COMENTARIO</th>
-            <th>NECESIDAD</th>
-            <th class="text-center">ACCIONES</th>
-        </tr>`;
-    }
+  const thead = document.getElementById("theadContactos");
+  if (tipoVistaActual === "VENTAS") {
+    thead.innerHTML = `
+      <tr>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('direccion')">DIRECCIÓN ${obtenerIconoOrden('direccion')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('email')">EMAIL ${obtenerIconoOrden('email')}</th>
+        <th onclick="cambiarOrden('ciudad')">CIUDAD ${obtenerIconoOrden('ciudad')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th>COMENTARIO</th>
+        <th>FEC. NAC</th>
+        <th>NECESIDAD</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('requiere')">BANCO ${obtenerIconoOrden('requiere')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th>COMENTARIO</th>
+        <th>FEC. NAC</th>
+        <th>NECESIDAD</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
+      </tr>
+    `;
+  }
 }
 
 async function cargarContactos() {
+  renderizarEncabezado();
 
-    renderizarEncabezado();
+  const tbody = document.getElementById("tbodyContactos");
+  const numColumnas = tipoVistaActual === "VENTAS" ? 13 : 11;
+  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
 
-    const tbody = document.getElementById("tbodyContactos");
-    tbody.innerHTML = `<tr><td colspan="13" class="text-center py-4">
-        <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
-    </td></tr>`;
+  const nom = document.getElementById("buscarNombre")?.value.trim() || "";
+  const ced = document.getElementById("buscarCedula")?.value.trim() || "";
+  const cod = document.getElementById("buscarCodigo")?.value.trim() || "";
+  const gen = document.getElementById("buscarGeneral")?.value.trim() || "";
 
-    const desde = (paginaActual - 1) * registrosPorPagina;
-    const hasta = desde + registrosPorPagina - 1;
+  const desde = (paginaActual - 1) * registrosPorPagina;
+  const hasta = desde + registrosPorPagina - 1;
 
+  try {
     let query = client.from("clientes").select("*", { count: "exact" });
 
-    query = query.order(columnaOrden, { ascending: ordenAscendente })
-                 .range(desde, hasta);
+    if (nom) {
+      query = query.or(`nombre.ilike.%${nom}%,razon_social.ilike.%${nom}%`);
+    }
+    if (ced) {
+      query = query.ilike("ruc", `%${ced}%`);
+    }
+    if (cod) {
+      query = query.ilike("codigo_cliente", `%${cod}%`);
+    }
+    if (gen) {
+      query = query.or(
+        `codigo_cliente.ilike.%${gen}%,ruc.ilike.%${gen}%,nombre.ilike.%${gen}%,razon_social.ilike.%${gen}%,direccion.ilike.%${gen}%,categoria.ilike.%${gen}%`
+      );
+    }
+
+    query = query.order(columnaOrden, { ascending: ordenAscendente }).range(desde, hasta);
 
     const { data, count, error } = await query;
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="13" class="text-danger text-center">
-            Error: ${error.message}
-        </td></tr>`;
-        return;
+      console.error("Error en consulta Supabase:", error);
+      tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
+      return;
     }
 
-    totalRegistros = count;
+    totalRegistros = count || 0;
     renderizarTabla(data);
     actualizarPaginacion(desde, hasta);
+
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
+  }
 }
 
 function renderizarTabla(lista) {
-    const tbody = document.getElementById("tbodyContactos");
-    tbody.innerHTML = "";
+  const tbody = document.getElementById("tbodyContactos");
+  tbody.innerHTML = "";
+  const numColumnas = tipoVistaActual === "VENTAS" ? 13 : 11;
 
-    if (!lista || lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" class="text-center py-4">
-            No se encontraron contactos.
-        </td></tr>`;
-        return;
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
+    return;
+  }
+
+  lista.forEach((item) => {
+    const tr = document.createElement("tr");
+    const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
+    const nombreMostrado = item.razon_social || item.nombre || "-";
+
+    // Soporte para variantes de nombres de columnas COBOL en Supabase
+    const comentVal = item.coment_c || item.coment || item.comentario || "-";
+    const fecnacVal = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "-";
+    const necesiVal = item.necesi_c || item.necesi || item.necesidad || "-";
+
+    if (tipoVistaActual === "VENTAS") {
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td>${item.ruc || "-"}</td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.direccion || "-"}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.email || "-"}</td>
+        <td>${item.ciudad || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td>${comentVal}</td>
+        <td>${fecnacVal}</td>
+        <td>${necesiVal}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.ruc || "-"}</td>
+        <td>${item.requiere || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td>${comentVal}</td>
+        <td>${fecnacVal}</td>
+        <td>${necesiVal}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
     }
 
-    lista.forEach(item => {
-
-        const comentVal = item.coment_c || item.coment || item.comentario || "-";
-        const fecnacVal = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "-";
-        const necesiVal = item.necesi_c || item.necesi || item.necesidad || "-";
-
-        const tr = document.createElement("tr");
-
-        if (tipoVistaActual === "VENTAS") {
-            tr.innerHTML = `
-                <td>${item.codigo_cliente}</td>
-                <td>${item.ruc}</td>
-                <td>${item.categoria}</td>
-                <td>${item.razon_social || item.nombre}</td>
-                <td>${item.direccion}</td>
-                <td>${item.telefono1}</td>
-                <td>${item.email}</td>
-                <td>${item.ciudad}</td>
-                <td>${item.transporte}</td>
-                <td>${fecnacVal}</td>
-                <td>${comentVal}</td>
-                <td>${necesiVal}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="editarContacto('${item.id}')">✏️</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarContacto('${item.id}')">🗑️</button>
-                </td>`;
-        } else {
-            tr.innerHTML = `
-                <td>${item.codigo_cliente}</td>
-                <td>${item.ruc}</td>
-                <td>${item.categoria}</td>
-                <td>${item.razon_social || item.nombre}</td>
-                <td>${item.direccion}</td>
-                <td>${item.telefono1}</td>
-                <td>${item.transporte}</td>
-
-                <!-- BANCO = COMENTARIO -->
-                <td>${comentVal}</td>
-
-                <!-- DATOS BANCARIOS = NECESIDAD -->
-                <td>${necesiVal}</td>
-
-                <td>${comentVal}</td>
-                <td>${necesiVal}</td>
-
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="editarContacto('${item.id}')">✏️</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarContacto('${item.id}')">🗑️</button>
-                </td>`;
-        }
-
-        tbody.appendChild(tr);
-    });
+    tbody.appendChild(tr);
+  });
 }
 
 function actualizarPaginacion(desde, hasta) {
-    const lbl = document.getElementById("lblInfoPaginacion");
-    const totalPag = Math.ceil(totalRegistros / registrosPorPagina);
-    const desdeReal = totalRegistros === 0 ? 0 : desde + 1;
-    const hastaReal = Math.min(hasta + 1, totalRegistros);
+  const lblInfo = document.getElementById("lblInfoPaginacion");
+  const btnAnt = document.getElementById("btnAnterior");
+  const btnSig = document.getElementById("btnSiguiente");
+  const inputPag = document.getElementById("inputPagina");
 
-    lbl.textContent = `Mostrando ${desdeReal}-${hastaReal} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPag})`;
+  const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+  const registroHasta = Math.min(hasta + 1, totalRegistros);
+  const registroDesde = totalRegistros === 0 ? 0 : desde + 1;
+
+  if (lblInfo) lblInfo.textContent = `Mostrando ${registroDesde}-${registroHasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
+  if (inputPag) inputPag.value = paginaActual;
+
+  if (btnAnt) btnAnt.disabled = paginaActual <= 1;
+  if (btnSig) btnSig.disabled = paginaActual >= totalPaginas;
 }
 
 window.editarContacto = async (id) => {
+  try {
     const { data, error } = await client.from("clientes").select("*").eq("id", id).single();
-    if (error) return alert("Error al cargar contacto.");
-
-    document.getElementById("editId").value = data.id;
-    document.getElementById("editCodigo").value = data.codigo_cliente || "";
-    document.getElementById("editRuc").value = data.ruc || "";
-    document.getElementById("editCategoria").value = data.categoria || "";
-    document.getElementById("editNombre").value = data.razon_social || data.nombre || "";
-    document.getElementById("editDireccion").value = data.direccion || "";
-    document.getElementById("editCiudad").value = data.ciudad || "";
-    document.getElementById("editTelefono").value = data.telefono1 || "";
-    document.getElementById("editEmail").value = data.email || "";
-    document.getElementById("editTransporte").value = data.transporte || "";
-
-    document.getElementById("editBanco").value = data.coment_c || data.coment || data.comentario || "";
-    document.getElementById("editDatosBancarios").value = data.necesi_c || data.necesi || data.necesidad || "";
-
-    document.getElementById("editComentario").value = data.coment_c || data.coment || data.comentario || "";
-    document.getElementById("editFecnac").value = data.fecnac_c || data.fecnac || data.fecha_nacimiento || "";
-    document.getElementById("editNecesidad").value = data.necesi_c || data.necesi || data.necesidad || "";
-
-    modalEditar.show();
+    if (error) throw error;
+    abrirModalEdicion(data);
+  } catch (err) {
+    console.error("Error al obtener contacto:", err);
+    alert("No se pudo cargar la información del contacto.");
+  }
 };
 
+function abrirModalEdicion(item) {
+  document.getElementById("editId").value = item.id || "";
+  document.getElementById("editCodigo").value = item.codigo_cliente || "";
+  document.getElementById("editCategoria").value = item.categoria || "";
+  document.getElementById("editRuc").value = item.ruc || "";
+  document.getElementById("editNombre").value = item.razon_social || item.nombre || "";
+  document.getElementById("editDireccion").value = item.direccion || "";
+  document.getElementById("editCiudad").value = item.ciudad || "";
+  document.getElementById("editTelefono").value = item.telefono1 || "";
+  document.getElementById("editEmail").value = item.email || "";
+  document.getElementById("editTransporte").value = item.transporte || "";
+  document.getElementById("editRequiere").value = item.requiere || "";
+
+  // Asignar campos COBOL al modal
+  document.getElementById("editComentario").value = item.coment_c || item.coment || item.comentario || "";
+  document.getElementById("editFecnac").value = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "";
+  document.getElementById("editNecesidad").value = item.necesi_c || item.necesi || item.necesidad || "";
+
+  if (modalEditar) modalEditar.show();
+}
+
 async function guardarEdicionContacto() {
+  const id = document.getElementById("editId").value;
+  if (!id) return;
 
-    const id = document.getElementById("editId").value;
+  const payload = {
+    codigo_cliente: document.getElementById("editCodigo").value.trim(),
+    categoria: document.getElementById("editCategoria").value.trim().toUpperCase(),
+    ruc: document.getElementById("editRuc").value.trim(),
+    razon_social: document.getElementById("editNombre").value.trim(),
+    nombre: document.getElementById("editNombre").value.trim(),
+    direccion: document.getElementById("editDireccion").value.trim(),
+    ciudad: document.getElementById("editCiudad").value.trim(),
+    telefono1: document.getElementById("editTelefono").value.trim(),
+    email: document.getElementById("editEmail").value.trim(),
+    transporte: document.getElementById("editTransporte").value.trim(),
+    requiere: document.getElementById("editRequiere").value.trim(),
+    // Guardado en columnas COBOL
+    coment_c: document.getElementById("editComentario").value.trim(),
+    fecnac_c: document.getElementById("editFecnac").value.trim(),
+    necesi_c: document.getElementById("editNecesidad").value.trim()
+  };
 
-    const payload = {
-        codigo_cliente: editCodigo.value.trim(),
-        ruc: editRuc.value.trim(),
-        categoria: editCategoria.value.trim(),
-        razon_social: editNombre.value.trim(),
-        nombre: editNombre.value.trim(),
-        direccion: editDireccion.value.trim(),
-        ciudad: editCiudad.value.trim(),
-        telefono1: editTelefono.value.trim(),
-        email: editEmail.value.trim(),
-        transporte: editTransporte.value.trim(),
+  const btnGuardar = document.getElementById("btnGuardarCambiosContacto");
+  btnGuardar.disabled = true;
+  btnGuardar.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Guardando...`;
 
-        // BANCO = COMENTARIO
-        coment_c: editBanco.value.trim(),
+  const { error } = await client.from("clientes").update(payload).eq("id", id);
 
-        // DATOS BANCARIOS = NECESIDAD
-        necesi_c: editDatosBancarios.value.trim(),
+  btnGuardar.disabled = false;
+  btnGuardar.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios`;
 
-        fecnac_c: editFecnac.value.trim(),
-        coment: editComentario.value.trim(),
-        necesidad: editNecesidad.value.trim()
-    };
+  if (error) {
+    console.error("Error al actualizar:", error);
+    alert("Error al guardar los cambios: " + error.message);
+  } else {
+    if (modalEditar) modalEditar.hide();
+    cargarContactos();
+  }
+}
 
-    const btn = document.getElementById("
+window.eliminarContacto = async (id) => {
+  if (confirm("¿Está seguro de eliminar este contacto?")) {
+    const { error } = await client.from("clientes").delete().eq("id", id);
+    if (error) alert("Error al eliminar contacto.");
+    else cargarContactos();
+  }
+};
