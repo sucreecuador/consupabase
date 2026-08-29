@@ -19,6 +19,7 @@
       background-color: #1e293b;
       color: #fff;
       flex-shrink: 0;
+      transition: all 0.3s ease;
     }
     .sidebar-brand {
       font-size: 1.25rem;
@@ -54,25 +55,44 @@
       flex-grow: 1;
       padding: 1.5rem;
     }
+    .suggestions-list {
+      position: absolute;
+      z-index: 1050;
+      width: 100%;
+      max-height: 220px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .suggestions-list .list-group-item {
+      cursor: pointer;
+      border-left: 0;
+      border-right: 0;
+    }
+    .suggestions-list .list-group-item:hover {
+      background-color: #f1f5f9;
+    }
   </style>
 </head>
 <body>
 
   <div class="d-flex">
-    <!-- SIDEBAR UNIFICADO -->
+    <!-- SIDEBAR CON RUTAS ABSOLUTAS -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         ERP SUCRE
       </div>
       <ul class="sidebar-nav">
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="indicadores.html">Indicadores</a></li>
-        <li><a href="productos.html">Productos</a></li>
-        <li><a href="inventario.html">Inventario</a></li>
-        <li><a href="contactos.html">Contactos</a></li>
-        <li><a href="reportes.html">Reportes</a></li>
-        <li><a href="facturacion.html" class="active">Facturación</a></li>
-        <li><a href="configuracion.html">Configuración</a></li>
+        <li><a href="/web/index.html">Inicio</a></li>
+        <li><a href="/web/indicadores.html">Indicadores</a></li>
+        <li><a href="/web/productos.html">Productos</a></li>
+        <li><a href="/web/inventario.html">Inventario</a></li>
+        <li><a href="/web/contactos.html">Contactos</a></li>
+        <li><a href="/web/reportes.html">Reportes</a></li>
+        <li><a href="/web/facturacion/index.html" class="active">Facturación</a></li>
+        <li><a href="/web/configuracion.html">Configuración</a></li>
       </ul>
     </aside>
 
@@ -86,92 +106,278 @@
         </div>
       </div>
 
+      <!-- DATOS DE CLIENTE Y FACTURA -->
       <div class="card p-3 mb-3 shadow-sm">
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label fw-bold small text-uppercase">Número Factura</label>
             <input type="text" class="form-control" id="numFactura" value="FAC-000001" readonly>
           </div>
-          <div class="col-md-4">
-            <label class="form-label fw-bold small text-uppercase">RUC / Cédula</label>
-            <input type="text" class="form-control" id="rucCliente" placeholder="Ingrese RUC o Cédula">
+          <div class="col-md-3 position-relative">
+            <label class="form-label fw-bold small text-uppercase">RUC / Cédula / Nombre</label>
+            <input type="text" class="form-control" id="rucCliente" placeholder="Ingresa RUC o Cédula..." autocomplete="off">
+            <div id="listaSugerenciasCliente" class="suggestions-list list-group d-none"></div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
+            <label class="form-label fw-bold small text-uppercase">Nombre / Razón Social</label>
+            <input type="text" class="form-control" id="nombreCliente" placeholder="Nombre del cliente" readonly>
+          </div>
+          <div class="col-md-3">
             <label class="form-label fw-bold small text-uppercase">Dirección</label>
             <input type="text" class="form-control" id="dirCliente" placeholder="Dirección del cliente">
           </div>
         </div>
       </div>
 
+      <!-- BÚSQUEDA DE PRODUCTOS -->
       <div class="card p-3 mb-3 shadow-sm">
         <div class="row g-3 align-items-end">
-          <div class="col-md-6">
-            <label class="form-label fw-bold small text-uppercase">Buscar por Nombre</label>
-            <input type="text" class="form-control" id="buscarProducto" placeholder="Nombre producto...">
+          <div class="col-md-12 position-relative">
+            <label class="form-label fw-bold small text-uppercase">Buscar por Nombre o Código de Producto</label>
+            <input type="text" class="form-control" id="buscarProducto" placeholder="Nombre o código del producto..." autocomplete="off">
+            <div id="listaSugerenciasProd" class="suggestions-list list-group d-none"></div>
           </div>
         </div>
       </div>
 
+      <!-- TABLA DETALLE FACTURA -->
       <div class="card shadow-sm mb-3">
         <div class="table-responsive">
-          <table class="table table-hover mb-0">
+          <table class="table table-hover mb-0 align-middle">
             <thead class="table-dark">
               <tr>
                 <th>CÓDIGO</th>
-                <th>ORI</th>
                 <th>MARCA</th>
                 <th>DESCRIPCIÓN</th>
-                <th>CANT.</th>
-                <th>PRECIO</th>
-                <th>SUBTOTAL</th>
-                <th class="text-center">ACCIONES</th>
+                <th style="width: 110px;">CANT.</th>
+                <th style="width: 130px;">PRECIO</th>
+                <th class="text-end">SUBTOTAL</th>
+                <th class="text-center" style="width: 80px;">ACCIONES</th>
               </tr>
             </thead>
             <tbody id="tbodyDetalleFactura">
-              <tr>
-                <td colspan="8" class="text-center py-4 text-muted">No hay productos agregados a la factura.</td>
+              <tr id="rowVacia">
+                <td colspan="7" class="text-center py-4 text-muted">No hay productos agregados a la factura.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
+      <!-- TOTALES -->
       <div class="card p-3 shadow-sm">
-        <div class="row text-center fw-bold">
-          <div class="col-md-4">
-            <label class="small text-muted d-block">ITEMS</label>
+        <div class="row text-center fw-bold align-items-center">
+          <div class="col-md-3">
+            <label class="small text-muted d-block text-uppercase">Items</label>
             <span id="lblTotalItems" class="fs-5">0</span>
           </div>
-          <div class="col-md-4">
-            <label class="small text-muted d-block">SUBTOTAL</label>
-            <span id="lblSubtotal" class="fs-5">0.00</span>
+          <div class="col-md-3">
+            <label class="small text-muted d-block text-uppercase">Subtotal</label>
+            <span id="lblSubtotal" class="fs-5">$0.00</span>
           </div>
-          <div class="col-md-4">
-            <label class="small text-muted d-block">TOTAL</label>
-            <span id="lblTotal" class="fs-4 text-success">0.00</span>
+          <div class="col-md-3">
+            <label class="small text-muted d-block text-uppercase">Total</label>
+            <span id="lblTotal" class="fs-4 text-success">$0.00</span>
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-success w-100 py-2 fw-bold" id="btnEmitirFactura">
+              <i class="fa-solid fa-check-circle me-1"></i> EMITIR FACTURA
+            </button>
           </div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Script Toggle Sidebar -->
-  <script>
-    document.getElementById('btnToggleSidebar')?.addEventListener('click', () => {
-      const sidebar = document.getElementById('sidebar');
-      const btn = document.getElementById('btnToggleSidebar');
-      if (sidebar.style.display === 'none') {
-        sidebar.style.display = 'block';
-        btn.textContent = 'Ocultar menú';
-      } else {
-        sidebar.style.display = 'none';
-        btn.textContent = 'Mostrar menú';
-      }
-    });
-  </script>
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- LÓGICA CONEXIÓN CON SUPABASE -->
+  <script>
+    const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let detalleFactura = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Ocultar / Mostrar Sidebar
+      document.getElementById('btnToggleSidebar')?.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        const btn = document.getElementById('btnToggleSidebar');
+        if (sidebar.style.display === 'none') {
+          sidebar.style.display = 'block';
+          btn.textContent = 'Ocultar menú';
+        } else {
+          sidebar.style.display = 'none';
+          btn.textContent = 'Mostrar menú';
+        }
+      });
+
+      // Autocompletado de Clientes
+      const inputRuc = document.getElementById('rucCliente');
+      const boxClientes = document.getElementById('listaSugerenciasCliente');
+
+      inputRuc.addEventListener('input', async () => {
+        const query = inputRuc.value.trim();
+        if (query.length < 2) {
+          boxClientes.classList.add('d-none');
+          return;
+        }
+
+        const { data } = await client.from('clientes')
+          .select('*')
+          .or(`ruc.ilike.%${query}%,nombre.ilike.%${query}%,razon_social.ilike.%${query}%`)
+          .limit(5);
+
+        boxClientes.innerHTML = '';
+        if (data && data.length > 0) {
+          boxClientes.classList.remove('d-none');
+          data.forEach(c => {
+            const item = document.createElement('button');
+            item.className = 'list-group-item list-group-item-action text-start small';
+            item.textContent = `${c.ruc || ''} - ${c.razon_social || c.nombre || ''}`;
+            item.onclick = () => {
+              inputRuc.value = c.ruc || '';
+              document.getElementById('nombreCliente').value = c.razon_social || c.nombre || '';
+              document.getElementById('dirCliente').value = c.direccion || '';
+              boxClientes.classList.add('d-none');
+            };
+            boxClientes.appendChild(item);
+          });
+        } else {
+          boxClientes.classList.add('d-none');
+        }
+      });
+
+      // Autocompletado de Productos
+      const inputProd = document.getElementById('buscarProducto');
+      const boxProd = document.getElementById('listaSugerenciasProd');
+
+      inputProd.addEventListener('input', async () => {
+        const query = inputProd.value.trim();
+        if (query.length < 2) {
+          boxProd.classList.add('d-none');
+          return;
+        }
+
+        const { data } = await client.from('productos')
+          .select('*')
+          .or(`codigo.ilike.%${query}%,descripcion.ilike.%${query}%,marca.ilike.%${query}%`)
+          .limit(5);
+
+        boxProd.innerHTML = '';
+        if (data && data.length > 0) {
+          boxProd.classList.remove('d-none');
+          data.forEach(p => {
+            const item = document.createElement('button');
+            item.className = 'list-group-item list-group-item-action text-start small';
+            const precioDisplay = parseFloat(p.precio || p.pvp || 0).toFixed(2);
+            item.textContent = `${p.codigo || ''} - ${p.descripcion || p.nombre || ''} ($${precioDisplay})`;
+            item.onclick = () => {
+              agregarProductoAFactura(p);
+              inputProd.value = '';
+              boxProd.classList.add('d-none');
+            };
+            boxProd.appendChild(item);
+          });
+        } else {
+          boxProd.classList.add('d-none');
+        }
+      });
+
+      // Emitir Factura
+      document.getElementById('btnEmitirFactura').addEventListener('click', () => {
+        if (detalleFactura.length === 0) {
+          alert('Debe agregar al menos un producto a la factura.');
+          return;
+        }
+        alert('Factura procesada con éxito.');
+        detalleFactura = [];
+        renderizarTablaDetalle();
+      });
+    });
+
+    function agregarProductoAFactura(p) {
+      const idx = detalleFactura.findIndex(item => item.id === p.id);
+      if (idx !== -1) {
+        detalleFactura[idx].cantidad += 1;
+      } else {
+        detalleFactura.push({
+          id: p.id,
+          codigo: p.codigo || '-',
+          marca: p.marca || '-',
+          descripcion: p.descripcion || p.nombre || 'Producto sin descripción',
+          cantidad: 1,
+          precio: parseFloat(p.precio || p.pvp || 0)
+        });
+      }
+      renderizarTablaDetalle();
+    }
+
+    window.cambiarCantidad = (index, cant) => {
+      const nuevaCant = parseInt(cant, 10);
+      detalleFactura[index].cantidad = (isNaN(nuevaCant) || nuevaCant <= 0) ? 1 : nuevaCant;
+      renderizarTablaDetalle();
+    };
+
+    window.cambiarPrecio = (index, precio) => {
+      const nuevoPrecio = parseFloat(precio);
+      detalleFactura[index].precio = (isNaN(nuevoPrecio) || nuevoPrecio < 0) ? 0 : nuevoPrecio;
+      renderizarTablaDetalle();
+    };
+
+    window.eliminarItem = (index) => {
+      detalleFactura.splice(index, 1);
+      renderizarTablaDetalle();
+    };
+
+    function renderizarTablaDetalle() {
+      const tbody = document.getElementById('tbodyDetalleFactura');
+      tbody.innerHTML = '';
+
+      if (detalleFactura.length === 0) {
+        tbody.innerHTML = `<tr id="rowVacia"><td colspan="7" class="text-center py-4 text-muted">No hay productos agregados a la factura.</td></tr>`;
+        actualizarTotales();
+        return;
+      }
+
+      detalleFactura.forEach((item, index) => {
+        const subtotal = item.cantidad * item.precio;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge bg-secondary">${item.codigo}</span></td>
+          <td>${item.marca}</td>
+          <td class="fw-bold">${item.descripcion}</td>
+          <td>
+            <input type="number" class="form-control form-control-sm text-center" value="${item.cantidad}" min="1" onchange="cambiarCantidad(${index}, this.value)">
+          </td>
+          <td>
+            <input type="number" step="0.01" class="form-control form-control-sm text-end" value="${item.precio.toFixed(2)}" onchange="cambiarPrecio(${index}, this.value)">
+          </td>
+          <td class="fw-bold text-end">$${subtotal.toFixed(2)}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarItem(${index})">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      actualizarTotales();
+    }
+
+    function actualizarTotales() {
+      const totalItems = detalleFactura.reduce((acc, curr) => acc + curr.cantidad, 0);
+      const subtotal = detalleFactura.reduce((acc, curr) => acc + (curr.cantidad * curr.precio), 0);
+
+      document.getElementById('lblTotalItems').textContent = totalItems;
+      document.getElementById('lblSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('lblTotal').textContent = `$${subtotal.toFixed(2)}`;
+    }
+  </script>
 </body>
 </html>
