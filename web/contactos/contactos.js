@@ -19,6 +19,7 @@ const registrosPorPagina = 15;
 let totalRegistros = 0;
 let ordenColumna = "codigo";
 let ordenAscendente = true;
+let vistaActual = "compras"; // "ventas" o "compras"
 
 // ===============================
 //  INICIO
@@ -43,6 +44,36 @@ function inicializarEventos() {
             btnToggle.textContent = sidebar.classList.contains("d-none")
                 ? "Mostrar menú"
                 : "Ocultar menú";
+        });
+    }
+
+    // Switcher de Vistas (Ventas / Compras)
+    const btnVistaVentas = document.getElementById("btnVistaVentas");
+    const btnVistaCompras = document.getElementById("btnVistaCompras");
+
+    if (btnVistaVentas && btnVistaCompras) {
+        btnVistaVentas.addEventListener("click", () => {
+            vistaActual = "ventas";
+            btnVistaVentas.classList.add("btn-secondary", "active");
+            btnVistaVentas.classList.remove("btn-outline-secondary");
+            
+            btnVistaCompras.classList.add("btn-outline-secondary");
+            btnVistaCompras.classList.remove("btn-secondary", "active");
+
+            paginaActual = 1;
+            cargarPagina();
+        });
+
+        btnVistaCompras.addEventListener("click", () => {
+            vistaActual = "compras";
+            btnVistaCompras.classList.add("btn-secondary", "active");
+            btnVistaCompras.classList.remove("btn-outline-secondary");
+
+            btnVistaVentas.classList.add("btn-outline-secondary");
+            btnVistaVentas.classList.remove("btn-secondary", "active");
+
+            paginaActual = 1;
+            cargarPagina();
         });
     }
 
@@ -153,11 +184,16 @@ async function cargarPagina() {
             paginaActual * registrosPorPagina - 1
         );
 
+    // Filtros específicos
     if (nom !== "") query = query.ilike("nombre", `%${nom}%`);
-    if (ced !== "") query = query.or(`cedula_ruc.ilike.%${ced}%,ruc.ilike.%${ced}%`);
     if (cod !== "") query = query.ilike("codigo", `%${cod}%`);
 
-    // FIX: Búsqueda general incluyendo cédula y ruc
+    // Búsqueda robusta por Cédula / RUC (cubre diferentes posibles nombres de columnas)
+    if (ced !== "") {
+        query = query.or(`cedula_ruc.ilike.%${ced}%,ruc.ilike.%${ced}%,cedula.ilike.%${ced}%,codigo.ilike.%${ced}%`);
+    }
+
+    // Búsqueda General ("Buscar todos...")
     if (gen !== "") {
         query = query.or(
             `codigo.ilike.%${gen}%,nombre.ilike.%${gen}%,cedula_ruc.ilike.%${gen}%,ruc.ilike.%${gen}%,telefono.ilike.%${gen}%`
