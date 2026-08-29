@@ -147,7 +147,7 @@ function renderizarEncabezado() {
     thead.innerHTML = `
       <tr>
         <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
-        <th onclick="cambiarOrden('ruc')">RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
         <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
         <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
         <th onclick="cambiarOrden('direccion')">DIRECCIÓN ${obtenerIconoOrden('direccion')}</th>
@@ -162,7 +162,7 @@ function renderizarEncabezado() {
       </tr>
     `;
   } else {
-    // VISTA COMPRAS: BANCO usa coment_c y DATOS BANCARIOS usa necesi_c. Sin FEC. NAC.
+    // VISTA COMPRAS: BANCO usa comentario/coment_c y DATOS BANCARIOS usa necesidad/necesi_c. Sin FEC. NAC.
     thead.innerHTML = `
       <tr>
         <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
@@ -170,8 +170,8 @@ function renderizarEncabezado() {
         <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
         <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
         <th onclick="cambiarOrden('ruc')">RUC ${obtenerIconoOrden('ruc')}</th>
-        <th onclick="cambiarOrden('coment_c')">BANCO ${obtenerIconoOrden('coment_c')}</th>
-        <th onclick="cambiarOrden('necesi_c')">DATOS BANCARIOS ${obtenerIconoOrden('necesi_c')}</th>
+        <th onclick="cambiarOrden('comentario')">BANCO ${obtenerIconoOrden('comentario')}</th>
+        <th onclick="cambiarOrden('necesidad')">DATOS BANCARIOS ${obtenerIconoOrden('necesidad')}</th>
         <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
         <th class="text-center" style="cursor: default;">ACCIONES</th>
       </tr>
@@ -247,10 +247,10 @@ function renderizarTabla(lista) {
     const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
     const nombreMostrado = item.razon_social || item.nombre || "-";
 
-    // Soporte para variantes de nombres de columnas COBOL en Supabase
-    const bancoVal = item.coment_c || item.coment || item.comentario || "-"; // BANCO
-    const datosBancariosVal = item.necesi_c || item.necesi || item.necesidad || "-"; // DATOS BANCARIOS
-    const fecnacVal = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "-"; // FEC. NAC
+    // Extraer datos asegurando compatibilidad con nombres de columna de Supabase
+    const comentVal = item.comentario || item.coment_c || item.coment || "-";
+    const fecnacVal = item.fecnac_c || item.fecnac || item.fecha_nacimiento || item.fec_nac || "-";
+    const necesiVal = item.necesidad || item.necesi_c || item.necesi || "-";
 
     if (tipoVistaActual === "VENTAS") {
       tr.innerHTML = `
@@ -263,9 +263,9 @@ function renderizarTabla(lista) {
         <td>${item.email || "-"}</td>
         <td>${item.ciudad || "-"}</td>
         <td>${item.transporte || "-"}</td>
-        <td>${bancoVal}</td>
-        <td>${fecnacVal}</td>
-        <td>${datosBancariosVal}</td>
+        <td>${comentVal !== "" ? comentVal : "-"}</td>
+        <td>${fecnacVal !== "" ? fecnacVal : "-"}</td>
+        <td>${necesiVal !== "" ? necesiVal : "-"}</td>
         <td class="text-center">
           <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
             <i class="fa-solid fa-pen"></i>
@@ -276,15 +276,15 @@ function renderizarTabla(lista) {
         </td>
       `;
     } else {
-      // VISTA COMPRAS: Mapeado BANCO = coment_c, DATOS BANCARIOS = necesi_c. Sin FEC. NAC.
+      // VISTA COMPRAS: BANCO (comentVal), DATOS BANCARIOS (necesiVal). Sin FEC. NAC.
       tr.innerHTML = `
         <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
         <td><span class="badge-cat">${catLetra}</span></td>
         <td class="fw-bold">${nombreMostrado}</td>
         <td>${item.telefono1 || "-"}</td>
         <td>${item.ruc || "-"}</td>
-        <td>${bancoVal}</td>
-        <td>${datosBancariosVal}</td>
+        <td>${comentVal !== "" ? comentVal : "-"}</td>
+        <td>${necesiVal !== "" ? necesiVal : "-"}</td>
         <td>${item.transporte || "-"}</td>
         <td class="text-center">
           <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
@@ -342,9 +342,9 @@ function abrirModalEdicion(item) {
   document.getElementById("editTransporte").value = item.transporte || "";
 
   // Asignar campos COBOL al modal
-  document.getElementById("editComentario").value = item.coment_c || item.coment || item.comentario || "";
-  document.getElementById("editNecesidad").value = item.necesi_c || item.necesi || item.necesidad || "";
-  document.getElementById("editFecnac").value = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "";
+  document.getElementById("editComentario").value = item.comentario || item.coment_c || item.coment || "";
+  document.getElementById("editNecesidad").value = item.necesidad || item.necesi_c || item.necesi || "";
+  document.getElementById("editFecnac").value = item.fecnac_c || item.fecnac || item.fecha_nacimiento || item.fec_nac || "";
 
   if (modalEditar) modalEditar.show();
 }
@@ -364,9 +364,9 @@ async function guardarEdicionContacto() {
     telefono1: document.getElementById("editTelefono").value.trim(),
     email: document.getElementById("editEmail").value.trim(),
     transporte: document.getElementById("editTransporte").value.trim(),
-    // Guardado en columnas COBOL
-    coment_c: document.getElementById("editComentario").value.trim(),
-    necesi_c: document.getElementById("editNecesidad").value.trim(),
+    // Guardado en columnas correspondientes
+    comentario: document.getElementById("editComentario").value.trim(),
+    necesidad: document.getElementById("editNecesidad").value.trim(),
     fecnac_c: document.getElementById("editFecnac").value.trim()
   };
 
