@@ -239,6 +239,72 @@
     </div>
 </div>
 
+<!-- Modal Edición Contacto -->
+<div class="modal fade" id="modalEditarContacto" tabindex="-1" aria-labelledby="modalEditarContactoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="modalEditarContactoLabel"><i class="fa-solid fa-user-pen me-2"></i>Editar Contacto</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditarContacto">
+          <input type="hidden" id="editId">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Código Cliente</label>
+              <input type="text" id="editCodigo" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Categoría (E, B, C, T, P...)</label>
+              <input type="text" id="editCategoria" class="form-control form-control-sm text-uppercase" maxlength="1" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Cédula o RUC</label>
+              <input type="text" id="editRuc" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fw-bold small">Nombre / Razón Social</label>
+              <input type="text" id="editNombre" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-bold small">Dirección</label>
+              <input type="text" id="editDireccion" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Ciudad</label>
+              <input type="text" id="editCiudad" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Teléfono</label>
+              <input type="text" id="editTelefono" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Email</label>
+              <input type="email" id="editEmail" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small">Transporte</label>
+              <input type="text" id="editTransporte" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fw-bold small">Banco / Datos Pago</label>
+              <input type="text" id="editRequiere" class="form-control form-control-sm">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-green btn-sm" id="btnGuardarCambiosContacto">
+          <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="contactos.js"></script>
 </body>

@@ -13,6 +13,7 @@ let totalRegistros = 0;
 
 let columnaOrden = "codigo_cliente";
 let ordenAscendente = true;
+let modalEditar = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   inicializarEventos();
@@ -20,6 +21,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function inicializarEventos() {
+  // Modal de Edición Bootstrap
+  const modalEl = document.getElementById("modalEditarContacto");
+  if (modalEl) {
+    modalEditar = new bootstrap.Modal(modalEl);
+  }
+
+  // Evento Guardar en Modal
+  document.getElementById("btnGuardarCambiosContacto")?.addEventListener("click", guardarEdicionContacto);
+
+  // Toggle Sidebar
   const btnToggle = document.getElementById("btnToggleSidebar");
   const sidebar = document.getElementById("sidebar");
   if (btnToggle && sidebar) {
@@ -31,6 +42,7 @@ function inicializarEventos() {
     });
   }
 
+  // Cambio de Vista (Ventas / Compras)
   const btnVentas = document.getElementById("btnVistaVentas");
   const btnCompras = document.getElementById("btnVistaCompras");
 
@@ -52,6 +64,7 @@ function inicializarEventos() {
     });
   }
 
+  // Inputs de búsqueda en tiempo real
   const inputs = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
   inputs.forEach((id) => {
     document.getElementById(id)?.addEventListener("input", () => {
@@ -60,6 +73,7 @@ function inicializarEventos() {
     });
   });
 
+  // Botón Mostrar Todos
   document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
     inputs.forEach((id) => {
       const el = document.getElementById(id);
@@ -69,6 +83,20 @@ function inicializarEventos() {
     cargarContactos();
   });
 
+  // Botón Editar por Código
+  document.getElementById("btnEditarPorCodigo")?.addEventListener("click", async () => {
+    const cod = prompt("Ingrese el Código de Cliente a editar:");
+    if (cod) {
+      const { data, error } = await client.from("clientes").select("*").eq("codigo_cliente", cod.trim()).maybeSingle();
+      if (error || !data) {
+        alert("No se encontró ningún contacto con el código: " + cod);
+        return;
+      }
+      abrirModalEdicion(data);
+    }
+  });
+
+  // Paginación
   document.getElementById("btnAnterior")?.addEventListener("click", () => {
     if (paginaActual > 1) {
       paginaActual--;
@@ -162,7 +190,6 @@ async function cargarContactos() {
   const hasta = desde + registrosPorPagina - 1;
 
   try {
-    // Consulta directa a la tabla general sin restricciones de categoría
     let query = client.from("clientes").select("*", { count: "exact" });
 
     if (nom) {
@@ -276,9 +303,68 @@ function actualizarPaginacion(desde, hasta) {
   if (btnSig) btnSig.disabled = paginaActual >= totalPaginas;
 }
 
-window.editarContacto = (id) => {
-  alert("Editar contacto ID: " + id);
+window.editarContacto = async (id) => {
+  try {
+    const { data, error } = await client.from("clientes").select("*").eq("id", id).single();
+    if (error) throw error;
+    abrirModalEdicion(data);
+  } catch (err) {
+    console.error("Error al obtener contacto:", err);
+    alert("No se pudo cargar la información del contacto.");
+  }
 };
+
+function abrirModalEdicion(item) {
+  document.getElementById("editId").value = item.id || "";
+  document.getElementById("editCodigo").value = item.codigo_cliente || "";
+  document.getElementById("editCategoria").value = item.categoria || "";
+  document.getElementById("editRuc").value = item.ruc || "";
+  document.getElementById("editNombre").value = item.razon_social || item.nombre || "";
+  document.getElementById("editDireccion").value = item.direccion || "";
+  document.getElementById("editCiudad").value = item.ciudad || "";
+  document.getElementById("editTelefono").value = item.telefono1 || "";
+  document.getElementById("editEmail").value = item.email || "";
+  document.getElementById("editTransporte").value = item.transporte || "";
+  document.getElementById("editRequiere").value = item.requiere || "";
+
+  if (modalEditar) modalEditar.show();
+}
+
+async function guardarEdicionContacto() {
+  const id = document.getElementById("editId").value;
+  if (!id) return;
+
+  const payload = {
+    codigo_cliente: document.getElementById("editCodigo").value.trim(),
+    categoria: document.getElementById("editCategoria").value.trim().toUpperCase(),
+    ruc: document.getElementById("editRuc").value.trim(),
+    razon_social: document.getElementById("editNombre").value.trim(),
+    nombre: document.getElementById("editNombre").value.trim(),
+    direccion: document.getElementById("editDireccion").value.trim(),
+    ciudad: document.getElementById("editCiudad").value.trim(),
+    telefono1: document.getElementById("editTelefono").value.trim(),
+    email: document.getElementById("editEmail").value.trim(),
+    transporte: document.getElementById("editTransporte").value.trim(),
+    requiere: document.getElementById("editRequiere").value.trim()
+  };
+
+  const btnGuardar = document.getElementById("btnGuardarCambiosContacto");
+  btnGuardar.disabled = true;
+  btnGuardar.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Guardando...`;
+
+  const { error } = await client.from("clientes").update(payload).eq("id", id);
+
+  btnGuardar.disabled = false;
+  btnGuardar.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios`;
+
+  if (error) {
+    console.error("Error al actualizar:", error);
+    alert("Error al guardar los cambios: " + error.message);
+  } else {
+    if (modalEditar) modalEditar.hide();
+    cargarContactos();
+  }
+}
 
 window.eliminarContacto = async (id) => {
   if (confirm("¿Está seguro de eliminar este contacto?")) {
