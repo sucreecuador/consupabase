@@ -6,7 +6,7 @@ const SUPABASE_KEY =
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let tipoVistaActual = "VENTAS"; // "VENTAS" (tipo = 'C') o "COMPRAS" (tipo != 'C')
+let tipoVistaActual = "VENTAS"; // "VENTAS" (categoria = 'C') o "COMPRAS" (categoria != 'C')
 let paginaActual = 1;
 const registrosPorPagina = 10;
 let totalRegistros = 0;
@@ -116,10 +116,12 @@ async function cargarContactos() {
   try {
     let query = client.from("clientes").select("*", { count: "exact" });
 
+    // Filtrar por la columna 'categoria'
     if (tipoVistaActual === "VENTAS") {
-      query = query.eq("tipo", "C");
+      query = query.eq("categoria", "C");
     } else {
-      query = query.neq("tipo", "C");
+      // Para COMPRAS trae todo lo que no sea 'C' o que sea nulo
+      query = query.or("categoria.neq.C,categoria.is.null");
     }
 
     if (textoBusqueda) {
@@ -173,7 +175,6 @@ function renderizarTabla(lista) {
   lista.forEach((item) => {
     const tr = document.createElement("tr");
     
-    // Recortar Categoría a la primera letra
     const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
     const nombreMostrado = item.razon_social || item.nombre || "-";
 
@@ -198,7 +199,6 @@ function renderizarTabla(lista) {
         </td>
       `;
     } else {
-      // VISTA COMPRAS
       tr.innerHTML = `
         <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
         <td><span class="badge-cat">${catLetra}</span></td>
