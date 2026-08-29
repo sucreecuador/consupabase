@@ -1,272 +1,240 @@
-console.log("CONTACTOS JS CARGADO ✔");
+// ===============================
+//  CONEXIÓN REAL A SUPABASE (PRO)
+// ===============================
+let clientSupabase = null;
 
-const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
+if (typeof supabase !== 'undefined' && supabase.createClient) {
+    const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
-let tipoVistaActual = "VENTAS"; // "VENTAS" o "COMPRAS"
+// ===============================
+//  VARIABLES GLOBALES
+// ===============================
+let contactosFiltrados = [];
 let paginaActual = 1;
-const registrosPorPagina = 10;
+const registrosPorPagina = 15;
 let totalRegistros = 0;
-
-// Ordenamiento
-let columnaOrden = "codigo_cliente";
+let ordenColumna = "codigo";
 let ordenAscendente = true;
 
+// ===============================
+//  INICIO
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
-  inicializarEventos();
-  cargarContactos();
+    inicializarEventos();
+    cargarPagina();
 });
 
+// ===============================
+//  EVENTOS
+// ===============================
 function inicializarEventos() {
-  // Conmutador de Vistas estilo Pastilla
-  document.querySelectorAll(".btn-pill-toggle").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".btn-pill-toggle").forEach((b) => b.classList.remove("active"));
-      e.currentTarget.classList.add("active");
-      tipoVistaActual = e.currentTarget.getAttribute("data-tipo");
-      paginaActual = 1;
-      columnaOrden = "codigo_cliente";
-      ordenAscendente = true;
-      cargarContactos();
+
+    // Toggle Sidebar (Ocultar / Mostrar menú)
+    const btnToggle = document.getElementById("btnToggleSidebar");
+    const sidebar = document.getElementById("sidebar");
+
+    if (btnToggle && sidebar) {
+        btnToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("d-none");
+            btnToggle.textContent = sidebar.classList.contains("d-none")
+                ? "Mostrar menú"
+                : "Ocultar menú";
+        });
+    }
+
+    // Filtros de búsqueda
+    const filtros = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
+    filtros.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener("input", () => {
+                paginaActual = 1;
+                cargarPagina();
+            });
+        }
     });
-  });
 
-  // Búsqueda en tiempo real o por botón
-  const inputsBusqueda = ["busquedaNombre", "busquedaRuc", "busquedaCodigo", "busquedaTodos"];
-  inputsBusqueda.forEach(id => {
-    document.getElementById(id)?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        paginaActual = 1;
-        cargarContactos();
-      }
+    // Botón Mostrar Todos
+    const btnMostrarTodos = document.getElementById("btnMostrarTodos");
+    if (btnMostrarTodos) {
+        btnMostrarTodos.addEventListener("click", () => {
+            filtros.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+            paginaActual = 1;
+            cargarPagina();
+        });
+    }
+
+    // Paginación
+    const btnAnterior = document.getElementById("btnAnterior");
+    if (btnAnterior) {
+        btnAnterior.addEventListener("click", () => {
+            if (paginaActual > 1) {
+                paginaActual--;
+                cargarPagina();
+            }
+        });
+    }
+
+    const btnSiguiente = document.getElementById("btnSiguiente");
+    if (btnSiguiente) {
+        btnSiguiente.addEventListener("click", () => {
+            if ((paginaActual * registrosPorPagina) < totalRegistros) {
+                paginaActual++;
+                cargarPagina();
+            }
+        });
+    }
+
+    const btnIrPagina = document.getElementById("btnIrPagina");
+    if (btnIrPagina) {
+        btnIrPagina.addEventListener("click", () => {
+            const inputPagina = document.getElementById("inputPagina");
+            if (inputPagina) {
+                const pag = parseInt(inputPagina.value);
+                if (pag >= 1) {
+                    paginaActual = pag;
+                    cargarPagina();
+                }
+            }
+        });
+    }
+
+    // Ordenamiento de columnas
+    const headers = document.querySelectorAll("#tablaContactos thead th[data-column]");
+    headers.forEach(header => {
+        header.addEventListener("click", () => {
+            const columna = header.getAttribute("data-column");
+
+            if (ordenColumna === columna) {
+                ordenAscendente = !ordenAscendente;
+            } else {
+                ordenColumna = columna;
+                ordenAscendente = true;
+            }
+
+            paginaActual = 1;
+            cargarPagina();
+        });
     });
-  });
-
-  document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
-    inputsBusqueda.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = "";
-    });
-    paginaActual = 1;
-    cargarContactos();
-  });
-
-  // Paginación
-  document.getElementById("btnAnterior")?.addEventListener("click", () => {
-    if (paginaActual > 1) {
-      paginaActual--;
-      cargarContactos();
-    }
-  });
-
-  document.getElementById("btnSiguiente")?.addEventListener("click", () => {
-    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina);
-    if (paginaActual < maxPaginas) {
-      paginaActual++;
-      cargarContactos();
-    }
-  });
-
-  document.getElementById("btnIrPagina")?.addEventListener("click", () => {
-    const pag = parseInt(document.getElementById("inputPagina").value, 10);
-    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
-    if (pag >= 1 && pag <= maxPaginas) {
-      paginaActual = pag;
-      cargarContactos();
-    } else {
-      alert(`Página inválida. Ingrese un valor entre 1 y ${maxPaginas}`);
-    }
-  });
 }
 
-function cambiarOrden(columna) {
-  if (columnaOrden === columna) {
-    ordenAscendente = !ordenAscendente;
-  } else {
-    columnaOrden = columna;
-    ordenAscendente = true;
-  }
-  cargarContactos();
-}
-
-function obtenerIconoOrden(columna) {
-  if (columnaOrden !== columna) {
-    return `<i class="fa-solid fa-sort th-sort-icon"></i>`;
-  }
-  return ordenAscendente
-    ? `<i class="fa-solid fa-sort-up th-sort-icon text-dark"></i>`
-    : `<i class="fa-solid fa-sort-down th-sort-icon text-dark"></i>`;
-}
-
-function renderizarEncabezado() {
-  const thead = document.getElementById("theadContactos");
-  if (tipoVistaActual === "VENTAS") {
-    thead.innerHTML = `
-      <tr>
-        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
-        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
-        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
-        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
-        <th onclick="cambiarOrden('direccion')">DIRECCIÓN ${obtenerIconoOrden('direccion')}</th>
-        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
-        <th onclick="cambiarOrden('email')">EMAIL ${obtenerIconoOrden('email')}</th>
-        <th onclick="cambiarOrden('ciudad')">CIUDAD ${obtenerIconoOrden('ciudad')}</th>
-        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
-        <th class="text-center" style="cursor: default;">ACCIONES</th>
-      </tr>
-    `;
-  } else {
-    thead.innerHTML = `
-      <tr>
-        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
-        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
-        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
-        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
-        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
-        <th onclick="cambiarOrden('requiere')">BANCO ${obtenerIconoOrden('requiere')}</th>
-        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
-        <th class="text-center" style="cursor: default;">ACCIONES</th>
-      </tr>
-    `;
-  }
-}
-
-async function cargarContactos() {
-  renderizarEncabezado();
-
-  const tbody = document.getElementById("tbodyContactos");
-  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
-  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Cargando contactos...</td></tr>`;
-
-  // Capturar entradas de texto
-  const valNombre = document.getElementById("busquedaNombre")?.value.trim();
-  const valRuc = document.getElementById("busquedaRuc")?.value.trim();
-  const valCodigo = document.getElementById("busquedaCodigo")?.value.trim();
-  const valTodos = document.getElementById("busquedaTodos")?.value.trim();
-
-  const desde = (paginaActual - 1) * registrosPorPagina;
-  const hasta = desde + registrosPorPagina - 1;
-
-  try {
-    let query = client.from("clientes").select("*", { count: "exact" });
-
-    if (tipoVistaActual === "VENTAS") {
-      query = query.eq("categoria", "C");
-    } else {
-      query = query.or("categoria.neq.C,categoria.is.null");
+// ===============================
+//  CONSULTA PRO A SUPABASE
+// ===============================
+async function cargarPagina() {
+    if (!clientSupabase) {
+        console.error("Cliente de Supabase no inicializado.");
+        return;
     }
 
-    // Aplicar filtros dinámicos
-    if (valNombre) query = query.or(`nombre.ilike.%${valNombre}%,razon_social.ilike.%${valNombre}%`);
-    if (valRuc) query = query.ilike("ruc", `%${valRuc}%`);
-    if (valCodigo) query = query.ilike("codigo_cliente", `%${valCodigo}%`);
-    if (valTodos) {
-      query = query.or(
-        `codigo_cliente.ilike.%${valTodos}%,ruc.ilike.%${valTodos}%,nombre.ilike.%${valTodos}%,razon_social.ilike.%${valTodos}%,direccion.ilike.%${valTodos}%`
-      );
-    }
+    const nomInput = document.getElementById("buscarNombre");
+    const cedInput = document.getElementById("buscarCedula");
+    const codInput = document.getElementById("buscarCodigo");
+    const genInput = document.getElementById("buscarGeneral");
 
-    query = query.order(columnaOrden, { ascending: ordenAscendente }).range(desde, hasta);
+    const nom = nomInput ? nomInput.value.trim() : "";
+    const ced = cedInput ? cedInput.value.trim() : "";
+    const cod = codInput ? codInput.value.trim() : "";
+    const gen = genInput ? genInput.value.trim() : "";
+
+    let query = clientSupabase
+        .from("contactos")
+        .select("*", { count: "exact" })
+        .order(ordenColumna, { ascending: ordenAscendente })
+        .range(
+            (paginaActual - 1) * registrosPorPagina,
+            paginaActual * registrosPorPagina - 1
+        );
+
+    if (nom !== "") query = query.ilike("nombre", `%${nom}%`);
+    if (ced !== "") query = query.or(`cedula_ruc.ilike.%${ced}%,ruc.ilike.%${ced}%`);
+    if (cod !== "") query = query.ilike("codigo", `%${cod}%`);
+
+    // FIX: Búsqueda general incluyendo cédula y ruc
+    if (gen !== "") {
+        query = query.or(
+            `codigo.ilike.%${gen}%,nombre.ilike.%${gen}%,cedula_ruc.ilike.%${gen}%,ruc.ilike.%${gen}%,telefono.ilike.%${gen}%`
+        );
+    }
 
     const { data, count, error } = await query;
 
     if (error) {
-      console.error("Error en consulta Supabase:", error);
-      tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
-      return;
+        console.error("Error cargando contactos:", error);
+        return;
     }
 
+    contactosFiltrados = data || [];
     totalRegistros = count || 0;
-    renderizarTabla(data);
-    actualizarPaginacion(desde, hasta);
+    
+    renderizarTabla();
+    actualizarInfoPaginacion();
 
-  } catch (err) {
-    console.error("Error inesperado:", err);
-    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
-  }
+    const inputPagina = document.getElementById("inputPagina");
+    if (inputPagina) {
+        inputPagina.value = paginaActual;
+    }
 }
 
-function renderizarTabla(lista) {
-  const tbody = document.getElementById("tbodyContactos");
-  tbody.innerHTML = "";
-  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
+// ===============================
+//  TABLA
+// ===============================
+function renderizarTabla() {
+    const tbody = document.getElementById("tbodyContactos");
+    if (!tbody) return;
 
-  if (!lista || lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
-    return;
-  }
+    tbody.innerHTML = "";
 
-  lista.forEach((item) => {
-    const tr = document.createElement("tr");
-    
-    const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
-    const nombreMostrado = item.razon_social || item.nombre || "-";
-
-    if (tipoVistaActual === "VENTAS") {
-      tr.innerHTML = `
-        <td class="fw-bold">${item.codigo_cliente || "-"}</td>
-        <td>${item.ruc || "-"}</td>
-        <td>${catLetra}</td>
-        <td class="fw-bold">${nombreMostrado}</td>
-        <td>${item.direccion || "-"}</td>
-        <td>${item.telefono1 || "-"}</td>
-        <td>${item.email || "-"}</td>
-        <td>${item.ciudad || "-"}</td>
-        <td>${item.transporte || "-"}</td>
-        <td class="text-center">
-          <button class="btn-action-icon me-1" onclick="editarContacto('${item.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn-action-icon" onclick="eliminarContacto('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td class="fw-bold">${item.codigo_cliente || "-"}</td>
-        <td>${catLetra}</td>
-        <td class="fw-bold">${nombreMostrado}</td>
-        <td>${item.telefono1 || "-"}</td>
-        <td>${item.ruc || "-"}</td>
-        <td>${item.requiere || "-"}</td>
-        <td>${item.transporte || "-"}</td>
-        <td class="text-center">
-          <button class="btn-action-icon me-1" onclick="editarContacto('${item.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn-action-icon" onclick="eliminarContacto('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      `;
+    if (!contactosFiltrados || contactosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No se encontraron contactos.</td></tr>`;
+        return;
     }
 
-    tbody.appendChild(tr);
-  });
+    contactosFiltrados.forEach(c => {
+        const identificacion = c.cedula_ruc || c.ruc || c.cedula || "-";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${c.codigo || ''}</strong></td>
+            <td>${c.cat || c.categoria || 'E'}</td>
+            <td><strong>${c.nombre || c.razon_social || ''}</strong></td>
+            <td>${c.telefono || '-'}</td>
+            <td>${identificacion}</td>
+            <td>${c.banco || '-'}</td>
+            <td>${c.transporte || '-'}</td>
+            <td class="text-center">
+                <button class="action-btn me-1" onclick="editarContacto('${c.codigo}')"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" onclick="eliminarContacto('${c.codigo}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
-function actualizarPaginacion(desde, hasta) {
-  const lblInfo = document.getElementById("lblInfoPaginacion");
-  const btnAnt = document.getElementById("btnAnterior");
-  const btnSig = document.getElementById("btnSiguiente");
-  const inputPag = document.getElementById("inputPagina");
+function actualizarInfoPaginacion() {
+    const infoPaginacion = document.getElementById("infoPaginacion");
+    if (!infoPaginacion) return;
 
-  const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
-  const registroHasta = Math.min(hasta + 1, totalRegistros);
-  const registroDesde = totalRegistros === 0 ? 0 : desde + 1;
+    const desde = totalRegistros === 0 ? 0 : (paginaActual - 1) * registrosPorPagina + 1;
+    const hasta = Math.min(paginaActual * registrosPorPagina, totalRegistros);
+    const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
 
-  lblInfo.textContent = `Mostrando ${registroDesde}-${registroHasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
-  inputPag.value = paginaActual;
-
-  btnAnt.disabled = paginaActual <= 1;
-  btnSig.disabled = paginaActual >= totalPaginas;
+    infoPaginacion.textContent = `Mostrando ${desde}-${hasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
 }
 
-window.editarContacto = (id) => {
-  alert("Editar contacto ID: " + id);
-};
+// ===============================
+//  EDITAR / ELIMINAR
+// ===============================
+function editarContacto(codigo) {
+    console.log("Editar contacto:", codigo);
+}
 
-window.eliminarContacto = async (id) => {
-  if (confirm("¿Está seguro de eliminar este contacto?")) {
-    const { error } = await client.from("clientes").delete().eq("id", id);
-    if (error) alert("Error al eliminar contacto.");
-    else cargarContactos();
-  }
-};
+function eliminarContacto(codigo) {
+    console.log("Eliminar contacto:", codigo);
+}

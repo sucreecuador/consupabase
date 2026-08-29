@@ -1,288 +1,247 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERP SUCRE - Gestión de Contactos</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --sidebar-bg: #1e293b;
-      --sidebar-text: #94a3b8;
-      --sidebar-active: #ffffff;
-      --header-blue: #e8eef5;
-      --btn-green: #00a878;
-      --btn-green-hover: #008f66;
-      --btn-pill-active: #6c757d;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactos - ERP SUCRE</title>
 
-    body {
-      background-color: #f8fafc;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
-
-    /* SIDEBAR LATERAL */
-    .sidebar {
-      width: 240px;
-      background-color: var(--sidebar-bg);
-      min-height: 100vh;
-      color: var(--sidebar-text);
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 100;
-      padding-top: 20px;
-      transition: all 0.3s;
-    }
-
-    .sidebar-brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #ffffff;
-      padding: 0 24px 24px 24px;
-      letter-spacing: 0.5px;
-    }
-
-    .sidebar-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .sidebar-menu li a {
-      display: block;
-      padding: 12px 24px;
-      color: var(--sidebar-text);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: all 0.2s;
-    }
-
-    .sidebar-menu li a:hover, .sidebar-menu li.active a {
-      color: var(--sidebar-active);
-      background-color: rgba(255, 255, 255, 0.05);
-      font-weight: 600;
-    }
-
-    /* CONTENIDO PRINCIPAL */
-    .main-content {
-      margin-left: 240px;
-      padding: 30px 40px;
-    }
-
-    .page-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 4px;
-    }
-
-    .page-subtitle {
-      color: #64748b;
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-    }
-
-    /* BOTONES PASTILLA PARA VISTAS */
-    .btn-pill-toggle {
-      border-radius: 20px;
-      padding: 6px 20px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: 1px solid #ced4da;
-      background-color: #ffffff;
-      color: #495057;
-      transition: all 0.2s;
-    }
-
-    .btn-pill-toggle.active {
-      background-color: var(--btn-pill-active);
-      color: #ffffff;
-      border-color: var(--btn-pill-active);
-    }
-
-    .btn-green {
-      background-color: var(--btn-green);
-      color: #ffffff;
-      font-weight: 600;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-    }
-
-    .btn-green:hover {
-      background-color: var(--btn-green-hover);
-      color: #ffffff;
-    }
-
-    /* ESTILO TABLA EXACTO AL EJEMPLO */
-    .table-sucre-container {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .table-sucre {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 0;
-    }
-
-    .table-sucre thead th {
-      background-color: var(--header-blue);
-      color: #1e293b;
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 12px 10px;
-      border-bottom: 1px solid #cbd5e1;
-      border-right: 1px solid #cbd5e1;
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
-    }
-
-    .table-sucre thead th:last-child {
-      border-right: none;
-    }
-
-    .table-sucre tbody tr {
-      border-bottom: 1px solid #e2e8f0;
-      transition: background 0.15s;
-    }
-
-    .table-sucre tbody tr:hover {
-      background-color: #f1f5f9;
-    }
-
-    .table-sucre tbody td {
-      padding: 10px;
-      font-size: 0.88rem;
-      color: #334155;
-      border-right: 1px solid #e2e8f0;
-      vertical-align: middle;
-    }
-
-    .table-sucre tbody td:last-child {
-      border-right: none;
-    }
-
-    .th-sort-icon {
-      font-size: 0.75rem;
-      margin-left: 4px;
-      color: #64748b;
-    }
-
-    .btn-action-icon {
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      color: #475569;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 0.85rem;
-    }
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    .btn-action-icon:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
-  </style>
+    <style>
+        :root {
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #94a3b8;
+            --sidebar-active: #ffffff;
+            --theme-green: #00a67d;
+            --theme-green-hover: #008f6b;
+            --excel-header-bg: #e2e8f0;
+            --excel-header-border: #cbd5e1;
+            --excel-header-text: #1e293b;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background-color: var(--sidebar-bg);
+            transition: all 0.3s ease;
+        }
+
+        /* FIX: Ocultar menú correctamente */
+        #sidebar.d-none {
+            display: none !important;
+        }
+
+        #sidebar .brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            padding: 1.5rem 1.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        #sidebar .nav-link {
+            color: var(--sidebar-text);
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            color: var(--sidebar-active);
+        }
+
+        /* Layout Content */
+        #content {
+            flex: 1;
+            padding: 2rem;
+            min-width: 0;
+        }
+
+        /* Custom Buttons & Theme */
+        .btn-green {
+            background-color: var(--theme-green);
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+        .btn-green:hover {
+            background-color: var(--theme-green-hover);
+            color: white;
+        }
+
+        .btn-toggle-sidebar {
+            background-color: #475569;
+            color: white;
+            border: none;
+            font-size: 0.85rem;
+        }
+
+        /* Estilo Excel para Encabezado de Tabla */
+        .table-excel {
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--excel-header-border);
+        }
+
+        .table-excel thead th {
+            background-color: var(--excel-header-bg) !important;
+            color: var(--excel-header-text) !important;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--excel-header-border) !important;
+            border-right: 1px solid var(--excel-header-border) !important;
+            padding: 0.65rem 0.5rem;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .table-excel thead th:hover {
+            background-color: #cbd5e1 !important;
+        }
+
+        .table-excel tbody td {
+            font-size: 0.85rem;
+            vertical-align: middle;
+            color: #334155;
+            padding: 0.55rem 0.5rem;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table-excel tbody tr:nth-of-type(odd) td {
+            background-color: #ffffff;
+        }
+
+        .table-excel tbody tr:nth-of-type(even) td {
+            background-color: #f8fafc;
+        }
+
+        .table-excel tbody tr:hover td {
+            background-color: #e0f2fe !important;
+        }
+
+        .action-btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.8rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #64748b;
+            border-radius: 4px;
+        }
+        .action-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .sort-icon {
+            font-size: 0.75rem;
+            margin-left: 3px;
+            color: #64748b;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- SIDEBAR LATERAL -->
-  <div class="sidebar">
-    <div class="sidebar-brand">ERP SUCRE</div>
-    <ul class="sidebar-menu">
-      <li><a href="#">Inicio</a></li>
-      <li><a href="#">Indicadores</a></li>
-      <li><a href="#">Productos</a></li>
-      <li><a href="#">Inventario</a></li>
-      <li class="active"><a href="#">Contactos</a></li>
-      <li><a href="#">Reportes</a></li>
-      <li><a href="#">Facturación</a></li>
-      <li><a href="#">Configuración</a></li>
-    </ul>
-  </div>
-
-  <!-- CONTENIDO PRINCIPAL -->
-  <div class="main-content">
-    <h1 class="page-title">Contactos</h1>
-    <p class="page-subtitle">Gestión de clientes, proveedores y libreta de contactos</p>
-
-    <div class="mb-3">
-      <button class="btn btn-secondary btn-sm fw-bold px-3">Ocultar menú</button>
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <div class="brand">ERP SUCRE</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="../indicadores/index.html">Indicadores</a></li>
+            <li class="nav-item"><a class="nav-link" href="../productos/productos.html">Productos</a></li>
+            <li class="nav-item"><a class="nav-link" href="../inventario/index.html">Inventario</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html">Contactos</a></li>
+            <li class="nav-item"><a class="nav-link" href="../reportes/index.html">Reportes</a></li>
+            <li class="nav-item"><a class="nav-link" href="../facturacion/index.html">Facturación</a></li>
+            <li class="nav-item"><a class="nav-link" href="../configuracion/index.html">Configuración</a></li>
+        </ul>
     </div>
 
-    <!-- CAJAS DE BÚSQUEDA TIPO ERP SUCRE -->
-    <div class="row g-2 mb-3 align-items-center">
-      <div class="col-md-3">
-        <input type="text" id="busquedaNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
-      </div>
-      <div class="col-md-2">
-        <input type="text" id="busquedaRuc" class="form-control form-control-sm" placeholder="Buscar por RUC...">
-      </div>
-      <div class="col-md-2">
-        <input type="text" id="busquedaCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
-      </div>
-      <div class="col-md-2">
-        <input type="text" id="busquedaTodos" class="form-control form-control-sm" placeholder="Buscar todos...">
-      </div>
-      <div class="col-md-auto ms-auto d-flex gap-2">
-        <button id="btnMostrarTodos" class="btn btn-green btn-sm">Mostrar todos</button>
-        <button id="btnEditarPorCodigo" class="btn btn-green btn-sm">+ Editar por Código</button>
-      </div>
+    <!-- Main Content -->
+    <div id="content">
+        <h2 class="fw-bold text-dark mb-1">Contactos</h2>
+        <p class="text-muted small mb-3">Gestión de clientes, proveedores y libreta de contactos</p>
+
+        <!-- Sidebar Toggle Button -->
+        <button class="btn btn-toggle-sidebar btn-sm mb-3" id="btnToggleSidebar">Ocultar menú</button>
+
+        <!-- Filters Section -->
+        <div class="row g-2 mb-3">
+            <div class="col-md-3">
+                <input type="text" id="buscarNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
+            </div>
+            <div class="col-md-2">
+                <input type="text" id="buscarCedula" class="form-control form-control-sm" placeholder="Buscar por CÉDULA/RUC...">
+            </div>
+            <div class="col-md-2">
+                <input type="text" id="buscarCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
+            </div>
+            <div class="col-md-2">
+                <input type="text" id="buscarGeneral" class="form-control form-control-sm" placeholder="Buscar todos...">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-green btn-sm w-100" id="btnMostrarTodos">Mostrar todos</button>
+                <button class="btn btn-green btn-sm w-100" id="btnEditarCodigo">+ Editar por Código</button>
+            </div>
+        </div>
+
+        <!-- View Switcher -->
+        <div class="mb-3">
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnVistaVentas">Vista Ventas</button>
+            <button class="btn btn-sm btn-secondary rounded-pill active px-3" id="btnVistaCompras">Vista Compras</button>
+        </div>
+
+        <!-- Dynamic Data Table con Estilo Excel -->
+        <div class="table-responsive bg-white shadow-sm rounded">
+            <table class="table table-excel mb-0" id="tablaContactos">
+                <thead>
+                    <tr>
+                        <th data-column="codigo">CÓDIGO <span class="sort-icon">↕</span></th>
+                        <th data-column="cat">CAT <span class="sort-icon">↕</span></th>
+                        <th data-column="nombre">NOMBRE / RAZÓN SOCIAL <span class="sort-icon">↕</span></th>
+                        <th data-column="telefono">TELÉFONO <span class="sort-icon">↕</span></th>
+                        <th data-column="cedula_ruc">CÉDULA O RUC <span class="sort-icon">↕</span></th>
+                        <th data-column="banco">BANCO <span class="sort-icon">↕</span></th>
+                        <th data-column="transporte">TRANSPORTE <span class="sort-icon">↕</span></th>
+                        <th class="text-center" style="cursor: default;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyContactos">
+                    <!-- Filas inyectadas por JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div id="infoPaginacion" class="small text-muted">
+                Mostrando 0-0 de 0 registros
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-secondary btn-sm me-1" id="btnAnterior">Anterior</button>
+                <button class="btn btn-outline-secondary btn-sm me-3" id="btnSiguiente">Siguiente</button>
+                <span class="small text-muted">Ir a página:</span>
+                <input type="number" id="inputPagina" class="form-control form-control-sm w-auto" min="1" value="1" style="width: 70px;">
+                <button class="btn btn-sm btn-outline-primary" id="btnIrPagina">Ir</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- SELECCIÓN DE VISTA TIPO PASTILLA -->
-    <div class="d-flex gap-2 mb-3">
-      <button class="btn btn-pill-toggle active" id="tab-ventas" data-tipo="VENTAS">Vista Ventas</button>
-      <button class="btn btn-pill-toggle" id="tab-compras" data-tipo="COMPRAS">Vista Compras</button>
-    </div>
-
-    <!-- TABLA DE CONTACTOS CON COLORIMETRÍA BLUE-PASTEL -->
-    <div class="table-sucre-container">
-      <div class="table-responsive">
-        <table class="table-sucre align-middle">
-          <thead id="theadContactos">
-            <!-- Encabezado dinámico según vista y ordenamiento -->
-          </thead>
-          <tbody id="tbodyContactos">
-            <tr>
-              <td colspan="10" class="text-center py-4 text-muted">
-                <i class="fa-solid fa-spinner fa-spin me-2"></i>Cargando contactos...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PIE Y PAGINACIÓN -->
-    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
-      <small id="lblInfoPaginacion" class="text-muted">Mostrando 0-0 de 0 registros</small>
-      
-      <div class="d-flex align-items-center gap-2">
-        <button id="btnAnterior" class="btn btn-sm btn-light border" disabled>Anterior</button>
-        <button id="btnSiguiente" class="btn btn-sm btn-light border" disabled>Siguiente</button>
-        <span class="small text-muted ms-2">Ir a página:</span>
-        <input type="number" id="inputPagina" class="form-control form-control-sm text-center" style="width: 60px;" value="1" min="1">
-        <button id="btnIrPagina" class="btn btn-sm btn-light border">Ir</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Supabase & JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="contactos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="contactos.js"></script>
 </body>
 </html>
