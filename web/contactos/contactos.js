@@ -1,423 +1,185 @@
-let todosLosContactos = [];
-let contactosFiltrados = [];
-let vistaActual = "clientes";
+console.log("CONTACTOS JS CARGADO ✔");
 
-let paginaClientes = 1;
-let paginaProveedores = 1;
-const POR_PAGINA = 50;
+const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
 
-let columnaOrden = "";
-let direccionOrden = "asc";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let tipoVistaActual = "CLIENTE";
+let paginaActual = 1;
+const registrosPorPagina = 10;
+let totalRegistros = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
-    cargarContactos();
+  inicializarEventos();
+  cargarContactos();
 });
 
+function inicializarEventos() {
+  document.querySelectorAll("#pestañasContactos .nav-link").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll("#pestañasContactos .nav-link").forEach((b) => b.classList.remove("active"));
+      e.currentTarget.classList.add("active");
+      tipoVistaActual = e.currentTarget.getAttribute("data-tipo");
+      paginaActual = 1;
+      cargarContactos();
+    });
+  });
+
+  document.getElementById("btnBuscar")?.addEventListener("click", () => {
+    paginaActual = 1;
+    cargarContactos();
+  });
+
+  document.getElementById("inputBusqueda")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      paginaActual = 1;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnAnterior")?.addEventListener("click", () => {
+    if (paginaActual > 1) {
+      paginaActual--;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnSiguiente")?.addEventListener("click", () => {
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+    if (paginaActual < maxPaginas) {
+      paginaActual++;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnIrPagina")?.addEventListener("click", () => {
+    const pag = parseInt(document.getElementById("inputPagina").value, 10);
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+    if (pag >= 1 && pag <= maxPaginas) {
+      paginaActual = pag;
+      cargarContactos();
+    } else {
+      alert(`Página inválida. Ingrese un valor entre 1 y ${maxPaginas}`);
+    }
+  });
+}
+
 async function cargarContactos() {
-    try {
-        const response = await fetch("/api/contactos");
-        if (!response.ok) throw new Error("Error al obtener los contactos");
+  const tbody = document.getElementById("tbodyContactos");
+  tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
 
-        todosLosContactos = await response.json();
+  const textoBusqueda = document.getElementById("inputBusqueda").value.trim();
+  const campoFiltro = document.getElementById("selectFiltroCampo").value;
 
-        if (todosLosContactos.error) {
-            mostrarError(todosLosContactos.error);
-            return;
-        }
+  const desde = (paginaActual - 1) * registrosPorPagina;
+  const hasta = desde + registrosPorPagina - 1;
 
-        contactosFiltrados = [...todosLosContactos];
-        renderizarVista();
-    } catch (error) {
-        console.error("Error al cargar datos:", error);
-        mostrarError("Error al conectar con la base de datos de Supabase.");
-    }
-}
+  try {
+    let query = client.from("clientes").select("*", { count: "exact" });
 
-function cambiarVista(vista) {
-    vistaActual = vista;
-    const btnClientes = document.getElementById("btnTabClientes");
-    const btnProveedores = document.getElementById("btnTabProveedores");
-    const vistaClientes = document.getElementById("vistaClientes");
-    const vistaProveedores = document.getElementById("vistaProveedores");
-
-    if (vista === "clientes") {
-        btnClientes.className = "tab-btn active-clientes";
-        btnProveedores.className = "tab-btn";
-        vistaClientes.classList.add("active");
-        vistaProveedores.classList.remove("active");
-    } else {
-        btnClientes.className = "tab-btn";
-        btnProveedores.className = "tab-btn active-proveedores";
-        vistaClientes.classList.remove("active");
-        vistaProveedores.classList.add("active");
+    // Filtrar por vista únicamente cuando sea explícitamente PROVEEDOR
+    if (tipoVistaActual === "PROVEEDOR") {
+      query = query.eq("tipo", "PROVEEDOR");
     }
 
-    renderizarVista();
-}
-
-function renderizarVista() {
-    if (vistaActual === "clientes") {
-        renderizarClientes();
-    } else {
-        renderizarProveedores();
-    }
-}
-
-function obtenerCodigoContacto(c) {
-    if (!c) return "";
-    const val = c.codigo !== undefined && c.codigo !== null && c.codigo !== "" ? c.codigo : c.codigo_cliente;
-    return val !== undefined && val !== null ? String(val).trim() : "";
-}
-
-function renderizarClientes() {
-    const tbody = document.querySelector("#tablaClientes tbody");
-    const dataset = contactosFiltrados;
-    const total = dataset.length;
-
-    const totalPaginas = Math.ceil(total / POR_PAGINA) || 1;
-    if (paginaClientes > totalPaginas) paginaClientes = totalPaginas;
-    if (paginaClientes < 1) paginaClientes = 1;
-
-    const inicio = (paginaClientes - 1) * POR_PAGINA;
-    const fin = Math.min(inicio + POR_PAGINA, total);
-    const paginados = dataset.slice(inicio, fin);
-
-    tbody.innerHTML = "";
-    if (paginados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="loading-td">No hay contactos registrados.</td></tr>`;
-    } else {
-        paginados.forEach(c => {
-            const tr = document.createElement("tr");
-            const codigoValor = obtenerCodigoContacto(c) || '-';
-            tr.innerHTML = `
-                <td><span class="badge-code">${codigoValor}</span></td>
-                <td>${c.ruc || '-'}</td>
-                <td><strong>${c.nombre || c.razon_social || '-'}</strong></td>
-                <td>${c.direccion || '-'}</td>
-                <td>${c.telefono1 || c.telefono2 || '-'}</td>
-                <td>${c.email || '-'}</td>
-                <td>${c.ciudad || '-'}</td>
-                <td>${c.transporte || '-'}</td>
-                <td style="text-align: center;">
-                    <div class="action-btns">
-                        <button class="btn-action btn-edit" title="Editar" onclick="abrirFormularioEdicionPorObjeto('${codigoValor}')"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarContactoPorCodigo('${codigoValor}')"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+    // Búsqueda en texto
+    if (textoBusqueda) {
+      if (campoFiltro === "todos") {
+        query = query.or(
+          `codigo_cliente.ilike.%${textoBusqueda}%,ruc.ilike.%${textoBusqueda}%,nombre.ilike.%${textoBusqueda}%,direccion.ilike.%${textoBusqueda}%`
+        );
+      } else if (campoFiltro === "codigo") {
+        query = query.ilike("codigo_cliente", `%${textoBusqueda}%`);
+      } else if (campoFiltro === "ruc") {
+        query = query.ilike("ruc", `%${textoBusqueda}%`);
+      } else if (campoFiltro === "nombre") {
+        query = query.ilike("nombre", `%${textoBusqueda}%`);
+      } else if (campoFiltro === "direccion") {
+        query = query.ilike("direccion", `%${textoBusqueda}%`);
+      }
     }
 
-    document.getElementById("infoClientes").innerText = `Mostrando ${total === 0 ? 0 : inicio + 1}-${fin} de ${total} registros (Página ${paginaClientes} de ${totalPaginas})`;
-    document.getElementById("btnPrevClientes").disabled = paginaClientes === 1;
-    document.getElementById("btnNextClientes").disabled = paginaClientes >= totalPaginas;
-}
+    query = query.range(desde, hasta);
 
-function renderizarProveedores() {
-    const tbody = document.querySelector("#tablaProveedores tbody");
-    const dataset = contactosFiltrados;
-    const total = dataset.length;
+    const { data, count, error } = await query;
 
-    const totalPaginas = Math.ceil(total / POR_PAGINA) || 1;
-    if (paginaProveedores > totalPaginas) paginaProveedores = totalPaginas;
-    if (paginaProveedores < 1) paginaProveedores = 1;
-
-    const inicio = (paginaProveedores - 1) * POR_PAGINA;
-    const fin = Math.min(inicio + POR_PAGINA, total);
-    const paginados = dataset.slice(inicio, fin);
-
-    tbody.innerHTML = "";
-    if (paginados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="loading-td">No hay proveedores registrados.</td></tr>`;
-    } else {
-        paginados.forEach(p => {
-            const tr = document.createElement("tr");
-            const codigoValor = obtenerCodigoContacto(p) || '-';
-            tr.innerHTML = `
-                <td><span class="badge-code">${codigoValor}</span></td>
-                <td>${p.ruc || '-'}</td>
-                <td><strong>${p.nombre || p.razon_social || '-'}</strong></td>
-                <td>${p.direccion || '-'}</td>
-                <td>${p.telefono1 || p.telefono2 || '-'}</td>
-                <td>${p.email || '-'}</td>
-                <td>${p.requiere || '-'}</td>
-                <td style="text-align: center;">
-                    <div class="action-btns">
-                        <button class="btn-action btn-edit" title="Editar" onclick="abrirFormularioEdicionPorObjeto('${codigoValor}')"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn-action btn-delete" title="Eliminar" onclick="eliminarContactoPorCodigo('${codigoValor}')"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+    if (error) {
+      console.error("Error en consulta Supabase:", error);
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
+      return;
     }
 
-    document.getElementById("infoProveedores").innerText = `Mostrando ${total === 0 ? 0 : inicio + 1}-${fin} de ${total} registros (Página ${paginaProveedores} de ${totalPaginas})`;
-    document.getElementById("btnPrevProveedores").disabled = paginaProveedores === 1;
-    document.getElementById("btnNextProveedores").disabled = paginaProveedores >= totalPaginas;
+    totalRegistros = count || 0;
+    renderizarTabla(data);
+    actualizarPaginacion(desde, hasta);
+
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
+  }
 }
 
-function cambiarPagina(delta) {
-    if (vistaActual === "clientes") {
-        paginaClientes += delta;
-    } else {
-        paginaProveedores += delta;
-    }
-    renderizarVista();
+function renderizarTabla(lista) {
+  const tbody = document.getElementById("tbodyContactos");
+  tbody.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
+    return;
+  }
+
+  lista.forEach((item) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+      <td>${item.ruc || "-"}</td>
+      <td class="fw-bold">${item.nombre || item.razon_social || "-"}</td>
+      <td>${item.direccion || "-"}</td>
+      <td>${item.telefono1 || item.telefono || "-"}</td>
+      <td>${item.email || "-"}</td>
+      <td>${item.ciudad || "-"}</td>
+      <td>${item.transporte || "-"}</td>
+      <td class="text-center">
+        <button class="btn btn-sm btn-primary py-0 px-2" onclick="editarContacto('${item.id}')">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+        <button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
-function irAPaginaEspecifica() {
-    const inputId = vistaActual === "clientes" ? "gotoPageClientesInput" : "gotoPageProveedoresInput";
-    const input = document.getElementById(inputId);
-    const numeroPagina = parseInt(input.value, 10);
-    const totalRegistros = contactosFiltrados.length;
-    const totalPaginas = Math.ceil(totalRegistros / POR_PAGINA) || 1;
+function actualizarPaginacion(desde, hasta) {
+  const lblInfo = document.getElementById("lblInfoPaginacion");
+  const btnAnt = document.getElementById("btnAnterior");
+  const btnSig = document.getElementById("btnSiguiente");
+  const inputPag = document.getElementById("inputPagina");
 
-    if (isNaN(numeroPagina) || numeroPagina < 1 || numeroPagina > totalPaginas) {
-        alert("Número de página inválido");
-        return;
-    }
+  const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+  const registroHasta = Math.min(hasta + 1, totalRegistros);
+  const registroDesde = totalRegistros === 0 ? 0 : desde + 1;
 
-    if (vistaActual === "clientes") {
-        paginaClientes = numeroPagina;
-    } else {
-        paginaProveedores = numeroPagina;
-    }
+  lblInfo.textContent = `Mostrando ${registroDesde}-${registroHasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
+  inputPag.value = paginaActual;
 
-    renderizarVista();
+  btnAnt.disabled = paginaActual <= 1;
+  btnSig.disabled = paginaActual >= totalPaginas;
 }
 
-function filtrarContactos() {
-    const text = document.getElementById("searchInput").value.toLowerCase().trim();
-    const field = document.getElementById("searchField").value;
+window.editarContacto = (id) => {
+  alert("Editar contacto ID: " + id);
+};
 
-    contactosFiltrados = todosLosContactos.filter(c => {
-        if (!text) return true;
-        const cod = obtenerCodigoContacto(c).toLowerCase();
-
-        if (field === "todos") {
-            return (
-                cod.includes(text) ||
-                (c.ruc || "").toLowerCase().includes(text) ||
-                (c.nombre || "").toLowerCase().includes(text) ||
-                (c.razon_social || "").toLowerCase().includes(text) ||
-                (c.direccion || "").toLowerCase().includes(text) ||
-                (c.telefono1 || "").toLowerCase().includes(text) ||
-                (c.email || "").toLowerCase().includes(text) ||
-                (c.requiere || "").toLowerCase().includes(text)
-            );
-        } else if (field === "codigo") {
-            return cod.includes(text);
-        } else if (field === "nombre") {
-            return (c.nombre || "").toLowerCase().includes(text) || (c.razon_social || "").toLowerCase().includes(text);
-        } else {
-            return (c[field] || "").toString().toLowerCase().includes(text);
-        }
-    });
-
-    if (columnaOrden) {
-        aplicarOrdenamiento();
-    }
-
-    paginaClientes = 1;
-    paginaProveedores = 1;
-    renderizarVista();
-}
-
-function ordenar(columna) {
-    if (columnaOrden === columna) {
-        direccionOrden = direccionOrden === "asc" ? "desc" : "asc";
-    } else {
-        columnaOrden = columna;
-        direccionOrden = "asc";
-    }
-
-    aplicarOrdenamiento();
-    actualizarIconosOrden();
-    renderizarVista();
-}
-
-function aplicarOrdenamiento() {
-    contactosFiltrados.sort((a, b) => {
-        let valA = a[columnaOrden] || "";
-        let valB = b[columnaOrden] || "";
-
-        if (columnaOrden === "codigo") {
-            valA = obtenerCodigoContacto(a);
-            valB = obtenerCodigoContacto(b);
-        } else if (columnaOrden === "nombre") {
-            valA = a.nombre || a.razon_social || "";
-            valB = b.nombre || b.razon_social || "";
-        }
-
-        if (typeof valA === "string") valA = valA.toLowerCase();
-        if (typeof valB === "string") valB = valB.toLowerCase();
-
-        if (valA < valB) return direccionOrden === "asc" ? -1 : 1;
-        if (valA > valB) return direccionOrden === "asc" ? 1 : -1;
-        return 0;
-    });
-}
-
-function actualizarIconosOrden() {
-    const ths = document.querySelectorAll("th");
-    ths.forEach(th => {
-        th.classList.remove("sorted");
-        const icon = th.querySelector(".sort-icon");
-        if (icon) {
-            icon.className = "fa-solid fa-sort sort-icon";
-        }
-    });
-
-    const activeTableId = vistaActual === "clientes" ? "#tablaClientes" : "#tablaProveedores";
-    const currentTh = Array.from(document.querySelectorAll(`${activeTableId} th`)).find(th => 
-        th.getAttribute("onclick") && th.getAttribute("onclick").includes(`'${columnaOrden}'`)
-    );
-
-    if (currentTh) {
-        currentTh.classList.add("sorted");
-        const icon = currentTh.querySelector(".sort-icon");
-        if (icon) {
-            icon.className = direccionOrden === "asc" ? "fa-solid fa-sort-up sort-icon" : "fa-solid fa-sort-down sort-icon";
-        }
-    }
-}
-
-function iniciarEdicionPorCodigo() {
-    const codigoInput = prompt("Ingrese el código del cliente a editar:");
-    if (codigoInput === null) return;
-
-    const codigoLimpio = codigoInput.trim().toLowerCase();
-    if (!codigoLimpio) {
-        alert("Código inválido o no encontrado.");
-        return;
-    }
-
-    const contactoEncontrado = todosLosContactos.find(
-        c => obtenerCodigoContacto(c).toLowerCase() === codigoLimpio
-    );
-
-    if (!contactoEncontrado) {
-        alert("Código inválido o no encontrado.");
-        return;
-    }
-
-    cargarFormularioModal(contactoEncontrado);
-}
-
-function abrirFormularioEdicionPorObjeto(codigo) {
-    const codigoBuscado = String(codigo).trim().toLowerCase();
-    const contacto = todosLosContactos.find(
-        c => obtenerCodigoContacto(c).toLowerCase() === codigoBuscado
-    );
-    if (contacto) {
-        cargarFormularioModal(contacto);
-    }
-}
-
-function cargarFormularioModal(contacto) {
-    document.getElementById("edit_codigo").value = obtenerCodigoContacto(contacto);
-    document.getElementById("edit_ruc").value = contacto.ruc || "";
-    document.getElementById("edit_nombre").value = contacto.nombre || contacto.razon_social || "";
-    document.getElementById("edit_direccion").value = contacto.direccion || "";
-    document.getElementById("edit_telefono1").value = contacto.telefono1 || "";
-    document.getElementById("edit_email").value = contacto.email || "";
-    document.getElementById("edit_ciudad").value = contacto.ciudad || "";
-    document.getElementById("edit_transporte").value = contacto.transporte || contacto.requiere || "";
-
-    document.getElementById("modalEdicion").classList.add("active");
-}
-
-function cerrarModal() {
-    document.getElementById("modalEdicion").classList.remove("active");
-}
-
-async function guardarEdicion(event) {
-    event.preventDefault();
-
-    const codigo = document.getElementById("edit_codigo").value;
-    
-    const payload = {
-        ruc: document.getElementById("edit_ruc").value,
-        nombre: document.getElementById("edit_nombre").value,
-        direccion: document.getElementById("edit_direccion").value,
-        telefono1: document.getElementById("edit_telefono1").value,
-        email: document.getElementById("edit_email").value,
-        ciudad: document.getElementById("edit_ciudad").value,
-        transporte: document.getElementById("edit_transporte").value
-    };
-
-    try {
-        const response = await fetch(`/api/contactos/${encodeURIComponent(codigo)}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.status === 404) {
-            alert("Código inválido o no encontrado.");
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error("Error al actualizar la información.");
-        }
-
-        alert("Contacto actualizado exitosamente.");
-        cerrarModal();
-        await cargarContactos();
-    } catch (error) {
-        console.error(error);
-        alert("Error al intentar guardar los cambios.");
-    }
-}
-
-async function eliminarContactoPorCodigo(codigo) {
-    if (codigo === undefined || codigo === null || String(codigo).trim() === "" || String(codigo) === "undefined" || String(codigo) === "null" || String(codigo) === "-") {
-        alert("Código inválido o no encontrado.");
-        return;
-    }
-
-    const codigoBuscado = String(codigo).trim().toLowerCase();
-
-    const contactoEncontrado = todosLosContactos.find(c => {
-        return obtenerCodigoContacto(c).toLowerCase() === codigoBuscado;
-    });
-
-    if (!contactoEncontrado) {
-        alert("Código no encontrado. No se puede eliminar.");
-        return;
-    }
-
-    const codigoReal = obtenerCodigoContacto(contactoEncontrado);
-
-    const confirmado = confirm(`¿Desea eliminar el contacto con código ${codigoReal}?`);
-    if (!confirmado) return;
-
-    try {
-        const response = await fetch(`/api/contactos/${encodeURIComponent(codigoReal)}`, {
-            method: "DELETE"
-        });
-
-        if (response.status === 404) {
-            alert("Código no encontrado. No se puede eliminar.");
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error("Error al eliminar el registro.");
-        }
-
-        alert("Registro eliminado exitosamente.");
-        await cargarContactos();
-    } catch (error) {
-        console.error(error);
-        alert("Ocurrió un error al intentar eliminar el registro.");
-    }
-}
-
-function mostrarError(mensaje) {
-    document.querySelector("#tablaClientes tbody").innerHTML = `<tr><td colspan="9" class="loading-td" style="color: #dc2626;">${mensaje}</td></tr>`;
-    document.querySelector("#tablaProveedores tbody").innerHTML = `<tr><td colspan="8" class="loading-td" style="color: #dc2626;">${mensaje}</td></tr>`;
-}
+window.eliminarContacto = async (id) => {
+  if (confirm("¿Está seguro de eliminar este contacto?")) {
+    const { error } = await client.from("clientes").delete().eq("id", id);
+    if (error) alert("Error al eliminar contacto.");
+    else cargarContactos();
+  }
+};
