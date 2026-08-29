@@ -260,25 +260,4 @@ async function guardarEdicionContacto() {
         necesidad: editNecesidad.value.trim()
     };
 
-    const btn = document.getElementById("btnGuardarCambiosContacto");
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Guardando...`;
-
-    const { error } = await client.from("clientes").update(payload).eq("id", id);
-
-    btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios`;
-
-    if (error) return alert("Error al guardar: " + error.message);
-
-    modalEditar.hide();
-    cargarContactos();
-}
-
-window.eliminarContacto = async (id) => {
-    if (!confirm("¿Eliminar este contacto?")) return;
-
-    const { error } = await client.from("clientes").delete().eq("id", id);
-    if (error) alert("Error al eliminar.");
-    else cargarContactos();
-};
+    const btn = document.getElementById("
