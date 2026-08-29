@@ -11,7 +11,7 @@ let paginaActual = 1;
 const registrosPorPagina = 10;
 let totalRegistros = 0;
 
-// Variables de ordenamiento
+// Ordenamiento
 let columnaOrden = "codigo_cliente";
 let ordenAscendente = true;
 
@@ -21,9 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function inicializarEventos() {
-  document.querySelectorAll("#pestañasContactos .nav-link").forEach((btn) => {
+  // Conmutador de Vistas estilo Pastilla
+  document.querySelectorAll(".btn-pill-toggle").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      document.querySelectorAll("#pestañasContactos .nav-link").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".btn-pill-toggle").forEach((b) => b.classList.remove("active"));
       e.currentTarget.classList.add("active");
       tipoVistaActual = e.currentTarget.getAttribute("data-tipo");
       paginaActual = 1;
@@ -33,19 +34,28 @@ function inicializarEventos() {
     });
   });
 
-  document.getElementById("btnBuscar")?.addEventListener("click", () => {
+  // Búsqueda en tiempo real o por botón
+  const inputsBusqueda = ["busquedaNombre", "busquedaRuc", "busquedaCodigo", "busquedaTodos"];
+  inputsBusqueda.forEach(id => {
+    document.getElementById(id)?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        paginaActual = 1;
+        cargarContactos();
+      }
+    });
+  });
+
+  document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
+    inputsBusqueda.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
     paginaActual = 1;
     cargarContactos();
   });
 
-  document.getElementById("inputBusqueda")?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      paginaActual = 1;
-      cargarContactos();
-    }
-  });
-
+  // Paginación
   document.getElementById("btnAnterior")?.addEventListener("click", () => {
     if (paginaActual > 1) {
       paginaActual--;
@@ -88,8 +98,8 @@ function obtenerIconoOrden(columna) {
     return `<i class="fa-solid fa-sort th-sort-icon"></i>`;
   }
   return ordenAscendente
-    ? `<i class="fa-solid fa-sort-up th-sort-icon active"></i>`
-    : `<i class="fa-solid fa-sort-down th-sort-icon active"></i>`;
+    ? `<i class="fa-solid fa-sort-up th-sort-icon text-dark"></i>`
+    : `<i class="fa-solid fa-sort-down th-sort-icon text-dark"></i>`;
 }
 
 function renderizarEncabezado() {
@@ -130,10 +140,13 @@ async function cargarContactos() {
 
   const tbody = document.getElementById("tbodyContactos");
   const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
-  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Cargando contactos...</td></tr>`;
 
-  const textoBusqueda = document.getElementById("inputBusqueda").value.trim();
-  const campoFiltro = document.getElementById("selectFiltroCampo").value;
+  // Capturar entradas de texto
+  const valNombre = document.getElementById("busquedaNombre")?.value.trim();
+  const valRuc = document.getElementById("busquedaRuc")?.value.trim();
+  const valCodigo = document.getElementById("busquedaCodigo")?.value.trim();
+  const valTodos = document.getElementById("busquedaTodos")?.value.trim();
 
   const desde = (paginaActual - 1) * registrosPorPagina;
   const hasta = desde + registrosPorPagina - 1;
@@ -147,22 +160,14 @@ async function cargarContactos() {
       query = query.or("categoria.neq.C,categoria.is.null");
     }
 
-    if (textoBusqueda) {
-      if (campoFiltro === "todos") {
-        query = query.or(
-          `codigo_cliente.ilike.%${textoBusqueda}%,ruc.ilike.%${textoBusqueda}%,nombre.ilike.%${textoBusqueda}%,razon_social.ilike.%${textoBusqueda}%,categoria.ilike.%${textoBusqueda}%,direccion.ilike.%${textoBusqueda}%`
-        );
-      } else if (campoFiltro === "codigo") {
-        query = query.ilike("codigo_cliente", `%${textoBusqueda}%`);
-      } else if (campoFiltro === "ruc") {
-        query = query.ilike("ruc", `%${textoBusqueda}%`);
-      } else if (campoFiltro === "nombre") {
-        query = query.or(`nombre.ilike.%${textoBusqueda}%,razon_social.ilike.%${textoBusqueda}%`);
-      } else if (campoFiltro === "categoria") {
-        query = query.ilike("categoria", `%${textoBusqueda}%`);
-      } else if (campoFiltro === "direccion") {
-        query = query.ilike("direccion", `%${textoBusqueda}%`);
-      }
+    // Aplicar filtros dinámicos
+    if (valNombre) query = query.or(`nombre.ilike.%${valNombre}%,razon_social.ilike.%${valNombre}%`);
+    if (valRuc) query = query.ilike("ruc", `%${valRuc}%`);
+    if (valCodigo) query = query.ilike("codigo_cliente", `%${valCodigo}%`);
+    if (valTodos) {
+      query = query.or(
+        `codigo_cliente.ilike.%${valTodos}%,ruc.ilike.%${valTodos}%,nombre.ilike.%${valTodos}%,razon_social.ilike.%${valTodos}%,direccion.ilike.%${valTodos}%`
+      );
     }
 
     query = query.order(columnaOrden, { ascending: ordenAscendente }).range(desde, hasta);
@@ -203,9 +208,9 @@ function renderizarTabla(lista) {
 
     if (tipoVistaActual === "VENTAS") {
       tr.innerHTML = `
-        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td class="fw-bold">${item.codigo_cliente || "-"}</td>
         <td>${item.ruc || "-"}</td>
-        <td><span class="badge-cat">${catLetra}</span></td>
+        <td>${catLetra}</td>
         <td class="fw-bold">${nombreMostrado}</td>
         <td>${item.direccion || "-"}</td>
         <td>${item.telefono1 || "-"}</td>
@@ -213,30 +218,22 @@ function renderizarTabla(lista) {
         <td>${item.ciudad || "-"}</td>
         <td>${item.transporte || "-"}</td>
         <td class="text-center">
-          <button class="btn btn-sm btn-primary py-0 px-2" onclick="editarContacto('${item.id}')">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-          <button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
-            <i class="fa-solid fa-trash"></i>
-          </button>
+          <button class="btn-action-icon me-1" onclick="editarContacto('${item.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn-action-icon" onclick="eliminarContacto('${item.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>
       `;
     } else {
       tr.innerHTML = `
-        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
-        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${item.codigo_cliente || "-"}</td>
+        <td>${catLetra}</td>
         <td class="fw-bold">${nombreMostrado}</td>
         <td>${item.telefono1 || "-"}</td>
         <td>${item.ruc || "-"}</td>
         <td>${item.requiere || "-"}</td>
         <td>${item.transporte || "-"}</td>
         <td class="text-center">
-          <button class="btn btn-sm btn-primary py-0 px-2" onclick="editarContacto('${item.id}')">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-          <button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
-            <i class="fa-solid fa-trash"></i>
-          </button>
+          <button class="btn-action-icon me-1" onclick="editarContacto('${item.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn-action-icon" onclick="eliminarContacto('${item.id}')"><i class="fa-solid fa-trash"></i></button>
         </td>
       `;
     }

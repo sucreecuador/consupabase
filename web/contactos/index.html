@@ -9,87 +9,261 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background-color: #1e222d; color: #333; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
-    .main-container { padding: 30px; }
-    .card-custom { background: #ffffff; border-radius: 12px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 25px; }
-    .nav-tabs .nav-link { font-weight: 600; color: #6c757d; border: none; border-bottom: 3px solid transparent; }
-    .nav-tabs .nav-link.active { color: #fd7e14; border-bottom: 3px solid #fd7e14; background: transparent; }
+    :root {
+      --sidebar-bg: #1e293b;
+      --sidebar-text: #94a3b8;
+      --sidebar-active: #ffffff;
+      --header-blue: #e8eef5;
+      --btn-green: #00a878;
+      --btn-green-hover: #008f66;
+      --btn-pill-active: #6c757d;
+    }
+
+    body {
+      background-color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* SIDEBAR LATERAL */
+    .sidebar {
+      width: 240px;
+      background-color: var(--sidebar-bg);
+      min-height: 100vh;
+      color: var(--sidebar-text);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      padding-top: 20px;
+      transition: all 0.3s;
+    }
+
+    .sidebar-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 0 24px 24px 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar-menu li a {
+      display: block;
+      padding: 12px 24px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .sidebar-menu li a:hover, .sidebar-menu li.active a {
+      color: var(--sidebar-active);
+      background-color: rgba(255, 255, 255, 0.05);
+      font-weight: 600;
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .main-content {
+      margin-left: 240px;
+      padding: 30px 40px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    /* BOTONES PASTILLA PARA VISTAS */
+    .btn-pill-toggle {
+      border-radius: 20px;
+      padding: 6px 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: 1px solid #ced4da;
+      background-color: #ffffff;
+      color: #495057;
+      transition: all 0.2s;
+    }
+
+    .btn-pill-toggle.active {
+      background-color: var(--btn-pill-active);
+      color: #ffffff;
+      border-color: var(--btn-pill-active);
+    }
+
+    .btn-green {
+      background-color: var(--btn-green);
+      color: #ffffff;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+    }
+
+    .btn-green:hover {
+      background-color: var(--btn-green-hover);
+      color: #ffffff;
+    }
+
+    /* ESTILO TABLA EXACTO AL EJEMPLO */
+    .table-sucre-container {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .table-sucre {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0;
+    }
+
+    .table-sucre thead th {
+      background-color: var(--header-blue);
+      color: #1e293b;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 12px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .table-sucre thead th:last-child {
+      border-right: none;
+    }
+
+    .table-sucre tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: background 0.15s;
+    }
+
+    .table-sucre tbody tr:hover {
+      background-color: #f1f5f9;
+    }
+
+    .table-sucre tbody td {
+      padding: 10px;
+      font-size: 0.88rem;
+      color: #334155;
+      border-right: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+
+    .table-sucre tbody td:last-child {
+      border-right: none;
+    }
+
+    .th-sort-icon {
+      font-size: 0.75rem;
+      margin-left: 4px;
+      color: #64748b;
+    }
+
+    .btn-action-icon {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.85rem;
+    }
     
-    /* ESTILO TABLA EXCEL CON FILAS INTERCALADAS (ZEBRA) */
-    .table-excel { border-collapse: separate; border-spacing: 0; border: 1px solid #dee2e6; width: 100%; }
-    .table-excel thead th { background-color: #f1f3f5; color: #343a40; font-size: 0.82rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #dee2e6; border-right: 1px solid #dee2e6; padding: 10px 12px; cursor: pointer; user-select: none; transition: background 0.2s; }
-    .table-excel thead th:hover { background-color: #e9ecef; }
-    .table-excel tbody tr:nth-of-type(odd) { background-color: #ffffff; }
-    .table-excel tbody tr:nth-of-type(even) { background-color: #f8f9fa; }
-    .table-excel tbody tr:hover { background-color: #e2e6ea !important; }
-    .table-excel tbody td { border-bottom: 1px solid #dee2e6; border-right: 1px solid #dee2e6; padding: 8px 12px; font-size: 0.9rem; }
-    .table-excel thead th:last-child, .table-excel tbody td:last-child { border-right: none; }
-    
-    .badge-code { background-color: #e9ecef; color: #343a40; border: 1px solid #ced4da; padding: 3px 7px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; }
-    .badge-cat { background-color: #e7f5ff; color: #1971c2; border: 1px solid #a5d8ff; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; }
-    .th-sort-icon { font-size: 0.75rem; margin-left: 4px; opacity: 0.6; }
-    .th-sort-icon.active { opacity: 1; color: #fd7e14; }
+    .btn-action-icon:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
   </style>
 </head>
 <body>
 
-<div class="container-fluid main-container">
-  <div class="card card-custom">
-    
-    <!-- CABECERA DE BÚSQUEDA Y ACCIONES -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-      <h2 class="fw-bold mb-0 text-dark">Gestión de Contactos</h2>
-      
-      <div class="d-flex gap-2 align-items-center flex-wrap">
-        <div class="input-group" style="max-width: 400px;">
-          <select id="selectFiltroCampo" class="form-select form-select-sm" style="max-width: 150px;">
-            <option value="todos" selected>Buscar en todos</option>
-            <option value="codigo">Código</option>
-            <option value="ruc">Cédula o RUC</option>
-            <option value="nombre">Nombre / Razón Social</option>
-            <option value="categoria">Categoría</option>
-            <option value="direccion">Dirección</option>
-          </select>
-          <input type="text" id="inputBusqueda" class="form-control form-control-sm" placeholder="Buscar...">
-          <button id="btnBuscar" class="btn btn-outline-secondary btn-sm" type="button">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-        </div>
+  <!-- SIDEBAR LATERAL -->
+  <div class="sidebar">
+    <div class="sidebar-brand">ERP SUCRE</div>
+    <ul class="sidebar-menu">
+      <li><a href="#">Inicio</a></li>
+      <li><a href="#">Indicadores</a></li>
+      <li><a href="#">Productos</a></li>
+      <li><a href="#">Inventario</a></li>
+      <li class="active"><a href="#">Contactos</a></li>
+      <li><a href="#">Reportes</a></li>
+      <li><a href="#">Facturación</a></li>
+      <li><a href="#">Configuración</a></li>
+    </ul>
+  </div>
 
-        <button id="btnEditarPorCodigo" class="btn btn-primary btn-sm fw-bold">
-          <i class="fa-solid fa-pen-to-square me-1"></i> Editar por Código
-        </button>
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="main-content">
+    <h1 class="page-title">Contactos</h1>
+    <p class="page-subtitle">Gestión de clientes, proveedores y libreta de contactos</p>
+
+    <div class="mb-3">
+      <button class="btn btn-secondary btn-sm fw-bold px-3">Ocultar menú</button>
+    </div>
+
+    <!-- CAJAS DE BÚSQUEDA TIPO ERP SUCRE -->
+    <div class="row g-2 mb-3 align-items-center">
+      <div class="col-md-3">
+        <input type="text" id="busquedaNombre" class="form-control form-control-sm" placeholder="Buscar por NOMBRE...">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="busquedaRuc" class="form-control form-control-sm" placeholder="Buscar por RUC...">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="busquedaCodigo" class="form-control form-control-sm" placeholder="Buscar por CÓDIGO...">
+      </div>
+      <div class="col-md-2">
+        <input type="text" id="busquedaTodos" class="form-control form-control-sm" placeholder="Buscar todos...">
+      </div>
+      <div class="col-md-auto ms-auto d-flex gap-2">
+        <button id="btnMostrarTodos" class="btn btn-green btn-sm">Mostrar todos</button>
+        <button id="btnEditarPorCodigo" class="btn btn-green btn-sm">+ Editar por Código</button>
       </div>
     </div>
 
-    <!-- PESTAÑAS (VENTAS / COMPRAS) -->
-    <ul class="nav nav-tabs mb-3" id="pestañasContactos" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-ventas" data-tipo="VENTAS" type="button">
-          <i class="fa-solid fa-cart-shopping me-2"></i>VENTAS
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-compras" data-tipo="COMPRAS" type="button">
-          <i class="fa-solid fa-bag-shopping me-2"></i>COMPRAS
-        </button>
-      </li>
-    </ul>
+    <!-- SELECCIÓN DE VISTA TIPO PASTILLA -->
+    <div class="d-flex gap-2 mb-3">
+      <button class="btn btn-pill-toggle active" id="tab-ventas" data-tipo="VENTAS">Vista Ventas</button>
+      <button class="btn btn-pill-toggle" id="tab-compras" data-tipo="COMPRAS">Vista Compras</button>
+    </div>
 
-    <!-- TABLA DE CONTACTOS ESTILO EXCEL -->
-    <div class="table-responsive">
-      <table class="table-excel align-middle mb-0">
-        <thead id="theadContactos">
-          <!-- Encabezado dinámico con ordenamiento -->
-        </thead>
-        <tbody id="tbodyContactos">
-          <tr>
-            <td colspan="10" class="text-center py-4 text-muted">
-              <i class="fa-solid fa-spinner fa-spin me-2"></i>Cargando contactos...
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- TABLA DE CONTACTOS CON COLORIMETRÍA BLUE-PASTEL -->
+    <div class="table-sucre-container">
+      <div class="table-responsive">
+        <table class="table-sucre align-middle">
+          <thead id="theadContactos">
+            <!-- Encabezado dinámico según vista y ordenamiento -->
+          </thead>
+          <tbody id="tbodyContactos">
+            <tr>
+              <td colspan="10" class="text-center py-4 text-muted">
+                <i class="fa-solid fa-spinner fa-spin me-2"></i>Cargando contactos...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- PIE Y PAGINACIÓN -->
@@ -106,11 +280,9 @@
     </div>
 
   </div>
-</div>
 
-<!-- Bootstrap 5 JS & Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="contactos.js"></script>
+  <!-- Supabase & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="contactos.js"></script>
 </body>
 </html>
