@@ -16,6 +16,7 @@
     .nav-tabs .nav-link.active { color: #fd7e14; border-bottom: 3px solid #fd7e14; background: transparent; }
     .table-custom thead { background-color: #e9ecef; color: #495057; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-code { background-color: #f1f3f5; color: #495057; border: 1px solid #ced4da; padding: 4px 8px; border-radius: 4px; font-weight: 600; }
+    .badge-cat { background-color: #e7f5ff; color: #1971c2; border: 1px solid #a5d8ff; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -23,7 +24,7 @@
 <div class="container-fluid main-container">
   <div class="card card-custom">
     
-    <!-- CABECERA -->
+    <!-- CABECERA DE BÚSQUEDA Y ACCIONES -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
       <h2 class="fw-bold mb-0 text-dark">Gestión de Contactos</h2>
       
@@ -33,7 +34,8 @@
             <option value="todos" selected>Buscar en todos</option>
             <option value="codigo">Código</option>
             <option value="ruc">Cédula o RUC</option>
-            <option value="nombre">Nombre</option>
+            <option value="nombre">Nombre / Razón Social</option>
+            <option value="categoria">Categoría</option>
             <option value="direccion">Dirección</option>
           </select>
           <input type="text" id="inputBusqueda" class="form-control form-control-sm" placeholder="Buscar...">
@@ -48,21 +50,16 @@
       </div>
     </div>
 
-    <!-- PESTAÑAS (CLIENTES / PROVEEDORES) -->
+    <!-- PESTAÑAS (VENTAS / COMPRAS) -->
     <ul class="nav nav-tabs mb-3" id="pestañasContactos" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-clientes" data-tipo="CLIENTE" type="button">
-          <i class="fa-solid fa-users me-2"></i>Vista Clientes
+        <button class="nav-link active" id="tab-ventas" data-tipo="VENTAS" type="button">
+          <i class="fa-solid fa-cart-shopping me-2"></i>VENTAS
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-proveedores" data-tipo="PROVEEDOR" type="button">
-          <i class="fa-solid fa-truck-front me-2"></i>Vista Proveedores
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-todos" data-tipo="TODOS" type="button">
-          <i class="fa-solid fa-address-book me-2"></i>Todos los Contactos
+        <button class="nav-link" id="tab-compras" data-tipo="COMPRAS" type="button">
+          <i class="fa-solid fa-bag-shopping me-2"></i>COMPRAS
         </button>
       </li>
     </ul>
@@ -70,22 +67,12 @@
     <!-- TABLA DE CONTACTOS -->
     <div class="table-responsive">
       <table class="table table-hover align-middle table-custom mb-0">
-        <thead>
-          <tr>
-            <th>CÓDIGO <i class="fa-solid fa-sort"></i></th>
-            <th>CÉDULA O RUC <i class="fa-solid fa-sort"></i></th>
-            <th>NOMBRE <i class="fa-solid fa-sort"></i></th>
-            <th>DIRECCIÓN <i class="fa-solid fa-sort"></i></th>
-            <th>TELÉFONO <i class="fa-solid fa-sort"></i></th>
-            <th>EMAIL <i class="fa-solid fa-sort"></i></th>
-            <th>CIUDAD <i class="fa-solid fa-sort"></i></th>
-            <th>TRANSPORTE <i class="fa-solid fa-sort"></i></th>
-            <th class="text-center">ACCIONES</th>
-          </tr>
+        <thead id="theadContactos">
+          <!-- Se genera dinámicamente según la pestaña seleccionada -->
         </thead>
         <tbody id="tbodyContactos">
           <tr>
-            <td colspan="9" class="text-center py-4 text-muted">
+            <td colspan="10" class="text-center py-4 text-muted">
               <i class="fa-solid fa-spinner fa-spin me-2"></i>Cargando contactos...
             </td>
           </tr>

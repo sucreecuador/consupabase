@@ -6,7 +6,7 @@ const SUPABASE_KEY =
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let tipoVistaActual = "CLIENTE";
+let tipoVistaActual = "VENTAS"; // "VENTAS" (tipo = 'C') o "COMPRAS" (tipo != 'C')
 let paginaActual = 1;
 const registrosPorPagina = 10;
 let totalRegistros = 0;
@@ -67,9 +67,45 @@ function inicializarEventos() {
   });
 }
 
+function renderizarEncabezado() {
+  const thead = document.getElementById("theadContactos");
+  if (tipoVistaActual === "VENTAS") {
+    thead.innerHTML = `
+      <tr>
+        <th>CÓDIGO <i class="fa-solid fa-sort"></i></th>
+        <th>CÉDULA O RUC <i class="fa-solid fa-sort"></i></th>
+        <th>CAT <i class="fa-solid fa-sort"></i></th>
+        <th>NOMBRE / RAZÓN SOCIAL <i class="fa-solid fa-sort"></i></th>
+        <th>DIRECCIÓN <i class="fa-solid fa-sort"></i></th>
+        <th>TELÉFONO <i class="fa-solid fa-sort"></i></th>
+        <th>EMAIL <i class="fa-solid fa-sort"></i></th>
+        <th>CIUDAD <i class="fa-solid fa-sort"></i></th>
+        <th>TRANSPORTE <i class="fa-solid fa-sort"></i></th>
+        <th class="text-center">ACCIONES</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr>
+        <th>CÓDIGO <i class="fa-solid fa-sort"></i></th>
+        <th>CAT <i class="fa-solid fa-sort"></i></th>
+        <th>NOMBRE / RAZÓN SOCIAL <i class="fa-solid fa-sort"></i></th>
+        <th>TELÉFONO <i class="fa-solid fa-sort"></i></th>
+        <th>CÉDULA O RUC <i class="fa-solid fa-sort"></i></th>
+        <th>BANCO <i class="fa-solid fa-sort"></i></th>
+        <th>TRANSPORTE <i class="fa-solid fa-sort"></i></th>
+        <th class="text-center">ACCIONES</th>
+      </tr>
+    `;
+  }
+}
+
 async function cargarContactos() {
+  renderizarEncabezado();
+
   const tbody = document.getElementById("tbodyContactos");
-  tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
+  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
+  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
 
   const textoBusqueda = document.getElementById("inputBusqueda").value.trim();
   const campoFiltro = document.getElementById("selectFiltroCampo").value;
@@ -80,35 +116,37 @@ async function cargarContactos() {
   try {
     let query = client.from("clientes").select("*", { count: "exact" });
 
-    // Filtrar por vista únicamente cuando sea explícitamente PROVEEDOR
-    if (tipoVistaActual === "PROVEEDOR") {
-      query = query.eq("tipo", "PROVEEDOR");
+    if (tipoVistaActual === "VENTAS") {
+      query = query.eq("tipo", "C");
+    } else {
+      query = query.neq("tipo", "C");
     }
 
-    // Búsqueda en texto
     if (textoBusqueda) {
       if (campoFiltro === "todos") {
         query = query.or(
-          `codigo_cliente.ilike.%${textoBusqueda}%,ruc.ilike.%${textoBusqueda}%,nombre.ilike.%${textoBusqueda}%,direccion.ilike.%${textoBusqueda}%`
+          `codigo_cliente.ilike.%${textoBusqueda}%,ruc.ilike.%${textoBusqueda}%,nombre.ilike.%${textoBusqueda}%,razon_social.ilike.%${textoBusqueda}%,categoria.ilike.%${textoBusqueda}%,direccion.ilike.%${textoBusqueda}%`
         );
       } else if (campoFiltro === "codigo") {
         query = query.ilike("codigo_cliente", `%${textoBusqueda}%`);
       } else if (campoFiltro === "ruc") {
         query = query.ilike("ruc", `%${textoBusqueda}%`);
       } else if (campoFiltro === "nombre") {
-        query = query.ilike("nombre", `%${textoBusqueda}%`);
+        query = query.or(`nombre.ilike.%${textoBusqueda}%,razon_social.ilike.%${textoBusqueda}%`);
+      } else if (campoFiltro === "categoria") {
+        query = query.ilike("categoria", `%${textoBusqueda}%`);
       } else if (campoFiltro === "direccion") {
         query = query.ilike("direccion", `%${textoBusqueda}%`);
       }
     }
 
-    query = query.range(desde, hasta);
+    query = query.order("id", { ascending: true }).range(desde, hasta);
 
     const { data, count, error } = await query;
 
     if (error) {
       console.error("Error en consulta Supabase:", error);
-      tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
       return;
     }
 
@@ -118,39 +156,68 @@ async function cargarContactos() {
 
   } catch (err) {
     console.error("Error inesperado:", err);
-    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
   }
 }
 
 function renderizarTabla(lista) {
   const tbody = document.getElementById("tbodyContactos");
   tbody.innerHTML = "";
+  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
 
   if (!lista || lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
     return;
   }
 
   lista.forEach((item) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
-      <td>${item.ruc || "-"}</td>
-      <td class="fw-bold">${item.nombre || item.razon_social || "-"}</td>
-      <td>${item.direccion || "-"}</td>
-      <td>${item.telefono1 || item.telefono || "-"}</td>
-      <td>${item.email || "-"}</td>
-      <td>${item.ciudad || "-"}</td>
-      <td>${item.transporte || "-"}</td>
-      <td class="text-center">
-        <button class="btn btn-sm btn-primary py-0 px-2" onclick="editarContacto('${item.id}')">
-          <i class="fa-solid fa-pen"></i>
-        </button>
-        <button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      </td>
-    `;
+    
+    // Recortar Categoría a la primera letra
+    const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
+    const nombreMostrado = item.razon_social || item.nombre || "-";
+
+    if (tipoVistaActual === "VENTAS") {
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td>${item.ruc || "-"}</td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.direccion || "-"}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.email || "-"}</td>
+        <td>${item.ciudad || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-primary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
+    } else {
+      // VISTA COMPRAS
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.ruc || "-"}</td>
+        <td>${item.requiere || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-primary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
+    }
+
     tbody.appendChild(tr);
   });
 }
