@@ -1,276 +1,301 @@
-// ===============================
-//  CONEXIÓN REAL A SUPABASE (PRO)
-// ===============================
-let clientSupabase = null;
+console.log("CONTACTOS JS CARGADO ✔");
 
-if (typeof supabase !== 'undefined' && supabase.createClient) {
-    const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
+const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
 
-    clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ===============================
-//  VARIABLES GLOBALES
-// ===============================
-let contactosFiltrados = [];
+let tipoVistaActual = "COMPRAS"; // "VENTAS" o "COMPRAS"
 let paginaActual = 1;
-const registrosPorPagina = 15;
+const registrosPorPagina = 10;
 let totalRegistros = 0;
-let ordenColumna = "codigo";
-let ordenAscendente = true;
-let vistaActual = "compras"; // "ventas" o "compras"
 
-// ===============================
-//  INICIO
-// ===============================
+let columnaOrden = "codigo_cliente";
+let ordenAscendente = true;
+
 document.addEventListener("DOMContentLoaded", () => {
-    inicializarEventos();
-    cargarPagina();
+  inicializarEventos();
+  cargarContactos();
 });
 
-// ===============================
-//  EVENTOS
-// ===============================
 function inicializarEventos() {
+  // Toggle Sidebar
+  const btnToggle = document.getElementById("btnToggleSidebar");
+  const sidebar = document.getElementById("sidebar");
+  if (btnToggle && sidebar) {
+    btnToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("d-none");
+      btnToggle.textContent = sidebar.classList.contains("d-none")
+        ? "Mostrar menú"
+        : "Ocultar menú";
+    });
+  }
 
-    // Toggle Sidebar (Ocultar / Mostrar menú)
-    const btnToggle = document.getElementById("btnToggleSidebar");
-    const sidebar = document.getElementById("sidebar");
+  // Eventos de Vistas (Ventas / Compras)
+  const btnVentas = document.getElementById("btnVistaVentas");
+  const btnCompras = document.getElementById("btnVistaCompras");
 
-    if (btnToggle && sidebar) {
-        btnToggle.addEventListener("click", () => {
-            sidebar.classList.toggle("d-none");
-            btnToggle.textContent = sidebar.classList.contains("d-none")
-                ? "Mostrar menú"
-                : "Ocultar menú";
-        });
-    }
-
-    // Switcher de Vistas (Ventas / Compras)
-    const btnVistaVentas = document.getElementById("btnVistaVentas");
-    const btnVistaCompras = document.getElementById("btnVistaCompras");
-
-    if (btnVistaVentas && btnVistaCompras) {
-        btnVistaVentas.addEventListener("click", () => {
-            vistaActual = "ventas";
-            btnVistaVentas.classList.add("btn-secondary", "active");
-            btnVistaVentas.classList.remove("btn-outline-secondary");
-            
-            btnVistaCompras.classList.add("btn-outline-secondary");
-            btnVistaCompras.classList.remove("btn-secondary", "active");
-
-            paginaActual = 1;
-            cargarPagina();
-        });
-
-        btnVistaCompras.addEventListener("click", () => {
-            vistaActual = "compras";
-            btnVistaCompras.classList.add("btn-secondary", "active");
-            btnVistaCompras.classList.remove("btn-outline-secondary");
-
-            btnVistaVentas.classList.add("btn-outline-secondary");
-            btnVistaVentas.classList.remove("btn-secondary", "active");
-
-            paginaActual = 1;
-            cargarPagina();
-        });
-    }
-
-    // Filtros de búsqueda
-    const filtros = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
-    filtros.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener("input", () => {
-                paginaActual = 1;
-                cargarPagina();
-            });
-        }
+  if (btnVentas && btnCompras) {
+    btnVentas.addEventListener("click", () => {
+      tipoVistaActual = "VENTAS";
+      btnVentas.className = "btn btn-sm btn-secondary rounded-pill active px-3";
+      btnCompras.className = "btn btn-sm btn-outline-secondary rounded-pill px-3";
+      paginaActual = 1;
+      cargarContactos();
     });
 
-    // Botón Mostrar Todos
-    const btnMostrarTodos = document.getElementById("btnMostrarTodos");
-    if (btnMostrarTodos) {
-        btnMostrarTodos.addEventListener("click", () => {
-            filtros.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = "";
-            });
-            paginaActual = 1;
-            cargarPagina();
-        });
-    }
-
-    // Paginación
-    const btnAnterior = document.getElementById("btnAnterior");
-    if (btnAnterior) {
-        btnAnterior.addEventListener("click", () => {
-            if (paginaActual > 1) {
-                paginaActual--;
-                cargarPagina();
-            }
-        });
-    }
-
-    const btnSiguiente = document.getElementById("btnSiguiente");
-    if (btnSiguiente) {
-        btnSiguiente.addEventListener("click", () => {
-            if ((paginaActual * registrosPorPagina) < totalRegistros) {
-                paginaActual++;
-                cargarPagina();
-            }
-        });
-    }
-
-    const btnIrPagina = document.getElementById("btnIrPagina");
-    if (btnIrPagina) {
-        btnIrPagina.addEventListener("click", () => {
-            const inputPagina = document.getElementById("inputPagina");
-            if (inputPagina) {
-                const pag = parseInt(inputPagina.value);
-                if (pag >= 1) {
-                    paginaActual = pag;
-                    cargarPagina();
-                }
-            }
-        });
-    }
-
-    // Ordenamiento de columnas
-    const headers = document.querySelectorAll("#tablaContactos thead th[data-column]");
-    headers.forEach(header => {
-        header.addEventListener("click", () => {
-            const columna = header.getAttribute("data-column");
-
-            if (ordenColumna === columna) {
-                ordenAscendente = !ordenAscendente;
-            } else {
-                ordenColumna = columna;
-                ordenAscendente = true;
-            }
-
-            paginaActual = 1;
-            cargarPagina();
-        });
+    btnCompras.addEventListener("click", () => {
+      tipoVistaActual = "COMPRAS";
+      btnCompras.className = "btn btn-sm btn-secondary rounded-pill active px-3";
+      btnVentas.className = "btn btn-sm btn-outline-secondary rounded-pill px-3";
+      paginaActual = 1;
+      cargarContactos();
     });
+  }
+
+  // Inputs de búsqueda individual
+  const inputs = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
+  inputs.forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", () => {
+      paginaActual = 1;
+      cargarContactos();
+    });
+  });
+
+  // Botón Mostrar Todos
+  document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
+    inputs.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    paginaActual = 1;
+    cargarContactos();
+  });
+
+  // Paginación
+  document.getElementById("btnAnterior")?.addEventListener("click", () => {
+    if (paginaActual > 1) {
+      paginaActual--;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnSiguiente")?.addEventListener("click", () => {
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+    if (paginaActual < maxPaginas) {
+      paginaActual++;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnIrPagina")?.addEventListener("click", () => {
+    const pag = parseInt(document.getElementById("inputPagina").value, 10);
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+    if (pag >= 1 && pag <= maxPaginas) {
+      paginaActual = pag;
+      cargarContactos();
+    }
+  });
 }
 
-// ===============================
-//  CONSULTA PRO A SUPABASE
-// ===============================
-async function cargarPagina() {
-    if (!clientSupabase) {
-        console.error("Cliente de Supabase no inicializado.");
-        return;
+function cambiarOrden(columna) {
+  if (columnaOrden === columna) {
+    ordenAscendente = !ordenAscendente;
+  } else {
+    columnaOrden = columna;
+    ordenAscendente = true;
+  }
+  cargarContactos();
+}
+
+function obtenerIconoOrden(columna) {
+  if (columnaOrden !== columna) {
+    return `<i class="fa-solid fa-sort th-sort-icon"></i>`;
+  }
+  return ordenAscendente
+    ? `<i class="fa-solid fa-sort-up th-sort-icon active"></i>`
+    : `<i class="fa-solid fa-sort-down th-sort-icon active"></i>`;
+}
+
+function renderizarEncabezado() {
+  const thead = document.getElementById("theadContactos");
+  if (tipoVistaActual === "VENTAS") {
+    thead.innerHTML = `
+      <tr>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('direccion')">DIRECCIÓN ${obtenerIconoOrden('direccion')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('email')">EMAIL ${obtenerIconoOrden('email')}</th>
+        <th onclick="cambiarOrden('ciudad')">CIUDAD ${obtenerIconoOrden('ciudad')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('requiere')">BANCO ${obtenerIconoOrden('requiere')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
+      </tr>
+    `;
+  }
+}
+
+async function cargarContactos() {
+  renderizarEncabezado();
+
+  const tbody = document.getElementById("tbodyContactos");
+  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
+  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
+
+  // Captura de filtros desde la UI
+  const nom = document.getElementById("buscarNombre")?.value.trim() || "";
+  const ced = document.getElementById("buscarCedula")?.value.trim() || "";
+  const cod = document.getElementById("buscarCodigo")?.value.trim() || "";
+  const gen = document.getElementById("buscarGeneral")?.value.trim() || "";
+
+  const desde = (paginaActual - 1) * registrosPorPagina;
+  const hasta = desde + registrosPorPagina - 1;
+
+  try {
+    let query = client.from("clientes").select("*", { count: "exact" });
+
+    if (tipoVistaActual === "VENTAS") {
+      query = query.eq("categoria", "C");
+    } else {
+      query = query.or("categoria.neq.C,categoria.is.null");
     }
 
-    const nomInput = document.getElementById("buscarNombre");
-    const cedInput = document.getElementById("buscarCedula");
-    const codInput = document.getElementById("buscarCodigo");
-    const genInput = document.getElementById("buscarGeneral");
-
-    const nom = nomInput ? nomInput.value.trim() : "";
-    const ced = cedInput ? cedInput.value.trim() : "";
-    const cod = codInput ? codInput.value.trim() : "";
-    const gen = genInput ? genInput.value.trim() : "";
-
-    let query = clientSupabase
-        .from("contactos")
-        .select("*", { count: "exact" })
-        .order(ordenColumna, { ascending: ordenAscendente })
-        .range(
-            (paginaActual - 1) * registrosPorPagina,
-            paginaActual * registrosPorPagina - 1
-        );
-
-    // Filtros específicos
-    if (nom !== "") query = query.ilike("nombre", `%${nom}%`);
-    if (cod !== "") query = query.ilike("codigo", `%${cod}%`);
-
-    // Búsqueda robusta por Cédula / RUC (cubre diferentes posibles nombres de columnas)
-    if (ced !== "") {
-        query = query.or(`cedula_ruc.ilike.%${ced}%,ruc.ilike.%${ced}%,cedula.ilike.%${ced}%,codigo.ilike.%${ced}%`);
+    // Aplicar filtros a la consulta Supabase
+    if (nom) {
+      query = query.or(`nombre.ilike.%${nom}%,razon_social.ilike.%${nom}%`);
+    }
+    if (ced) {
+      query = query.ilike("ruc", `%${ced}%`);
+    }
+    if (cod) {
+      query = query.ilike("codigo_cliente", `%${cod}%`);
+    }
+    if (gen) {
+      query = query.or(
+        `codigo_cliente.ilike.%${gen}%,ruc.ilike.%${gen}%,nombre.ilike.%${gen}%,razon_social.ilike.%${gen}%,direccion.ilike.%${gen}%`
+      );
     }
 
-    // Búsqueda General ("Buscar todos...")
-    if (gen !== "") {
-        query = query.or(
-            `codigo.ilike.%${gen}%,nombre.ilike.%${gen}%,cedula_ruc.ilike.%${gen}%,ruc.ilike.%${gen}%,telefono.ilike.%${gen}%`
-        );
-    }
+    query = query.order(columnaOrden, { ascending: ordenAscendente }).range(desde, hasta);
 
     const { data, count, error } = await query;
 
     if (error) {
-        console.error("Error cargando contactos:", error);
-        return;
+      console.error("Error en consulta Supabase:", error);
+      tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
+      return;
     }
 
-    contactosFiltrados = data || [];
     totalRegistros = count || 0;
-    
-    renderizarTabla();
-    actualizarInfoPaginacion();
+    renderizarTabla(data);
+    actualizarPaginacion(desde, hasta);
 
-    const inputPagina = document.getElementById("inputPagina");
-    if (inputPagina) {
-        inputPagina.value = paginaActual;
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
+  }
+}
+
+function renderizarTabla(lista) {
+  const tbody = document.getElementById("tbodyContactos");
+  tbody.innerHTML = "";
+  const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
+
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
+    return;
+  }
+
+  lista.forEach((item) => {
+    const tr = document.createElement("tr");
+    const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
+    const nombreMostrado = item.razon_social || item.nombre || "-";
+
+    if (tipoVistaActual === "VENTAS") {
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td>${item.ruc || "-"}</td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.direccion || "-"}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.email || "-"}</td>
+        <td>${item.ciudad || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.ruc || "-"}</td>
+        <td>${item.requiere || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
     }
+
+    tbody.appendChild(tr);
+  });
 }
 
-// ===============================
-//  TABLA
-// ===============================
-function renderizarTabla() {
-    const tbody = document.getElementById("tbodyContactos");
-    if (!tbody) return;
+function actualizarPaginacion(desde, hasta) {
+  const lblInfo = document.getElementById("lblInfoPaginacion");
+  const btnAnt = document.getElementById("btnAnterior");
+  const btnSig = document.getElementById("btnSiguiente");
+  const inputPag = document.getElementById("inputPagina");
 
-    tbody.innerHTML = "";
+  const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+  const registroHasta = Math.min(hasta + 1, totalRegistros);
+  const registroDesde = totalRegistros === 0 ? 0 : desde + 1;
 
-    if (!contactosFiltrados || contactosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No se encontraron contactos.</td></tr>`;
-        return;
-    }
+  if (lblInfo) lblInfo.textContent = `Mostrando ${registroDesde}-${registroHasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
+  if (inputPag) inputPag.value = paginaActual;
 
-    contactosFiltrados.forEach(c => {
-        const identificacion = c.cedula_ruc || c.ruc || c.cedula || "-";
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td><strong>${c.codigo || ''}</strong></td>
-            <td>${c.cat || c.categoria || 'E'}</td>
-            <td><strong>${c.nombre || c.razon_social || ''}</strong></td>
-            <td>${c.telefono || '-'}</td>
-            <td>${identificacion}</td>
-            <td>${c.banco || '-'}</td>
-            <td>${c.transporte || '-'}</td>
-            <td class="text-center">
-                <button class="action-btn me-1" onclick="editarContacto('${c.codigo}')"><i class="fa-solid fa-pen"></i></button>
-                <button class="action-btn" onclick="eliminarContacto('${c.codigo}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+  if (btnAnt) btnAnt.disabled = paginaActual <= 1;
+  if (btnSig) btnSig.disabled = paginaActual >= totalPaginas;
 }
 
-function actualizarInfoPaginacion() {
-    const infoPaginacion = document.getElementById("infoPaginacion");
-    if (!infoPaginacion) return;
+window.editarContacto = (id) => {
+  alert("Editar contacto ID: " + id);
+};
 
-    const desde = totalRegistros === 0 ? 0 : (paginaActual - 1) * registrosPorPagina + 1;
-    const hasta = Math.min(paginaActual * registrosPorPagina, totalRegistros);
-    const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
-
-    infoPaginacion.textContent = `Mostrando ${desde}-${hasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
-}
-
-// ===============================
-//  EDITAR / ELIMINAR
-// ===============================
-function editarContacto(codigo) {
-    console.log("Editar contacto:", codigo);
-}
-
-function eliminarContacto(codigo) {
-    console.log("Eliminar contacto:", codigo);
-}
+window.eliminarContacto = async (id) => {
+  if (confirm("¿Está seguro de eliminar este contacto?")) {
+    const { error } = await client.from("clientes").delete().eq("id", id);
+    if (error) alert("Error al eliminar contacto.");
+    else cargarContactos();
+  }
+};
