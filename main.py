@@ -1,7 +1,9 @@
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from supabase import create_client, Client
 
 SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co"
@@ -11,6 +13,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI(title="API ERP SUCRE")
 
+# CONFIGURACIÓN DE CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,6 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# MODELO DE DATOS DE CLIENTES
 class ClienteModel(BaseModel):
     codigo_cliente: str
     categoria: Optional[str] = None
@@ -38,6 +42,7 @@ class ClienteModel(BaseModel):
     fecnac_c: Optional[str] = None
     fecha_nacimiento: Optional[str] = None
 
+# ENDPOINTS DE LA API
 @app.get("/clientes")
 def obtener_clientes():
     try:
@@ -72,3 +77,7 @@ def eliminar_cliente(codigo: str):
         return {"mensaje": "Cliente eliminado exitosamente", "data": res.data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA WEB
+if os.path.exists("web"):
+    app.mount("/web", StaticFiles(directory="web", html=True), name="web")
