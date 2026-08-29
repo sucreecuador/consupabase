@@ -3,387 +3,285 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Facturación PRO - ERP SUCRE</title>
+  <title>ERP SUCRE - Facturación PRO</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body {
-      background-color: #f4f6f9;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .sidebar {
-      width: 240px;
-      min-height: 100vh;
-      background-color: #1e293b;
-      color: #fff;
-      flex-shrink: 0;
-    }
-    .sidebar-brand {
-      font-size: 1.25rem;
-      font-weight: bold;
-      padding: 1.5rem 1rem 1rem 1.25rem;
-      letter-spacing: 0.5px;
-    }
-    .sidebar-nav {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .sidebar-nav li a {
-      display: block;
-      padding: 0.75rem 1.25rem;
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: all 0.2s ease;
-    }
-    .sidebar-nav li a:hover,
-    .sidebar-nav li a.active {
-      color: #ffffff;
-      background-color: #334155;
-    }
-    .sidebar-nav li a.active {
-      font-weight: 600;
-      border-radius: 6px;
-      margin: 0 8px;
-      padding-left: 1rem;
-    }
-    .main-content {
-      flex-grow: 1;
-      padding: 1.5rem;
-    }
-    .suggestions-list {
-      position: absolute;
-      z-index: 1050;
-      width: 100%;
-      max-height: 220px;
-      overflow-y: auto;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 0 0 6px 6px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-    .suggestions-list .list-group-item {
-      cursor: pointer;
-    }
-    .suggestions-list .list-group-item:hover {
-      background-color: #f1f5f9;
-    }
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .sidebar { width: 220px; min-height: 100vh; background-color: #212529; color: #fff; }
+    .sidebar .nav-link { color: #cfd8dc; padding: 12px 20px; font-weight: 500; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background-color: #343a40; }
+    .main-content { flex: 1; padding: 25px; overflow-x: hidden; }
+    .card-custom { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .action-btn { border: none; background: transparent; color: #dc3545; cursor: pointer; }
+    .action-btn:hover { color: #a71d2a; }
   </style>
 </head>
 <body>
 
-  <div class="d-flex">
-    <!-- SIDEBAR CON RUTAS RELATIVAS NATIVAS -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        ERP SUCRE
-      </div>
-      <ul class="sidebar-nav">
-        <li><a href="../index.html">Inicio</a></li>
-        <li><a href="../indicadores.html">Indicadores</a></li>
-        <li><a href="../productos.html">Productos</a></li>
-        <li><a href="../inventario.html">Inventario</a></li>
-        <li><a href="../contactos.html">Contactos</a></li>
-        <li><a href="../reportes.html">Reportes</a></li>
-        <li><a href="index.html" class="active">Facturación</a></li>
-        <li><a href="../configuracion.html">Configuración</a></li>
-      </ul>
-    </aside>
+<div class="d-flex">
+  <!-- SIDEBAR -->
+  <div id="sidebar" class="sidebar d-flex flex-column p-3">
+    <h3 class="fw-bold mb-4 text-white">ERP SUCRE</h3>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item"><a href="../productos/compras.html" class="nav-link">Compras</a></li>
+      <li class="nav-item"><a href="../productos/productos.html" class="nav-link">Productos / Ventas</a></li>
+      <li class="nav-item"><a href="#" class="nav-link">Contactos</a></li>
+      <li class="nav-item"><a href="#" class="nav-link">Reportes</a></li>
+      <li class="nav-item"><a href="index.html" class="nav-link active">Facturación</a></li>
+    </ul>
+  </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="main-content">
-      <div class="d-flex align-items-center mb-3">
-        <button class="btn btn-secondary btn-sm me-3" id="btnToggleSidebar">Ocultar menú</button>
-        <div>
-          <h2 class="m-0 fw-bold">Facturación PRO</h2>
-          <p class="text-muted m-0 small">Emisión de facturas, clientes, formas de pago y detalle de productos</p>
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <button id="btnToggleSidebar" class="btn btn-secondary btn-sm mb-3">Ocultar menú</button>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <h2 class="fw-bold mb-0">Facturación PRO</h2>
+        <small class="text-muted">Emisión de facturas, clientes, formas de pago y detalle de productos</small>
+      </div>
+    </div>
+
+    <!-- CABECERA DE FACTURA -->
+    <div class="card card-custom p-3 mb-3">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">NÚMERO FACTURA</label>
+          <input type="text" id="facNumero" class="form-control" readonly>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">FECHA</label>
+          <input type="date" id="facFecha" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">RESPONSABLE</label>
+          <input type="text" id="facResponsable" class="form-control" placeholder="CO.RESP">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">FORMA DE PAGO</label>
+          <select id="facFormaPago" class="form-select">
+            <option value="EFECTIVO">EFECTIVO</option>
+            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+            <option value="TARJETA">TARJETA DE CRÉDITO/DÉBITO</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">RUC / CÉDULA</label>
+          <input type="text" id="cliRuc" class="form-control">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label text-muted small fw-bold">NOMBRE / RAZÓN SOCIAL</label>
+          <input type="text" id="cliNombre" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">TELÉFONO</label>
+          <input type="text" id="cliTelefono" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold">CÓDIGO CLIENTE</label>
+          <input type="text" id="cliCodigo" class="form-control" readonly>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label text-muted small fw-bold">DIRECCIÓN</label>
+          <input type="text" id="cliDireccion" class="form-control">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label text-muted small fw-bold">CORREO ELECTRÓNICO</label>
+          <input type="email" id="cliCorreo" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold">% DESCUENTO</label>
+          <input type="number" id="facDescuentoPorc" class="form-control" value="0" min="0" max="100">
         </div>
       </div>
 
-      <!-- DATOS CLIENTE -->
-      <div class="card p-3 mb-3 shadow-sm">
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label class="form-label fw-bold small text-uppercase">Número Factura</label>
-            <input type="text" class="form-control" id="numFactura" value="FAC-000001" readonly>
-          </div>
-          <div class="col-md-3 position-relative">
-            <label class="form-label fw-bold small text-uppercase">RUC / Cédula / Nombre</label>
-            <input type="text" class="form-control" id="rucCliente" placeholder="Ingresa RUC o Cédula..." autocomplete="off">
-            <div id="listaSugerenciasCliente" class="suggestions-list list-group d-none"></div>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold small text-uppercase">Nombre / Razón Social</label>
-            <input type="text" class="form-control" id="nombreCliente" placeholder="Nombre del cliente" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold small text-uppercase">Dirección</label>
-            <input type="text" class="form-control" id="dirCliente" placeholder="Dirección del cliente">
-          </div>
+      <div class="d-flex gap-2 mt-3 justify-content-center">
+        <button id="btnCrearCliente" class="btn btn-success btn-sm"><i class="fa-solid fa-user-plus me-1"></i> Crear Cliente</button>
+        <button id="btnActualizarCliente" class="btn btn-warning btn-sm" style="display:none;"><i class="fa-solid fa-user-pen me-1"></i> Actualizar Cliente</button>
+      </div>
+    </div>
+
+    <!-- BUSCADOR DE PRODUCTOS -->
+    <div class="card card-custom p-3 mb-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">Buscar por NOMBRE</label>
+          <input type="text" id="buscarNombreProd" class="form-control" placeholder="Nombre producto...">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold">Buscar por MARCA</label>
+          <input type="text" id="buscarMarcaProd" class="form-control" placeholder="Marca...">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold">Buscar por CÓDIGO</label>
+          <input type="text" id="buscarCodigoProd" class="form-control" placeholder="Código...">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold">Buscar general</label>
+          <input type="text" id="buscarGeneralProd" class="form-control" placeholder="Texto libre...">
+        </div>
+        <div class="col-md-2">
+          <button id="btnBuscarProducto" class="btn btn-primary w-100">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Buscar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE DETALLE DE VENTA -->
+    <div class="card card-custom mb-3">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>CÓDIGO</th>
+              <th>ORI</th>
+              <th>MARCA</th>
+              <th>NOMBRE</th>
+              <th>UNI</th>
+              <th>SALDO</th>
+              <th>PVP</th>
+              <th>CANT</th>
+              <th>SUB-PVP</th>
+              <th class="text-center">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDetalleFactura">
+            <tr>
+              <td colspan="10" class="text-center text-muted py-3">Sin productos en el detalle.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PIE DE FACTURA -->
+    <div class="card card-custom p-3">
+      <div class="row g-2 text-center align-items-center mb-3">
+        <div class="col">
+          <label class="form-label text-muted small fw-bold">ITEMS</label>
+          <input type="text" id="facItems" class="form-control text-center" value="0" readonly>
+        </div>
+        <div class="col">
+          <label class="form-label text-muted small fw-bold">SUBTOTAL</label>
+          <input type="text" id="facSubtotal" class="form-control text-center" value="0.00" readonly>
+        </div>
+        <div class="col">
+          <label class="form-label text-muted small fw-bold">% DCTO</label>
+          <input type="text" id="facPorcDescuento" class="form-control text-center" value="0.00" readonly>
+        </div>
+        <div class="col">
+          <label class="form-label text-muted small fw-bold">VALOR DESCUENTO</label>
+          <input type="text" id="facValDescuento" class="form-control text-center" value="0.00" readonly>
+        </div>
+        <div class="col">
+          <label class="form-label text-muted small fw-bold">IVA</label>
+          <input type="text" id="facIva" class="form-control text-center" value="0.00" readonly>
+        </div>
+        <div class="col">
+          <label class="form-label text-muted small fw-bold">TOTAL</label>
+          <input type="text" id="facTotal" class="form-control text-center fw-bold text-success fs-5" value="0.00" readonly>
         </div>
       </div>
 
-      <!-- BUSCAR PRODUCTOS -->
-      <div class="card p-3 mb-3 shadow-sm">
-        <div class="row g-3 align-items-end">
-          <div class="col-md-12 position-relative">
-            <label class="form-label fw-bold small text-uppercase">Buscar por Nombre o Código de Producto</label>
-            <input type="text" class="form-control" id="buscarProducto" placeholder="Nombre o código del producto..." autocomplete="off">
-            <div id="listaSugerenciasProd" class="suggestions-list list-group d-none"></div>
-          </div>
+      <div class="d-flex justify-content-end gap-2">
+        <button id="btnNuevaFactura" class="btn btn-success"><i class="fa-solid fa-file-circle-plus me-1"></i> Nueva factura</button>
+        <button id="btnGuardarFactura" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
+        <button id="btnImprimir" class="btn btn-outline-secondary"><i class="fa-solid fa-print me-1"></i> Imprimir</button>
+        <button id="btnSalirFactura" class="btn btn-outline-danger"><i class="fa-solid fa-door-open me-1"></i> Salir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREAR CLIENTE -->
+<div class="modal fade" id="modalCrearCliente" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crear Nuevo Cliente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Código Cliente *</label>
+          <input type="text" id="newCliCodigo" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">RUC / Cédula *</label>
+          <input type="text" id="newCliRuc" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Nombre / Razón Social *</label>
+          <input type="text" id="newCliNombre" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Dirección</label>
+          <input type="text" id="newCliDireccion" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Teléfono</label>
+          <input type="text" id="newCliTelefono" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Correo Electrónico</label>
+          <input type="email" id="newCliCorreo" class="form-control">
         </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnGuardarNuevoCliente" class="btn btn-primary">Guardar Cliente</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-      <!-- TABLA DETALLE -->
-      <div class="card shadow-sm mb-3">
+<!-- MODAL BÚSQUEDA DE PRODUCTOS -->
+<div class="modal fade" id="modalBuscarProductos" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="fa-solid fa-boxes-stacked me-2"></i>Resultados de Búsqueda</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
         <div class="table-responsive">
-          <table class="table table-hover mb-0 align-middle">
+          <table class="table table-hover table-striped align-middle mb-0">
             <thead class="table-dark">
               <tr>
                 <th>CÓDIGO</th>
+                <th>ORI</th>
                 <th>MARCA</th>
                 <th>DESCRIPCIÓN</th>
-                <th style="width: 110px;">CANT.</th>
-                <th style="width: 130px;">PRECIO</th>
-                <th class="text-end">SUBTOTAL</th>
-                <th class="text-center" style="width: 80px;">ACCIONES</th>
+                <th>UNI</th>
+                <th>SALDO</th>
+                <th>PVP</th>
+                <th class="text-center">ACCIÓN</th>
               </tr>
             </thead>
-            <tbody id="tbodyDetalleFactura">
-              <tr id="rowVacia">
-                <td colspan="7" class="text-center py-4 text-muted">No hay productos agregados a la factura.</td>
+            <tbody id="tbodyResultadosProductos">
+              <tr>
+                <td colspan="8" class="text-center py-3">Cargando productos...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-
-      <!-- TOTALES -->
-      <div class="card p-3 shadow-sm">
-        <div class="row text-center fw-bold align-items-center">
-          <div class="col-md-3">
-            <label class="small text-muted d-block text-uppercase">Items</label>
-            <span id="lblTotalItems" class="fs-5">0</span>
-          </div>
-          <div class="col-md-3">
-            <label class="small text-muted d-block text-uppercase">Subtotal</label>
-            <span id="lblSubtotal" class="fs-5">$0.00</span>
-          </div>
-          <div class="col-md-3">
-            <label class="small text-muted d-block text-uppercase">Total</label>
-            <span id="lblTotal" class="fs-4 text-success">$0.00</span>
-          </div>
-          <div class="col-md-3">
-            <button class="btn btn-success w-100 py-2 fw-bold" id="btnEmitirFactura">
-              <i class="fa-solid fa-check-circle me-1"></i> EMITIR FACTURA
-            </button>
-          </div>
-        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
-    </main>
+    </div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let detalleFactura = [];
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // Toggle menú
-      document.getElementById('btnToggleSidebar')?.addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        const btn = document.getElementById('btnToggleSidebar');
-        if (sidebar.style.display === 'none') {
-          sidebar.style.display = 'block';
-          btn.textContent = 'Ocultar menú';
-        } else {
-          sidebar.style.display = 'none';
-          btn.textContent = 'Mostrar menú';
-        }
-      });
-
-      // Búsqueda de Clientes
-      const inputRuc = document.getElementById('rucCliente');
-      const boxClientes = document.getElementById('listaSugerenciasCliente');
-
-      inputRuc.addEventListener('input', async () => {
-        const query = inputRuc.value.trim();
-        if (query.length < 2) {
-          boxClientes.classList.add('d-none');
-          return;
-        }
-
-        try {
-          const { data, error } = await client.from('clientes')
-            .select('*')
-            .or(`ruc.ilike.%${query}%,nombre.ilike.%${query}%`)
-            .limit(5);
-
-          if (error) console.error("Error cargando clientes:", error);
-
-          boxClientes.innerHTML = '';
-          if (data && data.length > 0) {
-            boxClientes.classList.remove('d-none');
-            data.forEach(c => {
-              const item = document.createElement('button');
-              item.className = 'list-group-item list-group-item-action text-start small';
-              item.textContent = `${c.ruc || ''} - ${c.nombre || c.razon_social || ''}`;
-              item.onclick = () => {
-                inputRuc.value = c.ruc || '';
-                document.getElementById('nombreCliente').value = c.nombre || c.razon_social || '';
-                document.getElementById('dirCliente').value = c.direccion || '';
-                boxClientes.classList.add('d-none');
-              };
-              boxClientes.appendChild(item);
-            });
-          } else {
-            boxClientes.classList.add('d-none');
-          }
-        } catch (err) {
-          console.error("Error en la consulta:", err);
-        }
-      });
-
-      // Búsqueda de Productos
-      const inputProd = document.getElementById('buscarProducto');
-      const boxProd = document.getElementById('listaSugerenciasProd');
-
-      inputProd.addEventListener('input', async () => {
-        const query = inputProd.value.trim();
-        if (query.length < 2) {
-          boxProd.classList.add('d-none');
-          return;
-        }
-
-        try {
-          const { data, error } = await client.from('productos')
-            .select('*')
-            .or(`codigo.ilike.%${query}%,descripcion.ilike.%${query}%`)
-            .limit(5);
-
-          if (error) console.error("Error cargando productos:", error);
-
-          boxProd.innerHTML = '';
-          if (data && data.length > 0) {
-            boxProd.classList.remove('d-none');
-            data.forEach(p => {
-              const item = document.createElement('button');
-              item.className = 'list-group-item list-group-item-action text-start small';
-              const precio = parseFloat(p.precio || p.pvp || 0).toFixed(2);
-              item.textContent = `${p.codigo || ''} - ${p.descripcion || p.nombre || ''} ($${precio})`;
-              item.onclick = () => {
-                agregarProductoAFactura(p);
-                inputProd.value = '';
-                boxProd.classList.add('d-none');
-              };
-              boxProd.appendChild(item);
-            });
-          } else {
-            boxProd.classList.add('d-none');
-          }
-        } catch (err) {
-          console.error("Error en la consulta:", err);
-        }
-      });
-
-      // Emitir Factura
-      document.getElementById('btnEmitirFactura').addEventListener('click', () => {
-        if (detalleFactura.length === 0) {
-          alert('Debe agregar al menos un producto a la factura.');
-          return;
-        }
-        alert('Factura emitida con éxito.');
-        detalleFactura = [];
-        renderizarTablaDetalle();
-      });
-    });
-
-    function agregarProductoAFactura(p) {
-      const idx = detalleFactura.findIndex(item => item.id === p.id);
-      if (idx !== -1) {
-        detalleFactura[idx].cantidad += 1;
-      } else {
-        detalleFactura.push({
-          id: p.id,
-          codigo: p.codigo || '-',
-          marca: p.marca || '-',
-          descripcion: p.descripcion || p.nombre || 'Producto sin descripción',
-          cantidad: 1,
-          precio: parseFloat(p.precio || p.pvp || 0)
-        });
-      }
-      renderizarTablaDetalle();
-    }
-
-    window.cambiarCantidad = (index, cant) => {
-      const nuevaCant = parseInt(cant, 10);
-      detalleFactura[index].cantidad = (isNaN(nuevaCant) || nuevaCant <= 0) ? 1 : nuevaCant;
-      renderizarTablaDetalle();
-    };
-
-    window.cambiarPrecio = (index, precio) => {
-      const nuevoPrecio = parseFloat(precio);
-      detalleFactura[index].precio = (isNaN(nuevoPrecio) || nuevoPrecio < 0) ? 0 : nuevoPrecio;
-      renderizarTablaDetalle();
-    };
-
-    window.eliminarItem = (index) => {
-      detalleFactura.splice(index, 1);
-      renderizarTablaDetalle();
-    };
-
-    function renderizarTablaDetalle() {
-      const tbody = document.getElementById('tbodyDetalleFactura');
-      tbody.innerHTML = '';
-
-      if (detalleFactura.length === 0) {
-        tbody.innerHTML = `<tr id="rowVacia"><td colspan="7" class="text-center py-4 text-muted">No hay productos agregados a la factura.</td></tr>`;
-        actualizarTotales();
-        return;
-      }
-
-      detalleFactura.forEach((item, index) => {
-        const subtotal = item.cantidad * item.precio;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span class="badge bg-secondary">${item.codigo}</span></td>
-          <td>${item.marca}</td>
-          <td class="fw-bold">${item.descripcion}</td>
-          <td>
-            <input type="number" class="form-control form-control-sm text-center" value="${item.cantidad}" min="1" onchange="cambiarCantidad(${index}, this.value)">
-          </td>
-          <td>
-            <input type="number" step="0.01" class="form-control form-control-sm text-end" value="${item.precio.toFixed(2)}" onchange="cambiarPrecio(${index}, this.value)">
-          </td>
-          <td class="fw-bold text-end">$${subtotal.toFixed(2)}</td>
-          <td class="text-center">
-            <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarItem(${index})">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      actualizarTotales();
-    }
-
-    function actualizarTotales() {
-      const totalItems = detalleFactura.reduce((acc, curr) => acc + curr.cantidad, 0);
-      const subtotal = detalleFactura.reduce((acc, curr) => acc + (curr.cantidad * curr.precio), 0);
-
-      document.getElementById('lblTotalItems').textContent = totalItems;
-      document.getElementById('lblSubtotal').textContent = `$${subtotal.toFixed(2)}`;
-      document.getElementById('lblTotal').textContent = `$${subtotal.toFixed(2)}`;
-    }
-  </script>
+<!-- Bootstrap 5 JS & Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="facturacion.js"></script>
 </body>
 </html>
