@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function inicializarEventos() {
-  // Toggle Sidebar
   const btnToggle = document.getElementById("btnToggleSidebar");
   const sidebar = document.getElementById("sidebar");
   if (btnToggle && sidebar) {
@@ -32,7 +31,6 @@ function inicializarEventos() {
     });
   }
 
-  // Eventos de Vistas (Ventas / Compras)
   const btnVentas = document.getElementById("btnVistaVentas");
   const btnCompras = document.getElementById("btnVistaCompras");
 
@@ -54,7 +52,6 @@ function inicializarEventos() {
     });
   }
 
-  // Inputs de búsqueda individual
   const inputs = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
   inputs.forEach((id) => {
     document.getElementById(id)?.addEventListener("input", () => {
@@ -63,7 +60,6 @@ function inicializarEventos() {
     });
   });
 
-  // Botón Mostrar Todos
   document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
     inputs.forEach((id) => {
       const el = document.getElementById(id);
@@ -73,7 +69,6 @@ function inicializarEventos() {
     cargarContactos();
   });
 
-  // Paginación
   document.getElementById("btnAnterior")?.addEventListener("click", () => {
     if (paginaActual > 1) {
       paginaActual--;
@@ -158,7 +153,6 @@ async function cargarContactos() {
   const numColumnas = tipoVistaActual === "VENTAS" ? 10 : 8;
   tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
 
-  // Captura de filtros desde la UI
   const nom = document.getElementById("buscarNombre")?.value.trim() || "";
   const ced = document.getElementById("buscarCedula")?.value.trim() || "";
   const cod = document.getElementById("buscarCodigo")?.value.trim() || "";
@@ -168,15 +162,9 @@ async function cargarContactos() {
   const hasta = desde + registrosPorPagina - 1;
 
   try {
+    // Consulta directa a la tabla general sin restricciones de categoría
     let query = client.from("clientes").select("*", { count: "exact" });
 
-    if (tipoVistaActual === "VENTAS") {
-      query = query.eq("categoria", "C");
-    } else {
-      query = query.or("categoria.neq.C,categoria.is.null");
-    }
-
-    // Aplicar filtros a la consulta Supabase
     if (nom) {
       query = query.or(`nombre.ilike.%${nom}%,razon_social.ilike.%${nom}%`);
     }
@@ -188,7 +176,7 @@ async function cargarContactos() {
     }
     if (gen) {
       query = query.or(
-        `codigo_cliente.ilike.%${gen}%,ruc.ilike.%${gen}%,nombre.ilike.%${gen}%,razon_social.ilike.%${gen}%,direccion.ilike.%${gen}%`
+        `codigo_cliente.ilike.%${gen}%,ruc.ilike.%${gen}%,nombre.ilike.%${gen}%,razon_social.ilike.%${gen}%,direccion.ilike.%${gen}%,categoria.ilike.%${gen}%`
       );
     }
 
