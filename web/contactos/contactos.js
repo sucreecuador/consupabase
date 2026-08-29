@@ -1,254 +1,401 @@
-// CONFIGURACIÓN DE LA API Y ESTADO DE LA APLICACIÓN
-const API_URL = "https://consupabase-apiv2.onrender.com";
+console.log("CONTACTOS JS CARGADO ✔");
 
-let contactos = [];
-let contactosFiltrados = [];
+const SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let tipoVistaActual = "COMPRAS"; // "VENTAS" o "COMPRAS"
 let paginaActual = 1;
 const registrosPorPagina = 10;
-let modalContactoInstance = null;
+let totalRegistros = 0;
+
+let columnaOrden = "codigo_cliente";
+let ordenAscendente = true;
+let modalEditar = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    modalContactoInstance = new bootstrap.Modal(document.getElementById('modalContacto'));
-    cargarContactos();
+  inicializarEventos();
+  cargarContactos();
 });
 
-// CARGAR TODOS LOS CONTACTOS DESDE LA API
-async function cargarContactos() {
-    try {
-        const res = await fetch(`${API_URL}/clientes`);
-        if (!res.ok) throw new Error("Error al obtener la lista de clientes");
-        
-        contactos = await res.json();
-        contactosFiltrados = [...contactos];
-        renderizarTabla();
-    } catch (err) {
-        console.error(err);
-        alert("Error de conexión con la API: " + err.message);
-    }
-}
+function inicializarEventos() {
+  // Modal de Edición Bootstrap
+  const modalEl = document.getElementById("modalEditarContacto");
+  if (modalEl) {
+    modalEditar = new bootstrap.Modal(modalEl);
+  }
 
-// RENDERIZAR LA TABLA CON PAGINACIÓN
-function renderizarTabla() {
-    const tbody = document.getElementById("cuerpoTabla");
-    tbody.innerHTML = "";
+  // Evento Guardar en Modal
+  document.getElementById("btnGuardarCambiosContacto")?.addEventListener("click", guardarEdicionContacto);
 
-    const inicio = (paginaActual - 1) * registrosPorPagina;
-    const fin = inicio + registrosPorPagina;
-    const listaPagina = contactosFiltrados.slice(inicio, fin);
+  // Toggle Sidebar
+  const btnToggle = document.getElementById("btnToggleSidebar");
+  const sidebar = document.getElementById("sidebar");
+  if (btnToggle && sidebar) {
+    btnToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("d-none");
+      btnToggle.textContent = sidebar.classList.contains("d-none")
+        ? "Mostrar menú"
+        : "Ocultar menú";
+    });
+  }
 
-    if (listaPagina.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted">No se encontraron registros</td></tr>`;
-    } else {
-        listaPagina.forEach(c => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${c.codigo_cliente || '-'}</td>
-                <td><strong>${c.nombre || c.razon_social || '-'}</strong></td>
-                <td>${c.ruc || '-'}</td>
-                <td>${c.ciudad || '-'}</td>
-                <td>${c.direccion || '-'}</td>
-                <td>${c.telefono1 || '-'}</td>
-                <td>${c.email || '-'}</td>
-                <td>${c.fecnac_c || c.fecha_nacimiento || '-'}</td>
-                <td>${c.necesi_c || '-'}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalEditar('${c.codigo_cliente}')">
-                        <i class="bi bi-pencil-fill"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarContacto('${c.codigo_cliente}')">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+  // Cambio de Vista (Ventas / Compras)
+  const btnVentas = document.getElementById("btnVistaVentas");
+  const btnCompras = document.getElementById("btnVistaCompras");
 
-    // Actualizar texto de paginación
-    const total = contactosFiltrados.length;
-    const totalPaginas = Math.ceil(total / registrosPorPagina) || 1;
-    document.getElementById("infoPaginacion").innerText = `Mostrando ${listaPagina.length > 0 ? inicio + 1 : 0}-${Math.min(fin, total)} de ${total} registros (Página ${paginaActual} de ${totalPaginas})`;
-}
-
-// FILTRAR EN TIEMPO REAL
-function filtrarTabla() {
-    const texto = document.getElementById("inputBuscar").value.toLowerCase().strip();
-    contactosFiltrados = contactos.filter(c => {
-        const cod = (c.codigo_cliente || "").toLowerCase();
-        const nom = (c.nombre || "").toLowerCase();
-        const raz = (c.razon_social || "").toLowerCase();
-        const ruc = (c.ruc || "").toLowerCase();
-        const ciu = (c.ciudad || "").toLowerCase();
-
-        return cod.includes(texto) || nom.includes(texto) || raz.includes(texto) || ruc.includes(texto) || ciu.includes(texto);
+  if (btnVentas && btnCompras) {
+    btnVentas.addEventListener("click", () => {
+      tipoVistaActual = "VENTAS";
+      btnVentas.className = "btn btn-sm btn-secondary rounded-pill active px-3";
+      btnCompras.className = "btn btn-sm btn-outline-secondary rounded-pill px-3";
+      paginaActual = 1;
+      cargarContactos();
     });
 
+    btnCompras.addEventListener("click", () => {
+      tipoVistaActual = "COMPRAS";
+      btnCompras.className = "btn btn-sm btn-secondary rounded-pill active px-3";
+      btnVentas.className = "btn btn-sm btn-outline-secondary rounded-pill px-3";
+      paginaActual = 1;
+      cargarContactos();
+    });
+  }
+
+  // Inputs de búsqueda en tiempo real
+  const inputs = ["buscarNombre", "buscarCedula", "buscarCodigo", "buscarGeneral"];
+  inputs.forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", () => {
+      paginaActual = 1;
+      cargarContactos();
+    });
+  });
+
+  // Botón Mostrar Todos
+  document.getElementById("btnMostrarTodos")?.addEventListener("click", () => {
+    inputs.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
     paginaActual = 1;
-    renderizarTabla();
-}
+    cargarContactos();
+  });
 
-// ABRIR MODAL EN MODO EDICIÓN
-function abrirModalEditar(codigo) {
-    const cliente = contactos.find(c => String(c.codigo_cliente) === String(codigo));
-    if (!cliente) {
-        alert("Cliente no encontrado en memoria");
+  // Botón Editar por Código
+  document.getElementById("btnEditarPorCodigo")?.addEventListener("click", async () => {
+    const cod = prompt("Ingrese el Código de Cliente a editar:");
+    if (cod) {
+      const { data, error } = await client.from("clientes").select("*").eq("codigo_cliente", cod.trim()).maybeSingle();
+      if (error || !data) {
+        alert("No se encontró ningún contacto con el código: " + cod);
         return;
+      }
+      abrirModalEdicion(data);
     }
+  });
 
-    document.getElementById("codigo_cliente").value = cliente.codigo_cliente || "";
-    document.getElementById("categoria").value = cliente.categoria || "";
-    document.getElementById("ruc").value = cliente.ruc || "";
-    document.getElementById("nombre").value = cliente.nombre || cliente.razon_social || "";
-    document.getElementById("direccion").value = cliente.direccion || "";
-    document.getElementById("ciudad").value = cliente.ciudad || "";
-    document.getElementById("telefono1").value = cliente.telefono1 || "";
-    document.getElementById("email").value = cliente.email || "";
-    document.getElementById("transporte").value = cliente.transporte || "";
-    document.getElementById("banco_datos_pago").value = cliente.banco_datos_pago || "";
-    document.getElementById("fecnac_c").value = cliente.fecnac_c || cliente.fecha_nacimiento || "";
-    document.getElementById("coment_c").value = cliente.coment_c || "";
-    document.getElementById("necesi_c").value = cliente.necesi_c || "";
-
-    document.getElementById("modalContactoLabel").innerText = "Editar Contacto";
-    modalContactoInstance.show();
-}
-
-// ABRIR MODAL PARA NUEVO / EDICIÓN POR CÓDIGO
-function abrirModalNuevo() {
-    document.getElementById("formContacto").reset();
-    document.getElementById("codigo_cliente").removeAttribute("readonly");
-    document.getElementById("modalContactoLabel").innerText = "Editar/Nuevo Contacto";
-    modalContactoInstance.show();
-}
-
-// GUARDAR O ACTUALIZAR CONTACTO (CORRIGE Y FILTRA EL PAYLOAD EXACTO)
-async function guardarContacto(e) {
-    e.preventDefault();
-
-    const form = document.getElementById("formContacto");
-    const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
-
-    // 1. LIMPIAR PROPIEDADES NO DESEADAS QUE PROVOCAN EL ERROR DE ESQUEMA EN SUPABASE
-    delete payload.requiere;
-    delete payload.necesidad;
-    delete payload.comentario;
-
-    // 2. ASEGURAR NOMBRES DE COLUMNAS EXACTOS
-    payload.razon_social = payload.nombre;
-    if (payload.fecnac_c) {
-        payload.fecha_nacimiento = payload.fecnac_c;
-    }
-
-    const codigo = payload.codigo_cliente;
-    if (!codigo) {
-        alert("El código del cliente es obligatorio");
-        return;
-    }
-
-    // Mostrar spinner
-    document.getElementById("txtGuardar").innerText = "Guardando...";
-    document.getElementById("spinnerGuardar").classList.remove("d-none");
-    document.getElementById("btnGuardar").disabled = true;
-
-    try {
-        const response = await fetch(`${API_URL}/clientes/${codigo}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.detail || errData.message || "Could not find the column in the schema cache");
-        }
-
-        alert("¡Contacto guardado correctamente!");
-        modalContactoInstance.hide();
-        await cargarContactos();
-
-    } catch (error) {
-        console.error("Error al guardar:", error);
-        alert("Error al guardar los cambios: " + error.message);
-    } finally {
-        document.getElementById("txtGuardar").innerText = "Guardar Cambios";
-        document.getElementById("spinnerGuardar").classList.add("d-none");
-        document.getElementById("btnGuardar").disabled = false;
-    }
-}
-
-// ELIMINAR REGISTRO
-async function eliminarContacto(codigo) {
-    if (!confirm(`¿Está seguro de que desea eliminar al cliente con código ${codigo}?`)) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/clientes/${codigo}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.ok) throw new Error("No se pudo eliminar el registro");
-
-        alert("Contacto eliminado con éxito");
-        await cargarContactos();
-    } catch (err) {
-        alert("Error al eliminar: " + err.message);
-    }
-}
-
-// LOGICA DE PAGINACION
-function paginaAnterior() {
+  // Paginación
+  document.getElementById("btnAnterior")?.addEventListener("click", () => {
     if (paginaActual > 1) {
-        paginaActual--;
-        renderizarTabla();
+      paginaActual--;
+      cargarContactos();
     }
+  });
+
+  document.getElementById("btnSiguiente")?.addEventListener("click", () => {
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+    if (paginaActual < maxPaginas) {
+      paginaActual++;
+      cargarContactos();
+    }
+  });
+
+  document.getElementById("btnIrPagina")?.addEventListener("click", () => {
+    const pag = parseInt(document.getElementById("inputPagina").value, 10);
+    const maxPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+    if (pag >= 1 && pag <= maxPaginas) {
+      paginaActual = pag;
+      cargarContactos();
+    }
+  });
 }
 
-function paginaSiguiente() {
-    const totalPaginas = Math.ceil(contactosFiltrados.length / registrosPorPagina);
-    if (paginaActual < totalPaginas) {
-        paginaActual++;
-        renderizarTabla();
-    }
+function cambiarOrden(columna) {
+  if (columnaOrden === columna) {
+    ordenAscendente = !ordenAscendente;
+  } else {
+    columnaOrden = columna;
+    ordenAscendente = true;
+  }
+  cargarContactos();
 }
 
-function irAPagina() {
-    const input = document.getElementById("inputPagina");
-    const num = parseInt(input.value);
-    const totalPaginas = Math.ceil(contactosFiltrados.length / registrosPorPagina);
+function obtenerIconoOrden(columna) {
+  if (columnaOrden !== columna) {
+    return `<i class="fa-solid fa-sort th-sort-icon"></i>`;
+  }
+  return ordenAscendente
+    ? `<i class="fa-solid fa-sort-up th-sort-icon active"></i>`
+    : `<i class="fa-solid fa-sort-down th-sort-icon active"></i>`;
+}
 
-    if (num >= 1 && num <= totalPaginas) {
-        paginaActual = num;
-        renderizarTabla();
+function renderizarEncabezado() {
+  const thead = document.getElementById("theadContactos");
+  if (tipoVistaActual === "VENTAS") {
+    thead.innerHTML = `
+      <tr>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('direccion')">DIRECCIÓN ${obtenerIconoOrden('direccion')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('email')">EMAIL ${obtenerIconoOrden('email')}</th>
+        <th onclick="cambiarOrden('ciudad')">CIUDAD ${obtenerIconoOrden('ciudad')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th>COMENTARIO</th>
+        <th>FEC. NAC</th>
+        <th>NECESIDAD</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr>
+        <th onclick="cambiarOrden('codigo_cliente')">CÓDIGO ${obtenerIconoOrden('codigo_cliente')}</th>
+        <th onclick="cambiarOrden('categoria')">CAT ${obtenerIconoOrden('categoria')}</th>
+        <th onclick="cambiarOrden('razon_social')">NOMBRE / RAZÓN SOCIAL ${obtenerIconoOrden('razon_social')}</th>
+        <th onclick="cambiarOrden('telefono1')">TELÉFONO ${obtenerIconoOrden('telefono1')}</th>
+        <th onclick="cambiarOrden('ruc')">CÉDULA O RUC ${obtenerIconoOrden('ruc')}</th>
+        <th onclick="cambiarOrden('requiere')">BANCO ${obtenerIconoOrden('requiere')}</th>
+        <th onclick="cambiarOrden('transporte')">TRANSPORTE ${obtenerIconoOrden('transporte')}</th>
+        <th>COMENTARIO</th>
+        <th>FEC. NAC</th>
+        <th>NECESIDAD</th>
+        <th class="text-center" style="cursor: default;">ACCIONES</th>
+      </tr>
+    `;
+  }
+}
+
+async function cargarContactos() {
+  renderizarEncabezado();
+
+  const tbody = document.getElementById("tbodyContactos");
+  const numColumnas = tipoVistaActual === "VENTAS" ? 13 : 11;
+  tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Buscando registros...</td></tr>`;
+
+  const nom = document.getElementById("buscarNombre")?.value.trim() || "";
+  const ced = document.getElementById("buscarCedula")?.value.trim() || "";
+  const cod = document.getElementById("buscarCodigo")?.value.trim() || "";
+  const gen = document.getElementById("buscarGeneral")?.value.trim() || "";
+
+  const desde = (paginaActual - 1) * registrosPorPagina;
+  const hasta = desde + registrosPorPagina - 1;
+
+  try {
+    let query = client.from("clientes").select("*", { count: "exact" });
+
+    if (nom) {
+      query = query.or(`nombre.ilike.%${nom}%,razon_social.ilike.%${nom}%`);
+    }
+    if (ced) {
+      query = query.ilike("ruc", `%${ced}%`);
+    }
+    if (cod) {
+      query = query.ilike("codigo_cliente", `%${cod}%`);
+    }
+    if (gen) {
+      query = query.or(
+        `codigo_cliente.ilike.%${gen}%,ruc.ilike.%${gen}%,nombre.ilike.%${gen}%,razon_social.ilike.%${gen}%,direccion.ilike.%${gen}%,categoria.ilike.%${gen}%`
+      );
+    }
+
+    query = query.order(columnaOrden, { ascending: ordenAscendente }).range(desde, hasta);
+
+    const { data, count, error } = await query;
+
+    if (error) {
+      console.error("Error en consulta Supabase:", error);
+      tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error: ${error.message}</td></tr>`;
+      return;
+    }
+
+    totalRegistros = count || 0;
+    renderizarTabla(data);
+    actualizarPaginacion(desde, hasta);
+
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-danger fw-bold">Error de conexión al servidor.</td></tr>`;
+  }
+}
+
+function renderizarTabla(lista) {
+  const tbody = document.getElementById("tbodyContactos");
+  tbody.innerHTML = "";
+  const numColumnas = tipoVistaActual === "VENTAS" ? 13 : 11;
+
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${numColumnas}" class="text-center py-4 text-muted fw-bold">No se encontraron contactos.</td></tr>`;
+    return;
+  }
+
+  lista.forEach((item) => {
+    const tr = document.createElement("tr");
+    const catLetra = item.categoria ? item.categoria.toString().trim().charAt(0).toUpperCase() : "-";
+    const nombreMostrado = item.razon_social || item.nombre || "-";
+
+    // Soporte para variantes de nombres de columnas COBOL en Supabase
+    const comentVal = item.coment_c || item.coment || item.comentario || "-";
+    const fecnacVal = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "-";
+    const necesiVal = item.necesi_c || item.necesi || item.necesidad || "-";
+
+    if (tipoVistaActual === "VENTAS") {
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td>${item.ruc || "-"}</td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.direccion || "-"}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.email || "-"}</td>
+        <td>${item.ciudad || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td>${comentVal}</td>
+        <td>${fecnacVal}</td>
+        <td>${necesiVal}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
     } else {
-        alert(`Ingrese una página válida entre 1 y ${totalPaginas}`);
+      tr.innerHTML = `
+        <td><span class="badge-code">${item.codigo_cliente || "-"}</span></td>
+        <td><span class="badge-cat">${catLetra}</span></td>
+        <td class="fw-bold">${nombreMostrado}</td>
+        <td>${item.telefono1 || "-"}</td>
+        <td>${item.ruc || "-"}</td>
+        <td>${item.requiere || "-"}</td>
+        <td>${item.transporte || "-"}</td>
+        <td>${comentVal}</td>
+        <td>${fecnacVal}</td>
+        <td>${necesiVal}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="editarContacto('${item.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarContacto('${item.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      `;
     }
+
+    tbody.appendChild(tr);
+  });
 }
 
-function mostrarTodos() {
-    document.getElementById("inputBuscar").value = "";
-    contactosFiltrados = [...contactos];
-    paginaActual = 1;
-    renderizarTabla();
+function actualizarPaginacion(desde, hasta) {
+  const lblInfo = document.getElementById("lblInfoPaginacion");
+  const btnAnt = document.getElementById("btnAnterior");
+  const btnSig = document.getElementById("btnSiguiente");
+  const inputPag = document.getElementById("inputPagina");
+
+  const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+  const registroHasta = Math.min(hasta + 1, totalRegistros);
+  const registroDesde = totalRegistros === 0 ? 0 : desde + 1;
+
+  if (lblInfo) lblInfo.textContent = `Mostrando ${registroDesde}-${registroHasta} de ${totalRegistros} registros (Página ${paginaActual} de ${totalPaginas})`;
+  if (inputPag) inputPag.value = paginaActual;
+
+  if (btnAnt) btnAnt.disabled = paginaActual <= 1;
+  if (btnSig) btnSig.disabled = paginaActual >= totalPaginas;
 }
 
-function cambiarVista(vista) {
-    if (vista === 'ventas') {
-        document.getElementById("btnVistaVentas").classList.add("active", "btn-dark");
-        document.getElementById("btnVistaVentas").classList.remove("btn-outline-dark");
-        document.getElementById("btnVistaCompras").classList.remove("active", "btn-dark");
-        document.getElementById("btnVistaCompras").classList.add("btn-outline-dark");
-    } else {
-        document.getElementById("btnVistaCompras").classList.add("active", "btn-dark");
-        document.getElementById("btnVistaCompras").classList.remove("btn-outline-dark");
-        document.getElementById("btnVistaVentas").classList.remove("active", "btn-dark");
-        document.getElementById("btnVistaVentas").classList.add("btn-outline-dark");
-    }
+window.editarContacto = async (id) => {
+  try {
+    const { data, error } = await client.from("clientes").select("*").eq("id", id).single();
+    if (error) throw error;
+    abrirModalEdicion(data);
+  } catch (err) {
+    console.error("Error al obtener contacto:", err);
+    alert("No se pudo cargar la información del contacto.");
+  }
+};
+
+function abrirModalEdicion(item) {
+  document.getElementById("editId").value = item.id || "";
+  document.getElementById("editCodigo").value = item.codigo_cliente || "";
+  document.getElementById("editCategoria").value = item.categoria || "";
+  document.getElementById("editRuc").value = item.ruc || "";
+  document.getElementById("editNombre").value = item.razon_social || item.nombre || "";
+  document.getElementById("editDireccion").value = item.direccion || "";
+  document.getElementById("editCiudad").value = item.ciudad || "";
+  document.getElementById("editTelefono").value = item.telefono1 || "";
+  document.getElementById("editEmail").value = item.email || "";
+  document.getElementById("editTransporte").value = item.transporte || "";
+  document.getElementById("editRequiere").value = item.requiere || "";
+
+  // Asignar campos COBOL al modal
+  document.getElementById("editComentario").value = item.coment_c || item.coment || item.comentario || "";
+  document.getElementById("editFecnac").value = item.fecnac_c || item.fecnac || item.fecha_nacimiento || "";
+  document.getElementById("editNecesidad").value = item.necesi_c || item.necesi || item.necesidad || "";
+
+  if (modalEditar) modalEditar.show();
 }
 
-function toggleMenu() {
-    alert("Menú de navegación");
+async function guardarEdicionContacto() {
+  const id = document.getElementById("editId").value;
+  if (!id) return;
+
+  const payload = {
+    codigo_cliente: document.getElementById("editCodigo").value.trim(),
+    categoria: document.getElementById("editCategoria").value.trim().toUpperCase(),
+    ruc: document.getElementById("editRuc").value.trim(),
+    razon_social: document.getElementById("editNombre").value.trim(),
+    nombre: document.getElementById("editNombre").value.trim(),
+    direccion: document.getElementById("editDireccion").value.trim(),
+    ciudad: document.getElementById("editCiudad").value.trim(),
+    telefono1: document.getElementById("editTelefono").value.trim(),
+    email: document.getElementById("editEmail").value.trim(),
+    transporte: document.getElementById("editTransporte").value.trim(),
+    requiere: document.getElementById("editRequiere").value.trim(),
+    // Guardado en columnas COBOL
+    coment_c: document.getElementById("editComentario").value.trim(),
+    fecnac_c: document.getElementById("editFecnac").value.trim(),
+    necesi_c: document.getElementById("editNecesidad").value.trim()
+  };
+
+  const btnGuardar = document.getElementById("btnGuardarCambiosContacto");
+  btnGuardar.disabled = true;
+  btnGuardar.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Guardando...`;
+
+  const { error } = await client.from("clientes").update(payload).eq("id", id);
+
+  btnGuardar.disabled = false;
+  btnGuardar.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios`;
+
+  if (error) {
+    console.error("Error al actualizar:", error);
+    alert("Error al guardar los cambios: " + error.message);
+  } else {
+    if (modalEditar) modalEditar.hide();
+    cargarContactos();
+  }
 }
+
+window.eliminarContacto = async (id) => {
+  if (confirm("¿Está seguro de eliminar este contacto?")) {
+    const { error } = await client.from("clientes").delete().eq("id", id);
+    if (error) alert("Error al eliminar contacto.");
+    else cargarContactos();
+  }
+};

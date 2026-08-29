@@ -1,83 +1,87 @@
 import os
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from supabase import create_client, Client
 from pydantic import BaseModel
 from typing import Optional
-from supabase import create_client, Client
 
-SUPABASE_URL = "https://utcqgkeiyqvfxfhjupfc.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y3Fna2VpeXF2ZnhmaGp1cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NzU3MTAsImV4cCI6MjA5ODI1MTcxMH0.99DA5vNg4rUClLekWOyLjfe3QWEKX0vior4CZxxT9ts"
+# ============================
+# CONFIGURACIÓN SUPABASE
+# ============================
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY") or os.environ.get("SUPABASE_ANON_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-app = FastAPI(title="API ERP SUCRE")
+# ============================
+# INICIALIZAR FASTAPI
+# ============================
+app = FastAPI()
 
-# CONFIGURACIÓN DE CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Carpeta web completa
+app.mount("/web", StaticFiles(directory="web"), name="web")
 
-# MODELO DE DATOS DE CLIENTES
-class ClienteModel(BaseModel):
-    codigo_cliente: str
-    categoria: Optional[str] = None
-    nombre: Optional[str] = None
-    razon_social: Optional[str] = None
-    ruc: Optional[str] = None
-    ciudad: Optional[str] = None
-    direccion: Optional[str] = None
-    telefono1: Optional[str] = None
-    telefono2: Optional[str] = None
-    telefono3: Optional[str] = None
-    email: Optional[str] = None
-    transporte: Optional[str] = None
-    banco_datos_pago: Optional[str] = None
-    coment_c: Optional[str] = None
-    necesi_c: Optional[str] = None
-    fecnac_c: Optional[str] = None
-    fecha_nacimiento: Optional[str] = None
+# ============================
+# RUTA HOME (NO TOCAR)
+# ============================
+@app.get("/")
+def home():
+    return FileResponse("web/index.html")
 
-# ENDPOINTS DE LA API
-@app.get("/clientes")
-def obtener_clientes():
+# ============================
+# API PRODUCTOS
+# ============================
+class Producto(BaseModel):
+    codigo: str
+    cod_prov: Optional[str] = ""
+    marca: Optional[str] = ""
+    descripcion: str
+    stem: Optional[int] = 0
+    costo: Optional[float] = 0.0
+    pventa: Optional[float] = 0.0
+
+@app.get("/api/productos")
+def obtener_productos():
     try:
-        res = supabase.table("clientes").select("*").execute()
-        return res.data
+        response = supabase.table("productos").select("*").execute()
+        return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/clientes/{codigo}")
-def obtener_cliente(codigo: str):
+@app.post("/api/productos")
+def crear_producto(producto: Producto):
     try:
-        res = supabase.table("clientes").select("*").eq("codigo_cliente", codigo).execute()
-        if not res.data:
-            raise HTTPException(status_code=404, detail="Cliente no encontrado")
-        return res.data[0]
+        data = producto.model_dump()
+        response = supabase.table("productos").insert(data).execute()
+        return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/clientes/{codigo}")
-def actualizar_cliente(codigo: str, cliente: ClienteModel):
+@app.put("/api/productos/{codigo}")
+def actualizar_producto(codigo: str, producto: Producto):
     try:
-        data = cliente.dict(exclude_unset=True)
-        res = supabase.table("clientes").upsert(data, on_conflict="codigo_cliente").execute()
-        return {"mensaje": "Cliente actualizado exitosamente", "data": res.data}
+        data = producto.model_dump()
+        response = supabase.table("productos").update(data).eq("codigo", codigo).execute()
+        return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/clientes/{codigo}")
-def eliminar_cliente(codigo: str):
+@app.delete("/api/productos/{codigo}")
+def eliminar_producto(codigo: str):
     try:
-        res = supabase.table("clientes").delete().eq("codigo_cliente", codigo).execute()
-        return {"mensaje": "Cliente eliminado exitosamente", "data": res.data}
+        response = supabase.table("productos").delete().eq("codigo", codigo).execute()
+        return response.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA WEB
-if os.path.exists("web"):
-    app.mount("/web", StaticFiles(directory="web", html=True), name="web")
+# ============================
+# API CONTACTOS (NO TOCAR)
+# ============================
+@app.get("/api/contactos")
+def obtener_contactos():
+    try:
+        response = supabase.table("clientes").select("*").execute()
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
