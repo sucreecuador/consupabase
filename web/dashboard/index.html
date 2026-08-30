@@ -1,26 +1,116 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>ERP SUCRE - Dashboard</title>
-    <link rel="stylesheet" href="/web/dashboard/dashboard.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP SUCRE - Indicadores</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .sidebar { width: 240px; min-height: 100vh; background-color: #1c2838; color: #ffffff; }
+    .sidebar .logo-title { font-size: 1.6rem; margin-top: 10px; margin-bottom: 30px !important; }
+    .sidebar-menu { gap: 1.25rem; }
+    .sidebar .nav-link { color: #92a4b8; padding: 0; font-size: 1.1rem; font-weight: 500; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #ffffff !important; font-weight: 700 !important; }
+    .main-content { flex: 1; padding: 25px; }
+    .card-kpi { background: #fff; border-radius: 10px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: transform 0.2s; }
+    .card-kpi:hover { transform: translateY(-3px); }
+    .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+  </style>
 </head>
-
 <body>
 
-    <!-- SIDEBAR -->
-    <div id="sidebar-container">
-        <link rel="stylesheet" href="/web/components/sidebar/sidebar.css">
-        <script src="/web/components/sidebar/sidebar.js"></script>
-        <div id="sidebar"></div>
+<div class="d-flex">
+  <!-- SIDEBAR -->
+  <div id="sidebar" class="sidebar d-flex flex-column p-4">
+    <h2 class="fw-bold text-white logo-title">ERP SUCRE</h2>
+    <ul class="nav flex-column mb-auto sidebar-menu">
+      <li class="nav-item"><a href="/web/index.html" class="nav-link">Inicio</a></li>
+      <li class="nav-item"><a href="/web/dashboard/index.html" class="nav-link active">Indicadores</a></li>
+      <li class="nav-item"><a href="/web/productos/productos.html" class="nav-link">Productos</a></li>
+      <li class="nav-item"><a href="/web/inventario/index.html" class="nav-link">Inventario</a></li>
+      <li class="nav-item"><a href="/web/contactos/index.html" class="nav-link">Contactos</a></li>
+      <li class="nav-item"><a href="/web/reportes/index.html" class="nav-link">Reportes</a></li>
+      <li class="nav-item"><a href="/web/facturacion/index.html" class="nav-link">Facturación</a></li>
+      <li class="nav-item"><a href="/web/configuracion/index.html" class="nav-link">Configuración</a></li>
+    </ul>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Panel de Indicadores</h2>
+        <p class="text-muted mb-0">Visión general del estado comercial y de inventario.</p>
+      </div>
+      <button id="btnRefrescar" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-rotate me-1"></i> Actualizar</button>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="main-content">
-        <div id="dashboard-module"></div>
+    <!-- TARJETAS KPI -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card card-kpi p-3 d-flex flex-row align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small fw-semibold">Ventas del Mes</span>
+            <h3 class="fw-bold text-dark mb-0 mt-1" id="kpiVentas">$0.00</h3>
+          </div>
+          <div class="icon-box bg-primary-subtle text-primary"><i class="fa-solid fa-chart-line"></i></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card card-kpi p-3 d-flex flex-row align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small fw-semibold">Facturas Emitidas</span>
+            <h3 class="fw-bold text-dark mb-0 mt-1" id="kpiFacturas">0</h3>
+          </div>
+          <div class="icon-box bg-success-subtle text-success"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card card-kpi p-3 d-flex flex-row align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small fw-semibold">Productos en Stock</span>
+            <h3 class="fw-bold text-dark mb-0 mt-1" id="kpiStock">0</h3>
+          </div>
+          <div class="icon-box bg-warning-subtle text-warning"><i class="fa-solid fa-boxes-stacked"></i></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card card-kpi p-3 d-flex flex-row align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small fw-semibold">Total Contactos</span>
+            <h3 class="fw-bold text-dark mb-0 mt-1" id="kpiContactos">0</h3>
+          </div>
+          <div class="icon-box bg-info-subtle text-info"><i class="fa-solid fa-address-book"></i></div>
+        </div>
+      </div>
     </div>
 
-    <script src="/web/dashboard/dashboard.js"></script>
+    <!-- SECCIÓN DE GRÁFICOS -->
+    <div class="row g-3">
+      <div class="col-md-8">
+        <div class="card card-kpi p-4 h-100">
+          <h5 class="fw-bold mb-3">Ventas Mensuales</h5>
+          <canvas id="chartVentas" height="120"></canvas>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-kpi p-4 h-100">
+          <h5 class="fw-bold mb-3">Distribución de Productos</h5>
+          <canvas id="chartCategorias" height="200"></canvas>
+        </div>
+      </div>
+    </div>
 
+  </div>
+</div>
+
+<!-- SCRIPTS DE CHART.JS Y BOOTSTRAP -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dashboard.js"></script>
 </body>
 </html>
