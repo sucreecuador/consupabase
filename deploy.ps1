@@ -2,17 +2,19 @@
 Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE"
 Write-Host "============================================================"
 
-# Archivos principales
+# Archivos principales del ERP
 $archivos = @(
     "main.py",
 
     # Productos
     "web/productos/productos.html",
     "web/productos/productos.js",
+    "web/productos/productos.css",
 
     # Compras
     "web/compras/compras.html",
     "web/compras/compras.js",
+    "web/compras/compras.css",
 
     # Contactos
     "web/contactos/index.html",
@@ -31,7 +33,8 @@ $archivos = @(
 
     # Facturación
     "web/facturacion/index.html",
-    "web/facturacion/facturacion.js"
+    "web/facturacion/facturacion.js",
+    "web/facturacion/facturacion.css"
 )
 
 foreach ($archivo in $archivos) {
@@ -55,12 +58,18 @@ Write-Host "============================================================"
 Write-Host "   🚀 Enviando deploy a Render..."
 Write-Host "============================================================"
 
-# Render deploy trigger
-curl -X POST `
-  -H "Accept: application/json" `
-  -H "Content-Type: application/json" `
-  -d '{}' `
-  https://api.render.com/deploy/srv-d9l24qdaeets73ad9fvg?key=YOUR_RENDER_KEY
+# Headers correctos para PowerShell
+$headers = @{
+    "Accept" = "application/json"
+    "Content-Type" = "application/json"
+}
+
+# Trigger del deploy en Render
+Invoke-WebRequest `
+    -Uri "https://api.render.com/deploy/srv-d9l24qdaeets73ad9fvg?key=YOUR_RENDER_KEY" `
+    -Method POST `
+    -Headers $headers `
+    -Body "{}"
 
 Write-Host ""
 Write-Host "============================================================"
