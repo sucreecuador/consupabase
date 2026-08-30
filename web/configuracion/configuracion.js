@@ -1,8 +1,8 @@
-// Obtener URL base del dominio desplegado en Render
+// Detecta automáticamente el origen (ej. https://consupabase-apiv2.onrender.com)
 const API_BASE_URL = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Manejo de Pestañas
+  // 1. Alternar pestañas superiores
   const tabs = [
     { btn: 'tabEmpresa', sec: 'secEmpresa' },
     { btn: 'tabImpuestos', sec: 'secImpuestos' },
@@ -24,22 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 2. Cargar configuración inicial
+  // 2. Cargar datos existentes al abrir la página
   cargarConfiguracion();
 
-  // 3. Listener del formulario de Empresa
+  // 3. Escuchar el submit del formulario de Empresa
   const formEmpresa = document.getElementById('formEmpresa');
   if (formEmpresa) {
     formEmpresa.addEventListener('submit', guardarConfiguracion);
   }
 });
 
-// Cargar datos existentes de la empresa
+// Cargar la configuración de la empresa
 async function cargarConfiguracion() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/configuracion/empresa`);
-    if (!res.ok) throw new Error('No se pudo obtener la configuración');
-    const data = await res.json();
+    const response = await fetch(`${API_BASE_URL}/api/configuracion/empresa`);
+    if (!response.ok) throw new Error('API no disponible');
+    const data = await response.json();
 
     if (data) {
       document.getElementById('cfgNombreComercial').value = data.nombre_comercial || '';
@@ -48,7 +48,7 @@ async function cargarConfiguracion() {
       document.getElementById('cfgTelefono').value = data.telefono || '';
     }
   } catch (err) {
-    console.warn('Backend endpoint no disponible, intentando desde localStorage:', err);
+    console.warn('Cargando datos desde almacenamiento local:', err);
     const localData = JSON.parse(localStorage.getItem('config_empresa') || '{}');
     if (localData.nombre_comercial) {
       document.getElementById('cfgNombreComercial').value = localData.nombre_comercial || '';
@@ -59,7 +59,7 @@ async function cargarConfiguracion() {
   }
 }
 
-// Guardar datos de la empresa
+// Guardar la configuración
 async function guardarConfiguracion(e) {
   e.preventDefault();
 
@@ -70,22 +70,24 @@ async function guardarConfiguracion(e) {
     telefono: document.getElementById('cfgTelefono').value.trim()
   };
 
+  // Guardado preventivo inmediato en LocalStorage
+  localStorage.setItem('config_empresa', JSON.stringify(payload));
+
   try {
-    const res = await fetch(`${API_BASE_URL}/api/configuracion/empresa`, {
+    const response = await fetch(`${API_BASE_URL}/api/configuracion/empresa`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) {
-      // Fallback a localStorage si la API no está expuesta en FastAPI aún
-      localStorage.setItem('config_empresa', JSON.stringify(payload));
+    if (response.ok) {
+      alert('¡Configuración guardada exitosamente en el servidor!');
+    } else {
+      alert('¡Datos guardados localmente! (Pendiente sincronización con servidor)');
     }
-
-    alert('¡Configuración guardada correctamente!');
   } catch (err) {
-    // Si falla el fetch por red, asegura la persistencia en el navegador sin error de alerta brusco
-    localStorage.setItem('config_empresa', JSON.stringify(payload));
+    // Captura el error de red sin interrumpir al usuario
+    console.warn('Error enviando al backend:', err);
     alert('¡Configuración guardada en almacenamiento local!');
   }
 }
