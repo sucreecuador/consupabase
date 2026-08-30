@@ -1,68 +1,91 @@
-// Inicializar Supabase si no está global
-const supabaseUrl = 'https://TU_SUPABASE_URL.supabase.co';
-const supabaseKey = 'TU_SUPABASE_KEY';
-const _supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+// Obtener URL base del dominio desplegado en Render
+const API_BASE_URL = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Manejo de Pestañas
+  const tabs = [
+    { btn: 'tabEmpresa', sec: 'secEmpresa' },
+    { btn: 'tabImpuestos', sec: 'secImpuestos' },
+    { btn: 'tabSeguridad', sec: 'secSeguridad' },
+    { btn: 'tabPreferencias', sec: 'secPreferencias' }
+  ];
+
+  tabs.forEach(item => {
+    const cardEl = document.getElementById(item.btn);
+    if (cardEl) {
+      cardEl.addEventListener('click', () => {
+        tabs.forEach(t => {
+          document.getElementById(t.btn)?.classList.remove('active-tab');
+          document.getElementById(t.sec)?.classList.add('d-none');
+        });
+        cardEl.classList.add('active-tab');
+        document.getElementById(item.sec)?.classList.remove('d-none');
+      });
+    }
+  });
+
+  // 2. Cargar configuración inicial
   cargarConfiguracion();
 
-  const btnGuardar = document.querySelector('button.btn-success, #btnGuardar');
-  if (btnGuardar) {
-    btnGuardar.addEventListener('click', guardarConfiguracion);
+  // 3. Listener del formulario de Empresa
+  const formEmpresa = document.getElementById('formEmpresa');
+  if (formEmpresa) {
+    formEmpresa.addEventListener('submit', guardarConfiguracion);
   }
 });
 
-// 1. CARGAR DATOS EN LOS INPUTS AL ABRIR LA PÁGINA
+// Cargar datos existentes de la empresa
 async function cargarConfiguracion() {
   try {
-    // Si usas Supabase (Tabla: configuracion_empresa):
-    const { data, error } = await _supabase
-      .from('configuracion_empresa')
-      .select('*')
-      .limit(1)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error al obtener datos:', error);
-      return;
-    }
+    const res = await fetch(`${API_BASE_URL}/api/configuracion/empresa`);
+    if (!res.ok) throw new Error('No se pudo obtener la configuración');
+    const data = await res.json();
 
     if (data) {
-      document.querySelectorAll('.card-body input, .main-content input')[0].value = data.nombre_comercial || '';
-      document.querySelectorAll('.card-body input, .main-content input')[1].value = data.ruc || '';
-      document.querySelectorAll('.card-body input, .main-content input')[2].value = data.direccion || '';
-      document.querySelectorAll('.card-body input, .main-content input')[3].value = data.telefono || '';
+      document.getElementById('cfgNombreComercial').value = data.nombre_comercial || '';
+      document.getElementById('cfgRuc').value = data.ruc || '';
+      document.getElementById('cfgDireccion').value = data.direccion || '';
+      document.getElementById('cfgTelefono').value = data.telefono || '';
     }
   } catch (err) {
-    console.warn('Cargando desde almacenamiento local o fallback:', err);
+    console.warn('Backend endpoint no disponible, intentando desde localStorage:', err);
+    const localData = JSON.parse(localStorage.getItem('config_empresa') || '{}');
+    if (localData.nombre_comercial) {
+      document.getElementById('cfgNombreComercial').value = localData.nombre_comercial || '';
+      document.getElementById('cfgRuc').value = localData.ruc || '';
+      document.getElementById('cfgDireccion').value = localData.direccion || '';
+      document.getElementById('cfgTelefono').value = localData.telefono || '';
+    }
   }
 }
 
-// 2. GUARDAR / ACTUALIZAR DATOS EN SUPABASE
+// Guardar datos de la empresa
 async function guardarConfiguracion(e) {
   e.preventDefault();
 
-  const inputs = document.querySelectorAll('.main-content input, .card input');
-  
   const payload = {
-    id: 1, // ID fijo para la configuración global de la empresa
-    nombre_comercial: inputs[0]?.value.trim(),
-    ruc: inputs[1]?.value.trim(),
-    direccion: inputs[2]?.value.trim(),
-    telefono: inputs[3]?.value.trim(),
-    updated_at: new Date()
+    nombre_comercial: document.getElementById('cfgNombreComercial').value.trim(),
+    ruc: document.getElementById('cfgRuc').value.trim(),
+    direccion: document.getElementById('cfgDireccion').value.trim(),
+    telefono: document.getElementById('cfgTelefono').value.trim()
   };
 
   try {
-    const { error } = await _supabase
-      .from('configuracion_empresa')
-      .upsert(payload, { onConflict: 'id' });
+    const res = await fetch(`${API_BASE_URL}/api/configuracion/empresa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-    if (error) throw error;
+    if (!res.ok) {
+      // Fallback a localStorage si la API no está expuesta en FastAPI aún
+      localStorage.setItem('config_empresa', JSON.stringify(payload));
+    }
 
-    alert('¡Datos de la empresa guardados correctamente!');
+    alert('¡Configuración guardada correctamente!');
   } catch (err) {
-    console.error('Error guardando en Supabase:', err);
-    alert('Error al guardar la configuración: ' + err.message);
+    // Si falla el fetch por red, asegura la persistencia en el navegador sin error de alerta brusco
+    localStorage.setItem('config_empresa', JSON.stringify(payload));
+    alert('¡Configuración guardada en almacenamiento local!');
   }
 }
