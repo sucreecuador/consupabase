@@ -1,37 +1,63 @@
-.dash-title {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 5px;
+/* ================================
+   ESTILO CORPORATIVO SUCRE - DASHBOARD
+   ================================ */
+
+body {
+    background: #f8f9fa;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
-.dash-subtitle {
-    color: #666;
-    margin-bottom: 20px;
-}
-
-.dash-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-}
-
-.dash-card {
+/* Tarjetas de indicadores */
+.card-indicador {
     background: #ffffff;
-    border-radius: 14px;
-    padding: 25px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: 0.25s ease;
-    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #e3e3e3;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.dash-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+.card-indicador-icon {
+    font-size: 26px;
+    color: #0d6efd;
 }
 
-.dash-icon {
-    font-size: 42px;
-    margin-bottom: 10px;
+.card-indicador-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.card-indicador-subtitle {
+    font-size: 13px;
+    color: #666;
+}
+
+.card-indicador-value {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0d6efd;
+}
+
+/* Sección título */
+h3 {
+    font-weight: 700;
+    color: #333;
+}
+
+/* Botón actualizar */
+.btn-sucre {
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: none;
+}
+
+.btn-sucre:hover {
+    background: #0b5ed7;
 }
