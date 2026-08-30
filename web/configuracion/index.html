@@ -1,45 +1,137 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Configuración - ERP Sucre</title>
-    <link rel="stylesheet" href="configuracion.css">
-    <script src="configuracion.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP SUCRE - Configuración</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="configuracion.css">
+  <style>
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .sidebar { width: 240px; min-height: 100vh; background-color: #1c2838; color: #ffffff; }
+    .sidebar .logo-title { font-size: 1.6rem; margin-top: 10px; margin-bottom: 30px !important; }
+    .sidebar-menu { gap: 1.25rem; }
+    .sidebar .nav-link { color: #92a4b8; padding: 0; font-size: 1.1rem; font-weight: 500; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #ffffff !important; font-weight: 700 !important; }
+    .main-content { flex: 1; padding: 25px; }
+    .config-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e2e8f0; }
+    .config-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .config-card.active-tab { border-color: #0d6efd; background-color: #f8fafc; }
+    .card-custom { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+  </style>
 </head>
-
 <body>
 
-    <div class="header">
-        <h1>Configuración del Sistema</h1>
-        <p>Preferencias generales, empresa, impuestos y seguridad.</p>
+<div class="d-flex">
+  <!-- SIDEBAR -->
+  <div id="sidebar" class="sidebar d-flex flex-column p-4">
+    <h2 class="fw-bold text-white logo-title">ERP SUCRE</h2>
+    <ul class="nav flex-column mb-auto sidebar-menu">
+      <li class="nav-item"><a href="/web/index.html" class="nav-link">Inicio</a></li>
+      <li class="nav-item"><a href="/web/dashboard/index.html" class="nav-link">Indicadores</a></li>
+      <li class="nav-item"><a href="/web/productos/productos.html" class="nav-link">Productos</a></li>
+      <li class="nav-item"><a href="/web/inventario/index.html" class="nav-link">Inventario</a></li>
+      <li class="nav-item"><a href="/web/contactos/index.html" class="nav-link">Contactos</a></li>
+      <li class="nav-item"><a href="/web/reportes/index.html" class="nav-link">Reportes</a></li>
+      <li class="nav-item"><a href="/web/facturacion/index.html" class="nav-link">Facturación</a></li>
+      <li class="nav-item"><a href="/web/configuracion/index.html" class="nav-link active">Configuración</a></li>
+    </ul>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <h2 class="fw-bold mb-1">Configuración del Sistema</h2>
+    <p class="text-muted mb-4">Preferencias generales, empresa, impuestos y seguridad.</p>
+
+    <!-- PESTAÑAS / CARDS SUPERIORES -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card config-card active-tab p-3 h-100" id="tabEmpresa">
+          <h5 class="fw-bold mb-1"><i class="fa-solid fa-building text-secondary me-2"></i>Empresa</h5>
+          <small class="text-muted">Datos generales, RUC, dirección, contacto.</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card config-card p-3 h-100" id="tabImpuestos">
+          <h5 class="fw-bold mb-1"><i class="fa-solid fa-sack-dollar text-warning me-2"></i>Impuestos</h5>
+          <small class="text-muted">IVA, retenciones, porcentajes del sistema.</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card config-card p-3 h-100" id="tabSeguridad">
+          <h5 class="fw-bold mb-1"><i class="fa-solid fa-user-shield text-danger me-2"></i>Seguridad y Usuarios</h5>
+          <small class="text-muted">Roles, permisos y accesos.</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card config-card p-3 h-100" id="tabPreferencias">
+          <h5 class="fw-bold mb-1"><i class="fa-solid fa-gear text-primary me-2"></i>Preferencias</h5>
+          <small class="text-muted">Opciones generales del ERP.</small>
+        </div>
+      </div>
     </div>
 
-    <div class="config-grid">
+    <!-- PANEL CONTENEDOR DE OPCIONES -->
+    <div class="card card-custom p-4">
+      
+      <!-- SECCIÓN 1: EMPRESA -->
+      <div id="secEmpresa" class="config-section">
+        <h4 class="fw-bold mb-4">Datos de la Empresa</h4>
+        <form id="formEmpresa">
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold">Nombre Comercial</label>
+            <input type="text" id="cfgNombreComercial" class="form-control" placeholder="Ej. Mi Empresa S.A.">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold">RUC</label>
+            <input type="text" id="cfgRuc" class="form-control" placeholder="0999999999001">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold">Dirección</label>
+            <input type="text" id="cfgDireccion" class="form-control" placeholder="Dirección matriz">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold">Teléfono</label>
+            <input type="text" id="cfgTelefono" class="form-control" placeholder="0999999999">
+          </div>
+          <button type="submit" id="btnGuardarEmpresa" class="btn btn-success px-4">Guardar</button>
+        </form>
+      </div>
 
-        <div class="config-card" onclick="openSection('empresa')">
-            <h3>🏢 Empresa</h3>
-            <p>Datos generales, RUC, dirección, contacto.</p>
-        </div>
+      <!-- SECCIÓN 2: IMPUESTOS -->
+      <div id="secImpuestos" class="config-section d-none">
+        <h4 class="fw-bold mb-4">Configuración de Impuestos</h4>
+        <form id="formImpuestos">
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold">Porcentaje IVA (%)</label>
+            <input type="number" id="cfgIva" class="form-control" value="15" step="0.01">
+          </div>
+          <button type="submit" id="btnGuardarImpuestos" class="btn btn-success px-4">Guardar Impuestos</button>
+        </form>
+      </div>
 
-        <div class="config-card" onclick="openSection('impuestos')">
-            <h3>💰 Impuestos</h3>
-            <p>IVA, retenciones, porcentajes del sistema.</p>
-        </div>
+      <!-- SECCIÓN 3: SEGURIDAD -->
+      <div id="secSeguridad" class="config-section d-none">
+        <h4 class="fw-bold mb-4">Seguridad y Usuarios</h4>
+        <p class="text-muted">Gestión de roles y accesos al sistema ERP Sucre.</p>
+      </div>
 
-        <div class="config-card" onclick="openSection('usuarios')">
-            <h3>🔐 Seguridad y Usuarios</h3>
-            <p>Roles, permisos y accesos.</p>
-        </div>
-
-        <div class="config-card" onclick="openSection('preferencias')">
-            <h3>⚙️ Preferencias</h3>
-            <p>Opciones generales del ERP.</p>
-        </div>
+      <!-- SECCIÓN 4: PREFERENCIAS -->
+      <div id="secPreferencias" class="config-section d-none">
+        <h4 class="fw-bold mb-4">Preferencias Generales</h4>
+        <p class="text-muted">Opciones de formato de impresión y personalización visual.</p>
+      </div>
 
     </div>
+  </div>
+</div>
 
-    <!-- Panel dinámico -->
-    <div id="panel" class="panel"></div>
-
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="configuracion.js"></script>
 </body>
 </html>
