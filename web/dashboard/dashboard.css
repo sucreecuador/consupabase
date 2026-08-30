@@ -7,6 +7,11 @@ body {
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
+h3 {
+    font-weight: 700;
+    color: #333;
+}
+
 /* Tarjetas de indicadores */
 .card-indicador {
     background: #ffffff;
@@ -17,10 +22,11 @@ body {
     align-items: center;
     gap: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    height: 100%;
 }
 
 .card-indicador-icon {
-    font-size: 26px;
+    font-size: 28px;
     color: #0d6efd;
 }
 
@@ -38,14 +44,8 @@ body {
 
 .card-indicador-value {
     font-weight: 700;
-    font-size: 18px;
+    font-size: 20px;
     color: #0d6efd;
-}
-
-/* Sección título */
-h3 {
-    font-weight: 700;
-    color: #333;
 }
 
 /* Botón actualizar */
@@ -53,7 +53,7 @@ h3 {
     background: #0d6efd;
     color: #fff;
     border-radius: 4px;
-    padding: 6px 12px;
+    padding: 8px 14px;
     font-size: 14px;
     border: none;
 }
