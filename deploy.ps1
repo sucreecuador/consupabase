@@ -64,9 +64,9 @@ $headers = @{
     "Content-Type" = "application/json"
 }
 
-# Trigger del deploy en Render
+# 🔥 URL REAL DEL DEPLOY HOOK DE RENDER
 Invoke-WebRequest `
-    -Uri "https://api.render.com/deploy/srv-d9l24qdaeets73ad9fvg?key=YOUR_RENDER_KEY" `
+    -Uri "https://api.render.com/deploy/srv-da6dmsbbc2fs73d7g9n0?key=YOUR_RENDER_KEY" `
     -Method POST `
     -Headers $headers `
     -Body "{}"
