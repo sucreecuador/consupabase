@@ -2,91 +2,65 @@
 Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE"
 Write-Host "============================================================"
 
-# Ruta base del proyecto
-$basePath = "C:\Users\Supervisor\consupabase"
+# Archivos principales
+$archivos = @(
+    "main.py",
 
-# Archivos obligatorios
-$mainPy = Join-Path $basePath "main.py"
+    # Productos
+    "web/productos/productos.html",
+    "web/productos/productos.js",
 
-# Módulo Productos
-$productosHtml = Join-Path $basePath "web\productos\productos.html"
-$comprasHtml = Join-Path $basePath "web\productos\compras.html"
-$productosJs = Join-Path $basePath "web\productos\productos.js"
-$comprasJs = Join-Path $basePath "web\productos\compras.js"
+    # Compras
+    "web/compras/compras.html",
+    "web/compras/compras.js",
 
-# Módulo Facturación
-$facturacionHtml = Join-Path $basePath "web\facturacion\index.html"
-$facturacionJs = Join-Path $basePath "web\facturacion\facturacion.js"
+    # Contactos
+    "web/contactos/index.html",
+    "web/contactos/contactos.js",
+    "web/contactos/contactos.css",
 
-# Verificaciones
-if (Test-Path $mainPy) {
-    Write-Host "✔ OK: main.py encontrado"
-} else {
-    Write-Host "❌ ERROR: main.py no encontrado"
-    exit
-}
+    # Reportes
+    "web/reportes/index.html",
+    "web/reportes/reportes.js",
+    "web/reportes/reportes.css",
 
-if (Test-Path $productosHtml) {
-    Write-Host "✔ OK: productos.html encontrado"
-} else {
-    Write-Host "❌ ERROR: productos.html no encontrado"
-    exit
-}
+    # Dashboard / Indicadores
+    "web/dashboard/index.html",
+    "web/dashboard/dashboard.js",
+    "web/dashboard/dashboard.css",
 
-if (Test-Path $comprasHtml) {
-    Write-Host "✔ OK: compras.html encontrado"
-} else {
-    Write-Host "❌ ERROR: compras.html no encontrado"
-    exit
-}
+    # Facturación
+    "web/facturacion/index.html",
+    "web/facturacion/facturacion.js"
+)
 
-if (Test-Path $productosJs) {
-    Write-Host "✔ OK: productos.js encontrado"
-} else {
-    Write-Host "❌ ERROR: productos.js no encontrado"
-    exit
-}
-
-if (Test-Path $comprasJs) {
-    Write-Host "✔ OK: compras.js encontrado"
-} else {
-    Write-Host "❌ ERROR: compras.js no encontrado"
-    exit
-}
-
-if (Test-Path $facturacionHtml) {
-    Write-Host "✔ OK: index.html encontrado (Facturación)"
-} else {
-    Write-Host "❌ ERROR: index.html no encontrado"
-    exit
-}
-
-if (Test-Path $facturacionJs) {
-    Write-Host "✔ OK: facturacion.js encontrado"
-} else {
-    Write-Host "❌ ERROR: facturacion.js no encontrado"
-    exit
+foreach ($archivo in $archivos) {
+    if (Test-Path $archivo) {
+        Write-Host "✔ OK: $archivo encontrado"
+    } else {
+        Write-Host "❌ ERROR: $archivo NO existe"
+    }
 }
 
 Write-Host ""
 Write-Host "📦 Verificando cambios pendientes..."
 
-# Inicializar git si no existe
-if (!(Test-Path (Join-Path $basePath ".git"))) {
-    git init $basePath
-}
-
-Set-Location $basePath
-
-# Agregar cambios
 git add .
-
-# Crear commit
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Deploy ERP Sucre (Consolidación index.html y facturacion.js) - $fecha"
+git commit -m "Deploy ERP Sucre - $fecha"
+git push
 
-Write-Host "⬆ Subiendo cambios a GitHub..."
-git push origin main
+Write-Host ""
+Write-Host "============================================================"
+Write-Host "   🚀 Enviando deploy a Render..."
+Write-Host "============================================================"
+
+# Render deploy trigger
+curl -X POST `
+  -H "Accept: application/json" `
+  -H "Content-Type: application/json" `
+  -d '{}' `
+  https://api.render.com/deploy/srv-d9l24qdaeets73ad9fvg?key=YOUR_RENDER_KEY
 
 Write-Host ""
 Write-Host "============================================================"
