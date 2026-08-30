@@ -66,7 +66,7 @@ $headers = @{
 
 # 🔥 URL REAL DEL DEPLOY HOOK DE RENDER
 Invoke-WebRequest `
-    -Uri "https://api.render.com/deploy/srv-da6dmsbbc2fs73d7g9n0?key=YOUR_RENDER_KEY" `
+    -Uri "https://api.render.com/deploy/srv-da6dmsbbc2fs73d7g9n0?key=rpBa1kUCS1E" `
     -Method POST `
     -Headers $headers `
     -Body "{}"
