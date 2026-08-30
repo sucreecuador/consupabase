@@ -9,28 +9,106 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .sidebar { width: 220px; min-height: 100vh; background-color: #212529; color: #fff; }
-    .sidebar .nav-link { color: #cfd8dc; padding: 12px 20px; font-weight: 500; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background-color: #343a40; }
-    .main-content { flex: 1; padding: 25px; overflow-x: hidden; }
-    .card-custom { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .action-btn { border: none; background: transparent; color: #dc3545; cursor: pointer; }
-    .action-btn:hover { color: #a71d2a; }
+    body { 
+      background-color: #f4f6f9; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    }
+
+    /* ESTILOS SIDEBAR (IMAGEN 1) */
+    .sidebar { 
+      width: 240px; 
+      min-height: 100vh; 
+      background-color: #1c2838; 
+      color: #ffffff; 
+    }
+
+    .sidebar .logo-title {
+      font-size: 1.6rem;
+      letter-spacing: 0.5px;
+      margin-top: 10px;
+      margin-bottom: 30px !important;
+    }
+
+    .sidebar-menu {
+      gap: 1.25rem; 
+    }
+
+    .sidebar .nav-link { 
+      color: #92a4b8; 
+      padding: 0; 
+      font-size: 1.1rem;
+      font-weight: 500;
+      background: transparent !important; 
+      border-radius: 0;
+      transition: color 0.2s ease-in-out;
+    }
+
+    .sidebar .nav-link:hover { 
+      color: #ffffff; 
+    }
+
+    .sidebar .nav-link.active { 
+      color: #ffffff !important; 
+      font-weight: 700 !important; 
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .main-content { 
+      flex: 1; 
+      padding: 25px; 
+      overflow-x: hidden; 
+    }
+
+    .card-custom { 
+      background: #fff; 
+      border-radius: 8px; 
+      border: 1px solid #e0e0e0; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+    }
+
+    .action-btn { 
+      border: none; 
+      background: transparent; 
+      color: #dc3545; 
+      cursor: pointer; 
+    }
+
+    .action-btn:hover { 
+      color: #a71d2a; 
+    }
   </style>
 </head>
 <body>
 
 <div class="d-flex">
-  <!-- SIDEBAR -->
-  <div id="sidebar" class="sidebar d-flex flex-column p-3">
-    <h3 class="fw-bold mb-4 text-white">ERP SUCRE</h3>
-    <ul class="nav nav-pills flex-column mb-auto">
-      <li class="nav-item"><a href="../productos/compras.html" class="nav-link">Compras</a></li>
-      <li class="nav-item"><a href="../productos/productos.html" class="nav-link">Productos / Ventas</a></li>
-      <li class="nav-item"><a href="#" class="nav-link">Contactos</a></li>
-      <li class="nav-item"><a href="#" class="nav-link">Reportes</a></li>
-      <li class="nav-item"><a href="index.html" class="nav-link active">Facturación</a></li>
+  <!-- SIDEBAR (ESTRUCTURA Y ORDEN IMAGEN 1) -->
+  <div id="sidebar" class="sidebar d-flex flex-column p-4">
+    <h2 class="fw-bold text-white logo-title">ERP SUCRE</h2>
+    <ul class="nav flex-column mb-auto sidebar-menu">
+      <li class="nav-item">
+        <a href="#" class="nav-link">Inicio</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">Indicadores</a>
+      </li>
+      <li class="nav-item">
+        <a href="../productos/productos.html" class="nav-link active">Productos</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">Inventario</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">Contactos</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">Reportes</a>
+      </li>
+      <li class="nav-item">
+        <a href="index.html" class="nav-link">Facturación</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">Configuración</a>
+      </li>
     </ul>
   </div>
 
