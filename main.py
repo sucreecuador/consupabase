@@ -1,38 +1,36 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Optional
+import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-# Modelo Pydantic para los datos de la empresa
-class EmpresaConfig(BaseModel):
-    nombre_comercial: str
-    ruc: str
-    direccion: str
-    telefono: str
+# 1. Instanciación previa de la app
+app = FastAPI(
+    title="ERP Sucre API",
+    version="1.0.0"
+)
 
-# ENDPOINT: OBTENER CONFIGURACIÓN
+# 2. Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 3. Definición de rutas
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "ERP Sucre API activa"}
+
 @app.get("/api/configuracion/empresa")
-async def obtener_configuracion_empresa():
-    try:
-        response = supabase.table("configuracion_empresa").select("*").limit(1).execute()
-        if response.data and len(response.data) > 0:
-            return response.data[0]
-        return {}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def get_configuracion_empresa():
+    return {
+        "empresa": "Importadora Comercial Sucre",
+        "estado": "activo"
+    }
 
-# ENDPOINT: GUARDAR CONFIGURACIÓN
-@app.post("/api/configuracion/empresa")
-async def guardar_configuracion_empresa(config: EmpresaConfig):
-    try:
-        payload = {
-            "id": 1,  # ID único de configuración general
-            "nombre_comercial": config.nombre_comercial,
-            "ruc": config.ruc,
-            "direccion": config.direccion,
-            "telefono": config.telefono
-        }
-        # Realiza upsert en Supabase
-        response = supabase.table("configuracion_empresa").upsert(payload).execute()
-        return {"status": "success", "data": response.data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# 4. Bloque de ejecución principal con lectura dinámica de puerto para Railway/Render
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
