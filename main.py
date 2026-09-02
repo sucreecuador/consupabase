@@ -101,7 +101,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
             samesite="lax",
             path="/"
         )
-        return {"access_token": access_token, "token_type": "bearer", "redirect_url": "/web/index.html"}
+        return {"access_token": access_token, "token_type": "bearer", "redirect_url": "/dashboard"}
     
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -207,7 +207,7 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
 
         if (response.ok) {
             localStorage.setItem("access_token", data.access_token);
-            window.location.replace("/web/index.html");
+            window.location.replace("/dashboard");
         } else {
             alertError.textContent = data.detail || "Usuario o contraseña incorrectos";
             alertError.classList.remove("d-none");
@@ -223,8 +223,92 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
 </html>"""
     return HTMLResponse(content=html_content)
 
-if WEB_DIR.exists():
-    app.mount("/web", StaticFiles(directory=str(WEB_DIR), html=True), name="web")
+@app.get("/dashboard", response_class=HTMLResponse)
+def get_dashboard_page():
+    dashboard_html = """<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP SUCRE - Panel Principal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, sans-serif; }
+        .sidebar { min-height: 100vh; background-color: #1a365d; color: white; }
+        .sidebar a { color: #cbd5e0; text-decoration: none; padding: 10px 15px; display: block; border-radius: 6px; }
+        .sidebar a:hover, .sidebar a.active { background-color: #2b6cb0; color: white; }
+        .card-custom { border: none; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 p-3 sidebar">
+            <h4 class="text-white mb-4 ps-2 fw-bold">ERP SUCRE</h4>
+            <a href="#" class="active mb-2">📊 Dashboard</a>
+            <a href="#" class="mb-2">📦 Catálogo de Productos</a>
+            <a href="#" class="mb-2">📄 Proformas</a>
+            <a href="#" class="mb-2">⚙️ Configuración</a>
+            <hr class="border-secondary">
+            <a href="/api/logout" class="text-danger">🚪 Cerrar Sesión</a>
+        </nav>
+
+        <main class="col-md-9 col-lg-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Panel Principal</h2>
+                <span class="badge bg-success p-2">Sistema Conectado</span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card card-custom p-3 bg-white">
+                        <h6 class="text-muted">Empresa</h6>
+                        <h4 class="fw-bold" id="empresa-nombre">Cargando...</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-custom p-3 bg-white">
+                        <h6 class="text-muted">Usuario Activo</h6>
+                        <h4 class="fw-bold" id="usuario-activo">Cargando...</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-custom p-3 bg-white">
+                        <h6 class="text-muted">Estado Servidor</h6>
+                        <h4 class="fw-bold text-success">Railway Online</h4>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+async function cargarDatos() {
+    const token = localStorage.getItem("access_token");
+    try {
+        const response = await fetch("/api/configuracion/empresa", {
+            headers: token ? { "Authorization": "Bearer " + token } : {}
+        });
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById("empresa-nombre").textContent = data.empresa;
+            document.getElementById("usuario-activo").textContent = data.usuario;
+        } else {
+            window.location.href = "/login";
+        }
+    } catch (e) {
+        document.getElementById("empresa-nombre").textContent = "Importadora Comercial Sucre";
+        document.getElementById("usuario-activo").textContent = "admin";
+    }
+}
+cargarDatos();
+</script>
+
+</body>
+</html>"""
+    return HTMLResponse(content=dashboard_html)
 
 @app.get("/api/configuracion/empresa")
 def get_configuracion_empresa(current_user: str = Depends(get_current_user)):
