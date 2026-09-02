@@ -111,6 +111,17 @@ def get_login_page(request: Request):
         return FileResponse("web/login.html")
     return {"status": "ok", "message": "Crear web/login.html"}
 
+@app.get("/web")
+@app.get("/web/")
+@app.get("/web/index.html")
+def handle_web_root(request: Request):
+    token = request.cookies.get("access_token")
+    if not token or not verify_token_string(token):
+        return RedirectResponse(url="/login")
+    if os.path.exists("web/index.html"):
+        return FileResponse("web/index.html")
+    raise HTTPException(status_code=404, detail="Archivo no encontrado")
+
 @app.get("/web/{file_path:path}")
 def serve_protected_web(file_path: str, request: Request):
     token = request.cookies.get("access_token")
