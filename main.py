@@ -1,14 +1,13 @@
 import os
 import datetime
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "cambiar_esta_clave_secreta_en_produccion")
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "sucre_secret_key_2026_prod")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 480
 
@@ -50,14 +49,17 @@ def verify_token_string(token: str):
     except jwt.PyJWTError:
         return None
 
-def get_current_user(token: Optional[str] = Depends(oauth2_scheme)):
-    if not token:
+def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
+    cookie_token = request.cookies.get("access_token")
+    active_token = token or cookie_token
+    
+    if not active_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No autenticado",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    username = verify_token_string(token)
+    username = verify_token_string(active_token)
     if username is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -67,14 +69,20 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme)):
     return username
 
 @app.post("/api/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
+def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     admin_user = os.environ.get("ADMIN_USER", "admin")
     admin_pass = os.environ.get("ADMIN_PASSWORD", "admin123")
     
     if form_data.username == admin_user and form_data.password == admin_pass:
         access_token = create_access_token(data={"sub": form_data.username})
-        response_data = {"access_token": access_token, "token_type": "bearer"}
-        return response_data
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            samesite="lax",
+            secure=False
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
     
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -82,34 +90,37 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+@app.get("/api/logout")
+def logout(response: Response):
+    response.delete_cookie("access_token")
+    return RedirectResponse(url="/login")
+
 @app.get("/")
-def read_root():
-    if os.path.exists("web/login.html"):
-        return RedirectResponse(url="/login")
-    elif os.path.exists("web/index.html"):
+def read_root(request: Request):
+    token = request.cookies.get("access_token")
+    if token and verify_token_string(token):
         return RedirectResponse(url="/web/index.html")
-    return {"status": "ok", "message": "ERP Sucre API activa en Railway"}
+    return RedirectResponse(url="/login")
 
 @app.get("/login")
-def get_login_page():
+def get_login_page(request: Request):
+    token = request.cookies.get("access_token")
+    if token and verify_token_string(token):
+        return RedirectResponse(url="/web/index.html")
     if os.path.exists("web/login.html"):
         return FileResponse("web/login.html")
-    return {"status": "ok", "message": "Formulario de login no disponible en web/login.html"}
+    return {"status": "ok", "message": "Crear web/login.html"}
 
 @app.get("/web/{file_path:path}")
 def serve_protected_web(file_path: str, request: Request):
-    token = None
-    auth_header = request.headers.get("Authorization")
-    if auth_header and auth_header.startswith("Bearer "):
-        token = auth_header.split(" ")[1]
-    
+    token = request.cookies.get("access_token")
     if not token:
-        token = request.cookies.get("access_token")
-        
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+
     if not token or not verify_token_string(token):
-        if file_path.endswith(".html") or file_path == "":
-            return RedirectResponse(url="/login")
-        raise HTTPException(status_code=401, detail="Acceso denegado")
+        return RedirectResponse(url="/login")
         
     target_path = os.path.join("web", file_path)
     if os.path.isdir(target_path):
