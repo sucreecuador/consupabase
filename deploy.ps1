@@ -11,8 +11,8 @@ $archivos = @(
     "web/productos/productos.js",
     "web/productos/productos.css",
 
-    # Compras
-    "web/compras/compras.html",
+    # Compras (Estructura corregida)
+    "web/compras/index.html",
     "web/compras/compras.js",
     "web/compras/compras.css",
 
