@@ -5,23 +5,21 @@ Write-Host "============================================================"
 # Archivos principales del ERP
 $archivos = @(
     "main.py",
+    "web/login.html",
+    "web/index.html",
 
-    # Productos
-    "web/productos/productos.html",
-    "web/productos/productos.js",
-    "web/productos/productos.css",
+    # Componentes
+    "web/components/sidebar.html",
+
+    # Configuración
+    "web/configuracion/index.html",
 
     # Contactos
     "web/contactos/index.html",
     "web/contactos/contactos.js",
     "web/contactos/contactos.css",
 
-    # Reportes
-    "web/reportes/index.html",
-    "web/reportes/reportes.js",
-    "web/reportes/reportes.css",
-
-    # Dashboard / Indicadores
+    # Dashboard
     "web/dashboard/index.html",
     "web/dashboard/dashboard.js",
     "web/dashboard/dashboard.css",
@@ -29,14 +27,27 @@ $archivos = @(
     # Facturación
     "web/facturacion/index.html",
     "web/facturacion/facturacion.js",
-    "web/facturacion/facturacion.css"
+    "web/facturacion/facturacion.css",
+
+    # Inventario
+    "web/inventario/index.html",
+
+    # Productos
+    "web/productos/productos.html",
+    "web/productos/productos.js",
+    "web/productos/productos.css",
+
+    # Reportes
+    "web/reportes/index.html",
+    "web/reportes/reportes.js",
+    "web/reportes/reportes.css"
 )
 
 foreach ($archivo in $archivos) {
     if (Test-Path $archivo) {
         Write-Host "✔ OK: $archivo encontrado"
     } else {
-        Write-Host "❌ ERROR: $archivo NO existe"
+        Write-Host "❌ ADVERTENCIA: $archivo NO existe localmente"
     }
 }
 
@@ -45,7 +56,7 @@ Write-Host "📦 Verificando cambios pendientes..."
 
 git add .
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Deploy ERP Sucre - $fecha"
+git commit -m "Deploy ERP Sucre - Estructura completa y Login - $fecha"
 git push origin main
 
 Write-Host ""
