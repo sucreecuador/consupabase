@@ -6,11 +6,9 @@ from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
 import jwt
 
 BASE_DIR = Path(__file__).resolve().parent
-WEB_DIR = BASE_DIR / "web"
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "sucre_secret_key_2026_prod")
 ALGORITHM = "HS256"
@@ -21,7 +19,7 @@ ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
 app = FastAPI(
     title="ERP Sucre API",
     version="1.0.0",
-    description="Backend FastAPI y Frontend estático para ERP Sucre"
+    description="Backend FastAPI para ERP Sucre"
 )
 
 app.add_middleware(
@@ -74,19 +72,6 @@ def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_sch
         )
     return username
 
-@app.get("/debug")
-def debug_info():
-    files_in_root = [str(p.name) for p in BASE_DIR.iterdir()]
-    web_exists = WEB_DIR.exists()
-    web_files = [str(p.relative_to(WEB_DIR)) for p in WEB_DIR.glob("**/*")] if web_exists else []
-    
-    return {
-        "base_dir": str(BASE_DIR),
-        "files_in_root": files_in_root,
-        "web_dir_exists": web_exists,
-        "web_files": web_files
-    }
-
 @app.post("/api/login")
 def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     admin_user = os.environ.get("ADMIN_USER", "admin")
@@ -117,6 +102,10 @@ def logout(response: Response):
 @app.get("/")
 def read_root():
     return RedirectResponse(url="/login")
+
+@app.get("/web/index.html")
+def redirect_legacy_web():
+    return RedirectResponse(url="/dashboard")
 
 @app.get("/login", response_class=HTMLResponse)
 def get_login_page():
