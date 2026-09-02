@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 import jwt
@@ -47,7 +47,8 @@ def verify_token_string(token: str):
 def auth_middleware(request: Request, call_next):
     path = request.url.path
     
-    if path in ["/login", "/api/login", "/docs", "/openapi.json"]:
+    # Rutas explícitamente públicas
+    if path in ["/login", "/api/login", "/debug", "/docs", "/openapi.json"]:
         return call_next(request)
         
     if path.startswith("/web"):
@@ -94,6 +95,20 @@ def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_sch
         )
     return username
 
+# Endpoint de diagnóstico para verificar estructura de archivos en el contenedor
+@app.get("/debug")
+def debug_info():
+    files_in_root = [str(p.name) for p in BASE_DIR.iterdir()]
+    web_exists = WEB_DIR.exists()
+    web_files = [str(p.relative_to(WEB_DIR)) for p in WEB_DIR.glob("**/*")] if web_exists else []
+    
+    return {
+        "base_dir": str(BASE_DIR),
+        "files_in_root": files_in_root,
+        "web_dir_exists": web_exists,
+        "web_files": web_files
+    }
+
 @app.post("/api/login")
 def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     admin_user = os.environ.get("ADMIN_USER", "admin")
@@ -129,17 +144,13 @@ def read_root(request: Request):
     return RedirectResponse(url="/login")
 
 @app.get("/login", response_class=HTMLResponse)
-def get_login_page(request: Request):
-    token = request.cookies.get("access_token")
-    if token and verify_token_string(token):
-        return RedirectResponse(url="/web/index.html")
-        
+def get_login_page():
     login_path = WEB_DIR / "login.html"
     
     if login_path.exists():
         return HTMLResponse(content=login_path.read_text(encoding="utf-8"))
             
-    return HTMLResponse(content=f"<h2>Error: No se encontró {login_path} en el servidor</h2>", status_code=404)
+    return HTMLResponse(content=f"<h2>Error: No se encontró el archivo {login_path} en el servidor.</h2>", status_code=404)
 
 if WEB_DIR.exists():
     app.mount("/web", StaticFiles(directory=str(WEB_DIR), html=True), name="web")
