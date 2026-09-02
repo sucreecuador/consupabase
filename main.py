@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 import jwt
@@ -42,15 +42,16 @@ def verify_token_string(token: str):
     except jwt.PyJWTError:
         return None
 
-# --- MIDDLEWARE DE AUTENTICACIÓN ---
+# --- MIDDLEWARE DE AUTENTICACIÓN ASÍNCRONO ---
 @app.middleware("http")
-def auth_middleware(request: Request, call_next):
+async def auth_middleware(request: Request, call_next):
     path = request.url.path
     
-    # Rutas explícitamente públicas
+    # Excluir rutas públicas
     if path in ["/login", "/api/login", "/debug", "/docs", "/openapi.json"]:
-        return call_next(request)
+        return await call_next(request)
         
+    # Proteger acceso a /web/
     if path.startswith("/web"):
         token = request.cookies.get("access_token")
         if not token:
@@ -61,7 +62,7 @@ def auth_middleware(request: Request, call_next):
         if not token or not verify_token_string(token):
             return RedirectResponse(url="/login", status_code=307)
 
-    response = call_next(request)
+    response = await call_next(request)
     return response
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login", auto_error=False)
@@ -95,7 +96,6 @@ def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_sch
         )
     return username
 
-# Endpoint de diagnóstico para verificar estructura de archivos en el contenedor
 @app.get("/debug")
 def debug_info():
     files_in_root = [str(p.name) for p in BASE_DIR.iterdir()]
