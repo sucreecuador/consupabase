@@ -147,11 +147,9 @@ def read_root(request: Request):
 @app.get("/login", response_class=HTMLResponse)
 def get_login_page():
     login_path = WEB_DIR / "login.html"
-    
     if login_path.exists():
         return HTMLResponse(content=login_path.read_text(encoding="utf-8"))
-            
-    return HTMLResponse(content=f"<h2>Error: No se encontró el archivo {login_path} en el servidor.</h2>", status_code=404)
+    return HTMLResponse(content="<h2>Error: No se encontró el archivo login.html</h2>", status_code=404)
 
 if WEB_DIR.exists():
     app.mount("/web", StaticFiles(directory=str(WEB_DIR), html=True), name="web")
