@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERP SUCRE - Inicio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #e9ecef; font-family: system-ui, -apple-system, sans-serif; }
         
-        /* Header Superior */
         .top-navbar {
             background-color: #e2e8f0;
             border-bottom: 1px solid #cbd5e1;
@@ -31,13 +30,12 @@
             gap: 12px;
         }
 
-        /* Sidebar Styling */
         .sidebar {
             min-height: calc(100vh - 49px);
             background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
             padding-top: 10px;
         }
-        .sidebar .nav-link {
+        .sidebar a {
             color: #94a3b8;
             font-weight: 500;
             padding: 12px 20px;
@@ -45,20 +43,18 @@
             align-items: center;
             gap: 12px;
             font-size: 0.95rem;
-            border-radius: 0;
-            transition: all 0.2s;
             text-decoration: none;
+            transition: all 0.2s;
         }
-        .sidebar .nav-link:hover {
+        .sidebar a:hover {
             color: #ffffff;
             background-color: rgba(255, 255, 255, 0.05);
         }
-        .sidebar .nav-link.active {
+        .sidebar a.active {
             color: #ffffff;
             background-color: #2563eb;
         }
 
-        /* Área Principal */
         .main-content {
             padding: 24px 32px;
             background-color: #f1f5f9;
@@ -71,7 +67,6 @@
             font-size: 1.5rem;
         }
 
-        /* Dashboard Tiles */
         .tile-card {
             border: none;
             border-radius: 14px;
@@ -93,7 +88,6 @@
         .tile-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; }
         .tile-label { font-weight: 600; font-size: 1.05rem; }
 
-        /* Colores de las Tarjetas */
         .tile-contacts { background-color: #bfdbfe; color: #1e3a8a; }
         .tile-products { background-color: #fed7aa; color: #7c2d12; }
         .tile-inventory { background-color: #bbf7d0; color: #14532d; }
@@ -106,16 +100,15 @@
 </head>
 <body>
 
-<!-- Header Superior -->
 <header class="top-navbar d-flex justify-content-between align-items-center">
     <div class="brand-title">
-        <i class="bi bi-three-dots-vertical text-success"></i> ERP SUCRE
+        <i class="fa-solid fa-ellipsis-vertical text-success me-1"></i> ERP SUCRE
     </div>
     <div class="user-pill">
         <span>Bienvenido, <strong id="user-display-name">Ricardo</strong></span>
-        <i class="bi bi-person-circle fs-4"></i>
+        <i class="fa-solid fa-circle-user fs-4"></i>
         <a href="/api/logout" class="btn btn-sm btn-outline-danger ms-2" title="Cerrar Sesión">
-            <i class="bi bi-box-arrow-right"></i>
+            <i class="fa-solid fa-right-from-bracket"></i>
         </a>
     </div>
 </header>
@@ -125,61 +118,61 @@
         <!-- Sidebar Navigation -->
         <nav class="col-md-2 sidebar">
             <div class="nav flex-column">
-                <a class="nav-link active" href="/web/index.html"><i class="bi bi-house-door-fill"></i> Inicio</a>
-                <a class="nav-link" href="/web/contactos.html"><i class="bi bi-people-fill"></i> Contactos</a>
-                <a class="nav-link" href="/web/productos.html"><i class="bi bi-box-seam-fill"></i> Productos</a>
-                <a class="nav-link" href="/web/inventario.html"><i class="bi bi-basket3-fill"></i> Inventario</a>
-                <a class="nav-link" href="/web/facturacion.html"><i class="bi bi-file-earmark-text-fill"></i> Facturación</a>
-                <a class="nav-link" href="/web/indicadores.html"><i class="bi bi-graph-up-arrow"></i> Indicadores</a>
-                <a class="nav-link" href="/web/reportes.html"><i class="bi bi-table"></i> Reportes</a>
-                <a class="nav-link" href="/web/configuracion.html"><i class="bi bi-gear-fill"></i> Configuración</a>
+                <a class="active" href="/web/index.html"><i class="fa-solid fa-house"></i> Inicio</a>
+                <a href="/web/contactos/index.html"><i class="fa-solid fa-user-group"></i> Contactos</a>
+                <a href="/web/productos/productos.html"><i class="fa-solid fa-cube"></i> Productos</a>
+                <a href="/web/inventario/index.html"><i class="fa-solid fa-basket-shopping"></i> Inventario</a>
+                <a href="/web/facturacion/index.html"><i class="fa-solid fa-file-lines"></i> Facturación</a>
+                <a href="/web/dashboard/index.html"><i class="fa-solid fa-chart-line"></i> Indicadores</a>
+                <a href="/web/reportes/index.html"><i class="fa-solid fa-table"></i> Reportes</a>
+                <a href="/web/configuracion/index.html"><i class="fa-solid fa-gear"></i> Configuración</a>
             </div>
         </nav>
 
-        <!-- Main Content -->
+        <!-- Main Workspace Grid -->
         <main class="col-md-10 main-content">
             <h3 class="page-title">Inicio</h3>
 
             <div class="row g-4">
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/contactos.html" class="tile-card tile-contacts">
-                        <i class="bi bi-people tile-icon"></i>
+                    <a href="/web/contactos/index.html" class="tile-card tile-contacts">
+                        <i class="fa-solid fa-user-group tile-icon"></i>
                         <span class="tile-label">Contactos</span>
                     </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/productos.html" class="tile-card tile-products">
-                        <i class="bi bi-box-seam tile-icon"></i>
+                    <a href="/web/productos/productos.html" class="tile-card tile-products">
+                        <i class="fa-solid fa-cube tile-icon"></i>
                         <span class="tile-label">Productos</span>
                     </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/inventario.html" class="tile-card tile-inventory">
-                        <i class="bi bi-buildings tile-icon"></i>
+                    <a href="/web/inventario/index.html" class="tile-card tile-inventory">
+                        <i class="fa-solid fa-basket-shopping tile-icon"></i>
                         <span class="tile-label">Inventario</span>
                     </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/facturacion.html" class="tile-card tile-billing">
-                        <i class="bi bi-receipt tile-icon"></i>
+                    <a href="/web/facturacion/index.html" class="tile-card tile-billing">
+                        <i class="fa-solid fa-file-lines tile-icon"></i>
                         <span class="tile-label">Facturación</span>
                     </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/indicadores.html" class="tile-card tile-indicators">
-                        <i class="bi bi-graph-up tile-icon"></i>
+                    <a href="/web/dashboard/index.html" class="tile-card tile-indicators">
+                        <i class="fa-solid fa-chart-line tile-icon"></i>
                         <span class="tile-label">Indicadores</span>
                     </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/reportes.html" class="tile-card tile-reports">
-                        <i class="bi bi-layout-three-columns tile-icon"></i>
+                    <a href="/web/reportes/index.html" class="tile-card tile-reports">
+                        <i class="fa-solid fa-table tile-icon"></i>
                         <span class="tile-label">Reportes</span>
                     </a>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                    <a href="/web/configuracion.html" class="tile-card tile-config">
-                        <i class="bi bi-gear tile-icon"></i>
+                    <a href="/web/configuracion/index.html" class="tile-card tile-config">
+                        <i class="fa-solid fa-gear tile-icon"></i>
                         <span class="tile-label">Configuración</span>
                     </a>
                 </div>
@@ -204,7 +197,7 @@ async function cargarUsuario() {
             }
         }
     } catch (e) {
-        console.warn("No se pudo cargar el perfil del usuario");
+        console.warn("No se pudo cargar el usuario activo");
     }
 }
 cargarUsuario();
