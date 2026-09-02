@@ -1,7 +1,5 @@
-﻿fastapi[cite: 4]
-uvicorn[cite: 4]
-supabase[cite: 4]
-python-dotenv[cite: 4]
+﻿fastapi
+uvicorn[standard]
 pyjwt
-passlib[bcrypt]
 python-multipart
+jinja2
