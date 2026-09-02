@@ -28,21 +28,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- MIDDLEWARE GLOBAL DE AUTENTICACIÓN PARA RUTAS /web ---
+def verify_token_string(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+        return username
+    except jwt.PyJWTError:
+        return None
+
+# --- MIDDLEWARE DE AUTENTICACIÓN PARA PROTECCIÓN DE LA CARPETA /web ---
 @app.middleware("http")
 def auth_middleware(request: Request, call_next):
     path = request.url.path
     
-    # Interceptamos cualquier intento de acceso a /web (excepto si pide login)
+    # Proteger todas las rutas bajo /web/ (excepto assets estáticos de login si los hubiera)
     if path.startswith("/web"):
-        cookie_token = request.cookies.get("access_token")
-        auth_header = request.headers.get("Authorization")
-        
-        token = cookie_token
-        if not token and auth_header and auth_header.startswith("Bearer "):
-            token = auth_header.split(" ")[1]
+        token = request.cookies.get("access_token")
+        if not token:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
             
-        # Si no hay token o es inválido, redirigir inmediatamente a /login
         if not token or not verify_token_string(token):
             return RedirectResponse(url="/login", status_code=307)
 
@@ -60,16 +68,6 @@ def create_access_token(data: dict, expires_delta: Optional[datetime.timedelta] 
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-def verify_token_string(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            return None
-        return username
-    except jwt.PyJWTError:
-        return None
 
 def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
     cookie_token = request.cookies.get("access_token")
@@ -124,6 +122,7 @@ def read_root(request: Request):
         return RedirectResponse(url="/web/index.html")
     return RedirectResponse(url="/login")
 
+# Endpoint para servir la pantalla de login (URL de acceso: https://tu-domain.up.railway.app/login)
 @app.get("/login")
 def get_login_page(request: Request):
     token = request.cookies.get("access_token")
@@ -131,9 +130,9 @@ def get_login_page(request: Request):
         return RedirectResponse(url="/web/index.html")
     if os.path.exists("web/login.html"):
         return FileResponse("web/login.html")
-    return {"status": "ok", "message": "Archivo web/login.html no encontrado"}
+    raise HTTPException(status_code=404, detail="El archivo web/login.html no existe en el proyecto")
 
-# Servidor de archivos estáticos para la carpeta web
+# Montura de la carpeta /web para servir los archivos del ERP
 app.mount("/web", StaticFiles(directory="web", html=True), name="web")
 
 @app.get("/api/configuracion/empresa")
