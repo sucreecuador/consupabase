@@ -146,10 +146,107 @@ def read_root(request: Request):
 
 @app.get("/login", response_class=HTMLResponse)
 def get_login_page():
-    login_path = WEB_DIR / "login.html"
-    if login_path.exists():
-        return HTMLResponse(content=login_path.read_text(encoding="utf-8"))
-    return HTMLResponse(content="<h2>Error: No se encontró el archivo login.html</h2>", status_code=404)
+    html_content = """<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP SUCRE - Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .login-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        .btn-primary-sucre {
+            background-color: #1a365d;
+            border-color: #1a365d;
+            color: white;
+            padding: 0.6rem;
+            font-weight: 500;
+        }
+        .btn-primary-sucre:hover {
+            background-color: #0f2942;
+            border-color: #0f2942;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h3 class="text-center mb-4 fw-bold text-dark">ERP SUCRE</h3>
+    
+    <div id="alert-error" class="alert alert-danger d-none text-center" role="alert"></div>
+
+    <form id="login-form">
+        <div class="mb-3">
+            <label for="username" class="form-label text-secondary">Usuario</label>
+            <input type="text" class="form-control" id="username" name="username" required placeholder="admin">
+        </div>
+        
+        <div class="mb-4">
+            <label for="password" class="form-label text-secondary">Contraseña</label>
+            <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary-sucre w-100">Ingresar</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const alertError = document.getElementById("alert-error");
+    alertError.classList.add("d-none");
+
+    const usernameInput = document.getElementById("username").value;
+    const passwordInput = document.getElementById("password").value;
+
+    const formData = new URLSearchParams();
+    formData.append("username", usernameInput);
+    formData.append("password", passwordInput);
+
+    try {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            window.location.href = "/web/index.html";
+        } else {
+            alertError.textContent = data.detail || "Usuario o contraseña incorrectos";
+            alertError.classList.remove("d-none");
+        }
+    } catch (err) {
+        alertError.textContent = "Error de conexión con el servidor";
+        alertError.classList.remove("d-none");
+    }
+});
+</script>
+
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
 
 if WEB_DIR.exists():
     app.mount("/web", StaticFiles(directory=str(WEB_DIR), html=True), name="web")

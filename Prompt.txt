@@ -8,6 +8,11 @@ si, siempre dame el código completo, solo para copiar y pegar.
 siempre dame los códigos completos, solo para copiar y pegar, no por bloques
 sin explicaciones, sin teoría, sin pasos intermedios.
 
+
+https://consupabase-production.up.railway.app/web/index.html
+
+
+
 VISTA VENTAS
 
 codigo_cliente
