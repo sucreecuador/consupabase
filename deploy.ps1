@@ -8,9 +8,6 @@ $archivos = @(
     "web/login.html",
     "web/index.html",
 
-    # Componentes
-    "web/components/sidebar.html",
-
     # Configuración
     "web/configuracion/index.html",
 
@@ -56,7 +53,7 @@ Write-Host "📦 Verificando cambios pendientes..."
 
 git add .
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Deploy ERP Sucre - Estructura completa y Login - $fecha"
+git commit -m "Deploy ERP Sucre - Limpieza depuracion deploy - $fecha"
 git push origin main
 
 Write-Host ""
