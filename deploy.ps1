@@ -1,5 +1,5 @@
 ﻿Write-Host "============================================================"
-Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE"
+Write-Host "   🚀 INICIANDO DEPLOY COMPLETO DEL ERP SUCRE (RAILWAY)"
 Write-Host "============================================================"
 
 # Archivos principales del ERP
@@ -51,28 +51,10 @@ Write-Host "📦 Verificando cambios pendientes..."
 git add .
 $fecha = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 git commit -m "Deploy ERP Sucre - $fecha"
-git push
+git push origin main
 
 Write-Host ""
 Write-Host "============================================================"
-Write-Host "   🚀 Enviando deploy a Render..."
-Write-Host "============================================================"
-
-# Headers correctos para PowerShell
-$headers = @{
-    "Accept" = "application/json"
-    "Content-Type" = "application/json"
-}
-
-# 🔥 URL REAL DEL DEPLOY HOOK DE RENDER
-Invoke-WebRequest `
-    -Uri "https://api.render.com/deploy/srv-da6dmsbbc2fs73d7g9n0?key=rpBa1kUCS1E" `
-    -Method POST `
-    -Headers $headers `
-    -Body "{}"
-
-Write-Host ""
-Write-Host "============================================================"
-Write-Host "   🎉 DEPLOY FINALIZADO CON ÉXITO"
-Write-Host "   Render compilará y actualizará la app automáticamente."
+Write-Host "   🎉 CAMBIOS ENVIADOS A RAILWAY VIA GIT PUSH"
+Write-Host "   Railway detectará el push y desplegará automáticamente."
 Write-Host "============================================================"
