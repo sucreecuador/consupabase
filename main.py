@@ -3,7 +3,7 @@ import datetime
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 import jwt
@@ -38,12 +38,16 @@ def verify_token_string(token: str):
     except jwt.PyJWTError:
         return None
 
-# --- MIDDLEWARE DE AUTENTICACIÓN PARA PROTECCIÓN DE LA CARPETA /web ---
+# --- MIDDLEWARE DE AUTENTICACIÓN ---
 @app.middleware("http")
 def auth_middleware(request: Request, call_next):
     path = request.url.path
     
-    # Proteger todas las rutas bajo /web/ (excepto assets estáticos de login si los hubiera)
+    # Excluir explícitamente rutas públicas de login y API de login
+    if path in ["/login", "/api/login", "/docs", "/openapi.json"]:
+        return call_next(request)
+        
+    # Proteger carpetas internas
     if path.startswith("/web"):
         token = request.cookies.get("access_token")
         if not token:
@@ -122,17 +126,23 @@ def read_root(request: Request):
         return RedirectResponse(url="/web/index.html")
     return RedirectResponse(url="/login")
 
-# Endpoint para servir la pantalla de login (URL de acceso: https://tu-domain.up.railway.app/login)
-@app.get("/login")
+# Sirve login.html garantizando la resolución de la ruta absoluta del servidor
+@app.get("/login", response_class=HTMLResponse)
 def get_login_page(request: Request):
     token = request.cookies.get("access_token")
     if token and verify_token_string(token):
         return RedirectResponse(url="/web/index.html")
-    if os.path.exists("web/login.html"):
-        return FileResponse("web/login.html")
-    raise HTTPException(status_code=404, detail="El archivo web/login.html no existe en el proyecto")
+        
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    login_path = os.path.join(base_dir, "web", "login.html")
+    
+    if os.path.exists(login_path):
+        with open(login_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+            
+    return HTMLResponse(content="<h2>Error: No se encontró el archivo web/login.html en el servidor</h2>", status_code=404)
 
-# Montura de la carpeta /web para servir los archivos del ERP
+# Montura estática de la carpeta web
 app.mount("/web", StaticFiles(directory="web", html=True), name="web")
 
 @app.get("/api/configuracion/empresa")
