@@ -151,7 +151,6 @@ def get_login_page():
 
 <div class="login-card">
     <h3 class="text-center mb-4 fw-bold text-dark">ERP SUCRE</h3>
-    
     <div id="alert-error" class="alert alert-danger d-none text-center" role="alert"></div>
 
     <form id="login-form">
@@ -159,12 +158,10 @@ def get_login_page():
             <label for="username" class="form-label text-secondary">Usuario</label>
             <input type="text" class="form-control" id="username" name="username" required placeholder="admin">
         </div>
-        
         <div class="mb-4">
             <label for="password" class="form-label text-secondary">Contraseña</label>
             <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
         </div>
-
         <button type="submit" class="btn btn-primary-sucre w-100">Ingresar</button>
     </form>
 </div>
@@ -172,7 +169,6 @@ def get_login_page():
 <script>
 document.getElementById("login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    
     const alertError = document.getElementById("alert-error");
     alertError.classList.add("d-none");
 
@@ -186,14 +182,10 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     try {
         const response = await fetch("/api/login", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: formData
         });
-
         const data = await response.json();
-
         if (response.ok) {
             localStorage.setItem("access_token", data.access_token);
             window.location.replace("/dashboard");
@@ -219,54 +211,214 @@ def get_dashboard_page():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERP SUCRE - Panel Principal</title>
+    <title>ERP SUCRE - Inicio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, sans-serif; }
-        .sidebar { min-height: 100vh; background-color: #1a365d; color: white; }
-        .sidebar a { color: #cbd5e0; text-decoration: none; padding: 10px 15px; display: block; border-radius: 6px; }
-        .sidebar a:hover, .sidebar a.active { background-color: #2b6cb0; color: white; }
-        .card-custom { border: none; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        body { background-color: #e9ecef; font-family: system-ui, -apple-system, sans-serif; }
+        
+        /* Top Navigation Header */
+        .top-navbar {
+            background-color: #e2e8f0;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 8px 24px;
+        }
+        .brand-title {
+            font-weight: 800;
+            color: #1e293b;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-pill {
+            font-weight: 500;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            min-height: calc(100vh - 49px);
+            background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
+            padding-top: 10px;
+        }
+        .sidebar .nav-link {
+            color: #94a3b8;
+            font-weight: 500;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            border-radius: 0;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar .nav-link.active {
+            color: #ffffff;
+            background-color: #2563eb;
+        }
+
+        /* Main Workspace */
+        .main-content {
+            padding: 24px 32px;
+            background-color: #f1f5f9;
+            min-height: calc(100vh - 49px);
+        }
+        .page-title {
+            color: #0f172a;
+            font-weight: 700;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+        }
+
+        /* Dashboard Tile Cards */
+        .tile-card {
+            border: none;
+            border-radius: 14px;
+            padding: 24px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .tile-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .tile-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        .tile-label {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        /* Tile Color Variants */
+        .tile-contacts { background-color: #bfdbfe; color: #1e3a8a; }
+        .tile-products { background-color: #fed7aa; color: #7c2d12; }
+        .tile-inventory { background-color: #bbf7d0; color: #14532d; }
+        .tile-billing { background-color: #e9d5ff; color: #581c87; }
+        .tile-indicators { background-color: #fef08a; color: #713f12; }
+        .tile-reports { background-color: #a7f3d0; color: #064e3b; }
+        .tile-config { background-color: #cbd5e1; color: #334155; }
+        .tile-empty { background-color: #e2e8f0; border: 2px dashed #cbd5e1; }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-md-3 col-lg-2 p-3 sidebar">
-            <h4 class="text-white mb-4 ps-2 fw-bold">ERP SUCRE</h4>
-            <a href="#" class="active mb-2">📊 Dashboard</a>
-            <a href="#" class="mb-2">📦 Catálogo de Productos</a>
-            <a href="#" class="mb-2">📄 Proformas</a>
-            <a href="#" class="mb-2">⚙️ Configuración</a>
-            <hr class="border-secondary">
-            <a href="/api/logout" class="text-danger">🚪 Cerrar Sesión</a>
+<!-- Header Superior -->
+<header class="top-navbar d-flex justify-content-between align-items-center">
+    <div class="brand-title">
+        <i class="bi bi-three-dots-vertical text-success"></i> ERP SUCRE
+    </div>
+    <div class="user-pill">
+        <span>Bienvenido, <strong id="user-display-name">Ricardo</strong></span>
+        <i class="bi bi-person-circle fs-4"></i>
+        <a href="/api/logout" class="btn btn-sm btn-outline-danger ms-2" title="Cerrar Sesión">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</header>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 sidebar">
+            <div class="nav flex-column">
+                <a class="nav-link active" href="/dashboard"><i class="bi bi-house-door-fill"></i> Inicio</a>
+                <a class="nav-link" href="#"><i class="bi bi-people-fill"></i> Contactos</a>
+                <a class="nav-link" href="#"><i class="bi bi-box-seam-fill"></i> Productos</a>
+                <a class="nav-link" href="#"><i class="bi bi-basket3-fill"></i> Inventario</a>
+                <a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill"></i> Facturación</a>
+                <a class="nav-link" href="#"><i class="bi bi-graph-up-arrow"></i> Indicadores</a>
+                <a class="nav-link" href="#"><i class="bi bi-table"></i> Reportes</a>
+                <a class="nav-link" href="#"><i class="bi bi-gear-fill"></i> Configuración</a>
+            </div>
         </nav>
 
-        <main class="col-md-9 col-lg-10 p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Panel Principal</h2>
-                <span class="badge bg-success p-2">Sistema Conectado</span>
-            </div>
+        <!-- Main Dashboard View -->
+        <main class="col-md-10 main-content">
+            <h3 class="page-title">Inicio</h3>
 
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 bg-white">
-                        <h6 class="text-muted">Empresa</h6>
-                        <h4 class="fw-bold" id="empresa-nombre">Cargando...</h4>
-                    </div>
+            <div class="row g-4">
+                <!-- Tile 1: Contactos -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-contacts">
+                        <i class="bi bi-people tile-icon"></i>
+                        <span class="tile-label">Contactos</span>
+                    </a>
                 </div>
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 bg-white">
-                        <h6 class="text-muted">Usuario Activo</h6>
-                        <h4 class="fw-bold" id="usuario-activo">Cargando...</h4>
-                    </div>
+
+                <!-- Tile 2: Productos -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-products">
+                        <i class="bi bi-box-seam tile-icon"></i>
+                        <span class="tile-label">Productos</span>
+                    </a>
                 </div>
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 bg-white">
-                        <h6 class="text-muted">Estado Servidor</h6>
-                        <h4 class="fw-bold text-success">Railway Online</h4>
-                    </div>
+
+                <!-- Tile 3: Inventario -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-inventory">
+                        <i class="bi bi-buildings tile-icon"></i>
+                        <span class="tile-label">Inventario</span>
+                    </a>
+                </div>
+
+                <!-- Tile 4: Facturación -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-billing">
+                        <i class="bi bi-receipt tile-icon"></i>
+                        <span class="tile-label">Facturación</span>
+                    </a>
+                </div>
+
+                <!-- Tile 5: Indicadores -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-indicators">
+                        <i class="bi bi-graph-up tile-icon"></i>
+                        <span class="tile-label">Indicadores</span>
+                    </a>
+                </div>
+
+                <!-- Tile 6: Reportes -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-reports">
+                        <i class="bi bi-layout-three-columns tile-icon"></i>
+                        <span class="tile-label">Reportes</span>
+                    </a>
+                </div>
+
+                <!-- Tile 7: Configuración -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <a href="#" class="tile-card tile-config">
+                        <i class="bi bi-gear tile-icon"></i>
+                        <span class="tile-label">Configuración</span>
+                    </a>
+                </div>
+
+                <!-- Tile 8: Reserva/Vacío -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="tile-card tile-empty"></div>
+                </div>
+
+                <!-- Tile 9: Reserva/Vacío -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="tile-card tile-empty"></div>
                 </div>
             </div>
         </main>
@@ -274,7 +426,7 @@ def get_dashboard_page():
 </div>
 
 <script>
-async function cargarDatos() {
+async function cargarUsuario() {
     const token = localStorage.getItem("access_token");
     try {
         const response = await fetch("/api/configuracion/empresa", {
@@ -282,17 +434,15 @@ async function cargarDatos() {
         });
         if (response.ok) {
             const data = await response.json();
-            document.getElementById("empresa-nombre").textContent = data.empresa;
-            document.getElementById("usuario-activo").textContent = data.usuario;
-        } else {
-            window.location.href = "/login";
+            if (data.usuario) {
+                document.getElementById("user-display-name").textContent = data.usuario;
+            }
         }
     } catch (e) {
-        document.getElementById("empresa-nombre").textContent = "Importadora Comercial Sucre";
-        document.getElementById("usuario-activo").textContent = "admin";
+        console.warn("Cargando perfil por defecto");
     }
 }
-cargarDatos();
+cargarUsuario();
 </script>
 
 </body>
@@ -304,7 +454,7 @@ def get_configuracion_empresa(current_user: str = Depends(get_current_user)):
     return {
         "empresa": "Importadora Comercial Sucre",
         "estado": "activo",
-        "usuario": current_user
+        "usuario": "Ricardo" if current_user == "admin" else current_user
     }
 
 if __name__ == "__main__":
