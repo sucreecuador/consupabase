@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 import jwt
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "sucre_secret_key_2026_prod")
@@ -26,6 +27,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- MIDDLEWARE GLOBAL DE AUTENTICACIÓN PARA RUTAS /web ---
+@app.middleware("http")
+def auth_middleware(request: Request, call_next):
+    path = request.url.path
+    
+    # Interceptamos cualquier intento de acceso a /web (excepto si pide login)
+    if path.startswith("/web"):
+        cookie_token = request.cookies.get("access_token")
+        auth_header = request.headers.get("Authorization")
+        
+        token = cookie_token
+        if not token and auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            
+        # Si no hay token o es inválido, redirigir inmediatamente a /login
+        if not token or not verify_token_string(token):
+            return RedirectResponse(url="/login", status_code=307)
+
+    response = call_next(request)
+    return response
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login", auto_error=False)
 
@@ -109,38 +131,10 @@ def get_login_page(request: Request):
         return RedirectResponse(url="/web/index.html")
     if os.path.exists("web/login.html"):
         return FileResponse("web/login.html")
-    return {"status": "ok", "message": "Crear web/login.html"}
+    return {"status": "ok", "message": "Archivo web/login.html no encontrado"}
 
-@app.get("/web")
-@app.get("/web/")
-@app.get("/web/index.html")
-def handle_web_root(request: Request):
-    token = request.cookies.get("access_token")
-    if not token or not verify_token_string(token):
-        return RedirectResponse(url="/login")
-    if os.path.exists("web/index.html"):
-        return FileResponse("web/index.html")
-    raise HTTPException(status_code=404, detail="Archivo no encontrado")
-
-@app.get("/web/{file_path:path}")
-def serve_protected_web(file_path: str, request: Request):
-    token = request.cookies.get("access_token")
-    if not token:
-        auth_header = request.headers.get("Authorization")
-        if auth_header and auth_header.startswith("Bearer "):
-            token = auth_header.split(" ")[1]
-
-    if not token or not verify_token_string(token):
-        return RedirectResponse(url="/login")
-        
-    target_path = os.path.join("web", file_path)
-    if os.path.isdir(target_path):
-        target_path = os.path.join(target_path, "index.html")
-        
-    if os.path.exists(target_path):
-        return FileResponse(target_path)
-    
-    raise HTTPException(status_code=404, detail="Archivo no encontrado")
+# Servidor de archivos estáticos para la carpeta web
+app.mount("/web", StaticFiles(directory="web", html=True), name="web")
 
 @app.get("/api/configuracion/empresa")
 def get_configuracion_empresa(current_user: str = Depends(get_current_user)):
