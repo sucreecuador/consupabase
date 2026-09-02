@@ -21,7 +21,7 @@ ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
 app = FastAPI(
     title="ERP Sucre API",
     version="1.0.0",
-    description="Backend FastAPI y Frontend estático protegido para ERP Sucre"
+    description="Backend FastAPI y Frontend estático para ERP Sucre"
 )
 
 app.add_middleware(
@@ -41,29 +41,6 @@ def verify_token_string(token: str):
         return username
     except jwt.PyJWTError:
         return None
-
-# --- MIDDLEWARE DE AUTENTICACIÓN ASÍNCRONO ---
-@app.middleware("http")
-async def auth_middleware(request: Request, call_next):
-    path = request.url.path
-    
-    # Rutas públicas
-    if path in ["/login", "/api/login", "/debug", "/docs", "/openapi.json"]:
-        return await call_next(request)
-        
-    # Rutas protegidas bajo /web/
-    if path.startswith("/web"):
-        token = request.cookies.get("access_token")
-        if not token:
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.startswith("Bearer "):
-                token = auth_header.split(" ")[1]
-            
-        if not token or not verify_token_string(token):
-            return RedirectResponse(url="/login", status_code=307)
-
-    response = await call_next(request)
-    return response
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login", auto_error=False)
 
@@ -120,9 +97,9 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
         response.set_cookie(
             key="access_token",
             value=access_token,
-            httponly=True,
+            httponly=False,
             samesite="lax",
-            secure=True
+            path="/"
         )
         return {"access_token": access_token, "token_type": "bearer", "redirect_url": "/web/index.html"}
     
@@ -134,14 +111,11 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.get("/api/logout")
 def logout(response: Response):
-    response.delete_cookie("access_token")
+    response.delete_cookie("access_token", path="/")
     return RedirectResponse(url="/login")
 
 @app.get("/")
-def read_root(request: Request):
-    token = request.cookies.get("access_token")
-    if token and verify_token_string(token):
-        return RedirectResponse(url="/web/index.html")
+def read_root():
     return RedirectResponse(url="/login")
 
 @app.get("/login", response_class=HTMLResponse)
@@ -232,7 +206,8 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
         const data = await response.json();
 
         if (response.ok) {
-            window.location.href = "/web/index.html";
+            localStorage.setItem("access_token", data.access_token);
+            window.location.replace("/web/index.html");
         } else {
             alertError.textContent = data.detail || "Usuario o contraseña incorrectos";
             alertError.classList.remove("d-none");
